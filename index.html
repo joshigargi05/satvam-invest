@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script>
+      // Immediate, high-priority service worker purge to break sticky browser cache
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var i = 0; i < registrations.length; i++) {
+            registrations[i].unregister().then(function(success) {
+              if (success) console.log('Successfully purged sticky service worker.');
+            });
+          }
+        });
+      }
+      // Force clear cache storage keys if any exist
+      if ('caches' in window) {
+        caches.keys().then(function(keys) {
+          keys.forEach(function(key) { caches.delete(key); });
+        });
+      }
+    </script>
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="VestraAI - An AI-powered global investing intelligence platform." />
+    <title>VestraAI | Global Investing Intelligence</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
