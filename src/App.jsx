@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import * as Md from 'react-icons/md'
 import * as Io5 from 'react-icons/io5'
 
@@ -10,6 +10,8 @@ const MdCode = Md.MdCode || (() => '💻');
 const MdAnalytics = Md.MdAnalytics || (() => '📊');
 const IoNotificationsOutline = Io5.IoNotificationsOutline || (() => '🔔');
 
+const MdPublic = Md.MdPublic || (() => '🌐');
+
 // Context
 import { MarketProvider, useMarket } from './context/MarketContext'
 import { PortfolioProvider } from './context/PortfolioContext'
@@ -20,19 +22,39 @@ import Copilot from './pages/Copilot'
 import Markets from './pages/Markets'
 import AlgoTrading from './pages/AlgoTrading'
 import EarningsAgent from './pages/EarningsAgent'
+import MacroAgent from './pages/MacroAgent'
 
 import './index.css'
 
+import { usePortfolio } from './context/PortfolioContext'
+
 function TopHeader() {
   const { market, setMarket } = useMarket();
+  const { agentModeEnabled, setAgentModeEnabled, vaultDivertPct } = usePortfolio();
   
   return (
     <header className="top-header">
-      <div className="flex items-center gap-2">
-        <span className="live-status-dot"></span>
-        <span className="text-xs uppercase font-bold tracking-widest text-muted" style={{ letterSpacing: '0.1em' }}>
-          Platform Online
-        </span>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="live-status-dot"></span>
+          <span className="text-xs uppercase font-bold tracking-widest text-muted" style={{ letterSpacing: '0.1em' }}>
+            Live Stream
+          </span>
+        </div>
+
+        {/* Global Autonomous Agent Mode Toggle */}
+        <button
+          onClick={() => setAgentModeEnabled(!agentModeEnabled)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            agentModeEnabled 
+              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20' 
+              : 'bg-slate-800 text-slate-400 border border-white/10 hover:text-white'
+          }`}
+          title="Toggle Autonomous Execution & Rebalance Mode"
+        >
+          <span className={`w-2 h-2 rounded-full ${agentModeEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`}></span>
+          <span>Agent Mode: {agentModeEnabled ? `ON (${vaultDivertPct}% Vault)` : 'OFF (Manual)'}</span>
+        </button>
       </div>
       
       <div className="market-tabs-container">
@@ -57,9 +79,11 @@ function TopHeader() {
 
 function Navigation() {
   const location = useLocation();
+  const navigate = useNavigate();
   
   const navItems = [
     { path: '/', label: 'Portfolio', icon: <MdDashboard /> },
+    { path: '/macro-agent', label: 'Global Agent', icon: <MdPublic /> },
     { path: '/markets', label: 'Markets', icon: <MdAutoGraph /> },
     { path: '/algo', label: 'Algo Engine', icon: <MdCode /> },
     { path: '/deep-analysis', label: 'Deep Agent', icon: <MdAnalytics /> },
@@ -70,7 +94,7 @@ function Navigation() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden flex justify-between items-center p-4 bg-black/50 border-b border-white/5">
+      <div className="md-hidden flex justify-between items-center p-4 bg-black/50 border-b border-white/5">
         <div className="flex items-center gap-2">
           <div style={{ background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', width: '24px', height: '24px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'white', fontSize: '12px' }}>V</div>
           <h1 className="text-gradient font-bold">VestraAI</h1>
@@ -83,7 +107,13 @@ function Navigation() {
           <NavLink 
             key={item.path} 
             to={item.path} 
-            className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+            end={item.path === '/'}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(item.path);
+            }}
+            className={({ isActive }) => `nav-item ${isActive || location.pathname === item.path ? 'active' : ''}`}
+            style={{ cursor: 'pointer' }}
           >
             {item.icon}
             <span>{item.label}</span>
@@ -118,7 +148,13 @@ function Navigation() {
              <NavLink 
              key={item.path} 
              to={item.path} 
-             className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+             end={item.path === '/'}
+             onClick={(e) => {
+               e.preventDefault();
+               navigate(item.path);
+             }}
+             className={({ isActive }) => `nav-item ${isActive || location.pathname === item.path ? 'active' : ''}`}
+             style={{ cursor: 'pointer' }}
            >
              {item.icon}
              <span>{item.label}</span>
@@ -171,6 +207,7 @@ function App() {
               <TopHeader />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
+                <Route path="/macro-agent" element={<MacroAgent />} />
                 <Route path="/markets" element={<Markets />} />
                 <Route path="/algo" element={<AlgoTrading />} />
                 <Route path="/deep-analysis" element={<EarningsAgent />} />

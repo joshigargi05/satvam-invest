@@ -93,3 +93,41 @@ export const getFundamentals = async (symbol) => {
     return null;
   }
 };
+
+export const getMacroIntelligenceStream = async () => {
+  try {
+    const response = await fetch('/api/macro-intelligence/stream');
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching macro intelligence stream:', error);
+    return null;
+  }
+};
+
+export const getMacroAllocationRecommendation = async (payload) => {
+  try {
+    const response = await fetch('/api/macro-intelligence/recommend-allocation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching macro allocation recommendation:', error);
+    return null;
+  }
+};
+
+export const getCommodities = async (market = 'US') => {
+  try {
+    const response = await fetch(`/api/commodities?market=${market}`);
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching commodities:', error);
+    return [];
+  }
+};
+

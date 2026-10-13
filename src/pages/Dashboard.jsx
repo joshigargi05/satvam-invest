@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import * as Lucide from 'lucide-react';
 
@@ -10,14 +11,30 @@ const Activity = Lucide.Activity || (() => '⚡');
 const Calendar = Lucide.Calendar || (() => '📅');
 const ExternalLink = Lucide.ExternalLink || (() => '🔗');
 const Clock = Lucide.Clock || (() => '🕒');
+const Zap = Lucide.Zap || (() => '⚡');
+const Sparkles = Lucide.Sparkles || (() => '✨');
 import { usePortfolio } from '../context/PortfolioContext';
 import { getPortfolioNews, getMarketNews, getUpcomingEarnings, getPortfolioHistory } from '../services/api';
 
 import { useMarket } from '../context/MarketContext';
 
 export default function Dashboard() {
-  const { balance, holdings } = usePortfolio();
+  const navigate = useNavigate();
+  const { 
+    balance, 
+    holdings, 
+    coreHoldings = [], 
+    vaultHoldings = [], 
+    coreValue = 0, 
+    vaultValue = 0, 
+    vaultAutoPilot = true,
+    vaultDivertPct = 20,
+    agentModeEnabled,
+    setAgentModeEnabled,
+    sellAsset 
+  } = usePortfolio();
   const { market, currency } = useMarket();
+  const [holdingsFilter, setHoldingsFilter] = useState('ALL'); // 'ALL', 'CORE', 'VAULT'
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [period, setPeriod] = useState('ALL');
@@ -102,9 +119,67 @@ export default function Dashboard() {
           <h1 className="text-gradient">Portfolio Overview</h1>
           <p className="text-muted">Welcome back! Here's how your {market === 'US' ? 'US' : 'Indian'} investments are doing.</p>
         </div>
-        <button className="btn btn-primary">
-          Deposit Funds
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => navigate('/macro-agent')}
+            className="btn btn-outline flex items-center gap-2 text-sm"
+            style={{ borderColor: 'rgba(59, 130, 246, 0.4)', background: 'rgba(59, 130, 246, 0.1)' }}
+          >
+            <Sparkles size={16} className="text-blue-400" />
+            <span>Global Macro Agent</span>
+          </button>
+          <button className="btn btn-primary">
+            Deposit Funds
+          </button>
+        </div>
+      </div>
+
+      {/* Autonomous 4-Layer Multi-Factor Agent Mode Banner */}
+      <div className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-blue-950/60 via-purple-950/40 to-slate-900 border border-blue-500/30 shadow-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0 mt-0.5">
+            <Zap size={22} className={agentModeEnabled ? "text-emerald-400 animate-pulse" : "text-blue-400"} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <h4 className="font-bold text-white text-sm">
+                Autonomous 4-Layer Multi-Factor Engine
+              </h4>
+              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                agentModeEnabled 
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+                  : 'bg-slate-800 text-slate-400 border border-white/10'
+              }`}>
+                {agentModeEnabled ? `● Agent Mode Active (${vaultDivertPct}% Vault Protected)` : '○ Manual Portfolio Mode'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+              Evaluating <strong>Macro/Regime (25%)</strong> + <strong>Derivatives & OI Structure (25%)</strong> + <strong>Quant VWAP/Momentum (30%)</strong> + <strong>Earnings Sentiment (20%)</strong>. Core holdings remain 100% protected.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-end">
+          <button 
+            onClick={() => setAgentModeEnabled(!agentModeEnabled)}
+            className={`btn text-xs font-bold py-2 px-3.5 flex items-center gap-1.5 transition-all ${
+              agentModeEnabled 
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30' 
+                : 'bg-slate-800 text-slate-300 border border-white/10 hover:text-white'
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${agentModeEnabled ? 'bg-emerald-400' : 'bg-slate-500'}`}></span>
+            {agentModeEnabled ? 'Agent Mode: ON' : 'Enable Agent Mode'}
+          </button>
+          
+          <button 
+            onClick={() => navigate('/macro-agent')}
+            className="btn btn-primary py-2 px-4 text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-blue-500/25"
+            style={{ background: 'linear-gradient(135deg, #10b981, #2563eb)' }}
+          >
+            <Sparkles size={14} /> Review 4-Layer Shuffle &rarr;
+          </button>
+        </div>
       </div>
 
       <div className="dashboard-grid">
@@ -221,53 +296,198 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Your Holdings Section */}
-      <div style={{ marginTop: '2rem' }}></div>
-      <h3 className="text-xl font-bold" style={{ marginBottom: '1.5rem' }}>Your Holdings</h3>
+      {/* Dual Bucket Allocation Breakdown Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <div className="glass-panel p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              🛡️
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-white">Long-Term Core Portfolio</span>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                  Protected
+                </span>
+              </div>
+              <p className="text-xs text-muted">Core wealth holdings isolated from automated shuffles</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xl font-bold text-white font-mono">
+              {currency}{coreValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <span className="text-xs text-emerald-400">{coreHoldings.length} holdings</span>
+          </div>
+        </div>
+
+        <div className="glass-panel p-4 rounded-xl border border-blue-500/30 bg-blue-950/15 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+              ⚡
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-white">Global Agent Tactical Vault</span>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">
+                  {vaultAutoPilot ? 'Auto-Pilot Active' : 'Manual'}
+                </span>
+              </div>
+              <p className="text-xs text-muted">Managed autonomously by Global Macro Agent</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xl font-bold text-blue-300 font-mono">
+              {currency}{vaultValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <span className="text-xs text-blue-400 cursor-pointer hover:underline" onClick={() => navigate('/macro-agent')}>
+              {vaultHoldings.length} tactical assets • Manage ➔
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Your Holdings Section with Bucket Filters */}
+      <div style={{ marginTop: '2.5rem' }}></div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div>
+          <h3 className="text-xl font-bold">Your Portfolio Holdings</h3>
+          <p className="text-xs text-muted">Filter holdings between protected long-term investments and agent tactical allocations.</p>
+        </div>
+
+        {/* Bucket Segment Switcher */}
+        <div className="flex items-center gap-1.5 bg-black/40 p-1 rounded-xl border border-white/10 text-xs">
+          <button
+            onClick={() => setHoldingsFilter('ALL')}
+            className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
+              holdingsFilter === 'ALL'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            All Holdings ({holdings.length})
+          </button>
+          <button
+            onClick={() => setHoldingsFilter('CORE')}
+            className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 ${
+              holdingsFilter === 'CORE'
+                ? 'bg-emerald-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <span>🛡️ Core Protected</span>
+            <span>({coreHoldings.length})</span>
+          </button>
+          <button
+            onClick={() => setHoldingsFilter('VAULT')}
+            className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 ${
+              holdingsFilter === 'VAULT'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <span>⚡ Tactical Vault</span>
+            <span>({vaultHoldings.length})</span>
+          </button>
+        </div>
+      </div>
+
       <div className="glass-panel overflow-x-auto rounded-xl">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
               <th className="p-4 text-muted font-normal text-sm">Asset</th>
-              <th className="p-4 text-muted font-normal text-sm">Shares</th>
+              <th className="p-4 text-muted font-normal text-sm">Portfolio Bucket</th>
+              <th className="p-4 text-muted font-normal text-sm">Class</th>
+              <th className="p-4 text-muted font-normal text-sm">Units / Shares</th>
               <th className="p-4 text-muted font-normal text-sm">Avg Price</th>
               <th className="p-4 text-muted font-normal text-sm">Current Price</th>
               <th className="p-4 text-muted font-normal text-sm">Total Value</th>
-              <th className="p-4 text-muted font-normal text-sm text-right">Performance</th>
+              <th className="p-4 text-muted font-normal text-sm">Performance</th>
+              <th className="p-4 text-muted font-normal text-sm text-right">Action</th>
             </tr>
           </thead>
           <tbody>
             {holdings.length === 0 ? (
               <tr>
-                <td colSpan="6" className="p-6 text-center text-muted">No holdings yet. Go to Markets to buy some stocks!</td>
+                <td colSpan="9" className="p-6 text-center text-muted">
+                  No holdings yet. Go to <strong className="text-white cursor-pointer" onClick={() => navigate('/macro-agent')}>Global Agent</strong> to auto-shuffle or <strong className="text-white cursor-pointer" onClick={() => navigate('/markets')}>Markets</strong> to buy stocks & commodities!
+                </td>
               </tr>
             ) : (
-              holdings.map((asset, index) => {
-                const performance = ((asset.currentPrice - asset.avgPrice) / asset.avgPrice) * 100;
-                const isPositive = performance >= 0;
-                return (
-                  <tr key={index} className="hover:bg-white/5 transition-colors" style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                    <td className="p-4 font-bold flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs text-white shadow-lg" style={{ background: 'linear-gradient(135deg, var(--accent-primary) 0%, rgba(99, 102, 241, 0.8) 100%)' }}>
-                        {asset.ticker.substring(0, 1)}
-                      </div>
-                      <span className="text-sm font-bold">{asset.ticker}</span>
-                    </td>
-                    <td className="p-4 text-sm">{asset.shares}</td>
-                    <td className="p-4 text-muted text-sm">{currency}{asset.avgPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td className="p-4 text-sm font-bold" style={{ color: isPositive ? 'var(--accent-primary)' : 'var(--accent-warning)' }}>
-                      <div className="flex items-center gap-1.5">
-                        {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                        {currency}{asset.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
-                    </td>
-                    <td className="p-4 font-bold text-sm">{currency}{asset.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td className="p-4 text-right font-bold text-sm" style={{ color: isPositive ? 'var(--accent-primary)' : 'var(--accent-warning)' }}>
-                      {isPositive ? '+' : ''}{performance.toFixed(2)}%
-                    </td>
-                  </tr>
-                );
-              })
+              holdings
+                .filter(asset => {
+                  if (holdingsFilter === 'CORE') return (asset.bucket || 'core') !== 'agent_vault';
+                  if (holdingsFilter === 'VAULT') return asset.bucket === 'agent_vault';
+                  return true;
+                })
+                .map((asset, index) => {
+                  const performance = ((asset.currentPrice - asset.avgPrice) / asset.avgPrice) * 100;
+                  const isPositive = performance >= 0;
+                  const formattedShares = typeof asset.shares === 'number' 
+                    ? (asset.shares % 1 === 0 ? asset.shares : asset.shares.toFixed(3)) 
+                    : asset.shares;
+                  const isCommodity = asset.assetType === 'commodity' || asset.ticker.includes('=');
+                  const isVaultHolding = asset.bucket === 'agent_vault';
+
+                  return (
+                    <tr key={index} className="hover:bg-white/5 transition-colors text-sm" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                      <td className="p-4 font-bold flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs text-white shadow-lg" style={{ 
+                          background: isCommodity 
+                            ? 'linear-gradient(135deg, #f59e0b, #d97706)' 
+                            : 'linear-gradient(135deg, var(--accent-primary) 0%, rgba(99, 102, 241, 0.8) 100%)' 
+                        }}>
+                          {asset.ticker.substring(0, 2)}
+                        </div>
+                        <div>
+                          <span className="text-sm font-bold block">{asset.ticker}</span>
+                          <span className="text-[11px] text-muted">{asset.name || asset.ticker}</span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                          isVaultHolding 
+                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 
+                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        }`}>
+                          {isVaultHolding ? '⚡ Tactical Vault' : '🛡️ Long-Term Core'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
+                          isCommodity ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'bg-slate-800 text-slate-300'
+                        }`}>
+                          {asset.category || (isCommodity ? 'Commodity' : 'Equity')}
+                        </span>
+                      </td>
+                      <td className="p-4 text-sm font-mono font-bold text-white">{formattedShares}</td>
+                      <td className="p-4 text-muted text-sm">{currency}{(asset.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="p-4 text-sm font-bold" style={{ color: isPositive ? 'var(--accent-primary)' : 'var(--accent-warning)' }}>
+                        <div className="flex items-center gap-1.5">
+                          {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                          {currency}{(asset.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                      </td>
+                      <td className="p-4 font-bold text-sm">{currency}{(asset.totalValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="p-4 font-bold text-sm" style={{ color: isPositive ? 'var(--accent-primary)' : 'var(--accent-warning)' }}>
+                        {isPositive ? '+' : ''}{(isNaN(performance) ? 0 : performance).toFixed(2)}%
+                      </td>
+                      <td className="p-4 text-right">
+                        <button 
+                          onClick={() => {
+                            if (window.confirm(`Liquidate position in ${asset.ticker}?`)) {
+                              sellAsset(asset.ticker, null, asset.bucket);
+                            }
+                          }}
+                          className="btn btn-outline py-1 px-3 text-xs text-red-400 hover:text-red-300 hover:border-red-500/40"
+                        >
+                          Sell
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
             )}
           </tbody>
         </table>
@@ -326,7 +546,7 @@ export default function Dashboard() {
                   overflow: 'hidden',
                   color: 'var(--text-primary)'
                 }}>
-                  {item.headline.replace(` - ${item.source}`, '')}
+                  {(item.headline || '').replace(` - ${item.source}`, '')}
                 </h4>
 
                 <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted mt-auto pt-3" style={{ borderTop: '1px solid var(--glass-border)' }}>
@@ -384,7 +604,7 @@ export default function Dashboard() {
                   overflow: 'hidden',
                   color: 'var(--text-primary)'
                 }}>
-                  {item.headline.replace(` - ${item.source}`, '')}
+                  {(item.headline || '').replace(` - ${item.source}`, '')}
                 </h4>
 
                 <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted mt-auto pt-3" style={{ borderTop: '1px solid var(--glass-border)' }}>

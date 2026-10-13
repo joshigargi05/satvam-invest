@@ -11,18 +11,23 @@ const TrendingUp = Lucide.TrendingUp || (() => '📈');
 const TrendingDown = Lucide.TrendingDown || (() => '📉');
 const AlertCircle = Lucide.AlertCircle || Lucide.AlertTriangle || (() => '⚠️');
 const PlayCircle = Lucide.PlayCircle || (() => '▶️');
+const X = Lucide.X || (() => '✕');
+const Volume2 = Lucide.Volume2 || (() => '🔊');
+const CheckCircle2 = Lucide.CheckCircle2 || (() => '✓');
+const MessageSquare = Lucide.MessageSquare || (() => '💬');
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid } from 'recharts';
 import { getQuotes } from '../services/api';
 import { useMarket } from '../context/MarketContext';
 
 export default function EarningsAgent() {
-  const { market, currency } = useMarket();
+  const { market, currency, getCurrency } = useMarket();
   const [ticker, setTicker] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState('');
   const [results, setResults] = useState(null);
+  const [showTranscriptModal, setShowTranscriptModal] = useState(false);
 
   const handleAnalyze = async () => {
     if (!ticker.trim()) return;
@@ -30,14 +35,18 @@ export default function EarningsAgent() {
     setResults(null);
     setProgress(0);
     
-    let currentPrice = market === 'US' ? 100.00 : 1000.00;
     const cleanTicker = ticker.trim().toUpperCase();
-    
-    getQuotes(cleanTicker).then(quotes => {
+    const assetCurrency = getCurrency(cleanTicker);
+    let currentPrice = assetCurrency === '₹' ? 1000.00 : 100.00;
+
+    try {
+      const quotes = await getQuotes(cleanTicker);
       if (quotes && quotes[cleanTicker] && typeof quotes[cleanTicker].price === 'number') {
         currentPrice = quotes[cleanTicker].price;
       }
-    }).catch(() => {});
+    } catch (e) {
+      console.error(e);
+    }
 
     // Simulate complex multi-stage agentic workflow
     const stages = [
@@ -65,10 +74,10 @@ export default function EarningsAgent() {
           const targetMultiplier = isBullish ? (1.1 + (hash % 15) / 100) : (0.9 - (hash % 10) / 100);
           
           // Safety check in case currentPrice is somehow invalid
-          const safePrice = Number(currentPrice) || (market === 'US' ? 100.00 : 1000.00);
+          const safePrice = Number(currentPrice) || (assetCurrency === '₹' ? 1000.00 : 100.00);
           const targetPrice = safePrice * targetMultiplier;
           const revGrowth = isBullish ? `+${10 + (hash % 20)}% YoY` : `-${2 + (hash % 8)}% YoY`;
-          const epsChange = isBullish ? `Beat by ${currency}0.${10 + (hash % 20)}` : `Missed by ${currency}0.${5 + (hash % 15)}`;
+          const epsChange = isBullish ? `Beat by ${assetCurrency}0.${10 + (hash % 20)}` : `Missed by ${assetCurrency}0.${5 + (hash % 15)}`;
           
           const chartData = [
             { month: 'Q-3', price: Number((safePrice * (isBullish ? 0.85 : 1.15)).toFixed(2)), predicted: null },
@@ -80,6 +89,7 @@ export default function EarningsAgent() {
           
           setResults({
             ticker: cleanTicker,
+            currency: assetCurrency,
             currentPrice: safePrice,
             targetPrice: targetPrice,
             chartData: chartData,
@@ -175,7 +185,7 @@ export default function EarningsAgent() {
                 <div className="flex flex-wrap gap-8 items-center bg-black/20 p-6 rounded-xl border border-white/5">
                   <div className="flex-1 min-w-[120px]">
                     <div className="text-muted text-xs uppercase mb-2 tracking-wider">Current Price</div>
-                    <div className="text-3xl font-medium">{currency}{results.currentPrice.toFixed(2)}</div>
+                    <div className="text-3xl font-medium">{results.currency || currency}{results.currentPrice.toFixed(2)}</div>
                   </div>
                   <div className="hidden md:block w-px h-12 bg-white/10"></div>
                   <div className="flex-1 min-w-[120px]">
@@ -184,7 +194,7 @@ export default function EarningsAgent() {
                       {results.targetPrice > results.currentPrice ? <TrendingUp size={14}/> : <TrendingDown size={14} className="text-red-400"/>}
                     </div>
                     <div className={`text-4xl font-black ${results.targetPrice > results.currentPrice ? 'text-purple-400' : 'text-red-400'}`}>
-                      {currency}{results.targetPrice.toFixed(2)}
+                      {results.currency || currency}{results.targetPrice.toFixed(2)}
                     </div>
                   </div>
                   <div className="hidden md:block w-px h-12 bg-white/10"></div>
@@ -215,7 +225,7 @@ export default function EarningsAgent() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                     <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis domain={['auto', 'auto']} stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} width={40} tickFormatter={(v) => `${currency}${v}`} />
+                    <YAxis domain={['auto', 'auto']} stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} width={45} tickFormatter={(v) => `${results.currency || currency}${v}`} />
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '8px' }}
                       itemStyle={{ color: 'white' }}
@@ -253,7 +263,12 @@ export default function EarningsAgent() {
           <div className="glass-panel rounded-xl p-6">
             <h3 className="flex justify-between items-center font-bold mb-6 pb-4" style={{ borderBottom: '1px solid var(--glass-border)' }}>
               <span className="flex items-center gap-2"><Mic className="text-pink-400" size={20} /> Earnings Transcript</span>
-              <PlayCircle className="text-muted hover:text-white cursor-pointer" size={20} />
+              <PlayCircle 
+                onClick={() => setShowTranscriptModal(true)} 
+                className="text-pink-400 hover:text-pink-300 cursor-pointer transition-transform hover:scale-110" 
+                size={20} 
+                title="Open Full Transcript Analysis"
+              />
             </h3>
             <div className="space-y-3">
               {results.transcriptKeyPoints.map((point, i) => (
@@ -264,8 +279,12 @@ export default function EarningsAgent() {
               ))}
             </div>
             <div className="mt-4 pt-4 text-center border-t border-gray-800">
-              <button className="text-xs text-muted hover:text-pink-400 transition-colors uppercase tracking-wider">
-                Read Full Transcript Analysis →
+              <button 
+                onClick={() => setShowTranscriptModal(true)}
+                className="text-xs text-pink-400 hover:text-pink-300 transition-colors uppercase tracking-wider font-bold flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
+              >
+                <span>Read Full Transcript Analysis</span>
+                <span>→</span>
               </button>
             </div>
           </div>
@@ -290,6 +309,150 @@ export default function EarningsAgent() {
             </div>
           </div>
 
+        </div>
+      )}
+
+      {/* Full Transcript Analysis Modal */}
+      {showTranscriptModal && results && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+          onClick={() => setShowTranscriptModal(false)}
+        >
+          <div 
+            className="glass-panel w-full max-w-4xl max-h-[88vh] rounded-2xl border border-white/10 bg-slate-900/95 shadow-2xl flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-6 border-b border-white/10 flex justify-between items-start bg-slate-950/70">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-400">
+                  <Mic size={22} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-white">
+                      {results.ticker} Full Earnings Call Transcript Analysis
+                    </h3>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-pink-500/15 text-pink-300 border border-pink-500/30">
+                      Q3 FY2026
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted mt-0.5">
+                    Audio telemetry processed across Executive Remarks, Q&A Analyst Session & Linguistic Velocity.
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowTranscriptModal(false)}
+                className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-6 text-sm">
+              {/* Telemetry Summary Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-slate-800/60 border border-white/5">
+                  <span className="text-xs text-muted block mb-1 uppercase font-semibold">Executive Sentiment</span>
+                  <div className="text-lg font-bold text-pink-400">
+                    {results.algorithmConviction === 'High' ? '92% Bullish / High Conviction' : '64% Cautious / Defensive'}
+                  </div>
+                  <span className="text-xs text-slate-400">Tone index calculated via NLP</span>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-800/60 border border-white/5">
+                  <span className="text-xs text-muted block mb-1 uppercase font-semibold">Call Duration</span>
+                  <div className="text-lg font-bold text-white">54 Minutes</div>
+                  <span className="text-xs text-slate-400">42 mins Q&A • 12 mins Prepared</span>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-800/60 border border-white/5">
+                  <span className="text-xs text-muted block mb-1 uppercase font-semibold">Hedging / Evasion Index</span>
+                  <div className={`text-lg font-bold ${results.algorithmConviction === 'High' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {results.algorithmConviction === 'High' ? 'Low (Direct Transparency)' : 'Elevated (Guidance Hedged)'}
+                  </div>
+                  <span className="text-xs text-slate-400">Linguistic hesitation detection</span>
+                </div>
+              </div>
+
+              {/* Prepared Executive Remarks */}
+              <div className="p-5 rounded-xl bg-slate-800/40 border border-white/5 space-y-4">
+                <div className="flex items-center gap-2 text-white font-bold text-base">
+                  <Volume2 size={18} className="text-pink-400" />
+                  <h4>Prepared Executive Remarks</h4>
+                </div>
+                <div className="space-y-3">
+                  <div className="p-4 rounded-lg bg-black/25 border-l-4 border-pink-500">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-white text-xs uppercase tracking-wider">Chief Executive Officer (CEO)</span>
+                      <span className="text-[11px] text-muted">04:12 mark</span>
+                    </div>
+                    <p className="text-gray-300 italic text-sm leading-relaxed">
+                      "{results.transcriptKeyPoints[0] || 'We are experiencing immense structural adoption across our product matrix, delivering compounding value to global enterprise customers.'}"
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-black/25 border-l-4 border-blue-500">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-white text-xs uppercase tracking-wider">Chief Financial Officer (CFO)</span>
+                      <span className="text-[11px] text-muted">11:45 mark</span>
+                    </div>
+                    <p className="text-gray-300 italic text-sm leading-relaxed">
+                      "{results.transcriptKeyPoints[1] || 'Free cash flow conversion surged to historic highs as our operational leverage materialized across all geographic segments.'}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Q&A Analyst Session Highlights */}
+              <div className="p-5 rounded-xl bg-slate-800/40 border border-white/5 space-y-4">
+                <div className="flex items-center gap-2 text-white font-bold text-base">
+                  <MessageSquare size={18} className="text-blue-400" />
+                  <h4>Institutional Q&A Analyst Session</h4>
+                </div>
+                <div className="space-y-4 text-xs">
+                  <div className="p-4 rounded-lg bg-black/25 border border-white/5 space-y-2">
+                    <div className="font-semibold text-blue-300">
+                      Q: Toshiya Hari (Goldman Sachs) — On supply trajectory and capacity constraints:
+                    </div>
+                    <p className="text-gray-300 pl-3 border-l-2 border-white/10 leading-relaxed text-sm">
+                      A (Management): "{results.transcriptKeyPoints[2] || 'Our supply partners have accelerated ramp schedules significantly ahead of internal targets, giving us high order fulfillment confidence throughout upcoming quarters.'}"
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-black/25 border border-white/5 space-y-2">
+                    <div className="font-semibold text-blue-300">
+                      Q: Keith Weiss (Morgan Stanley) — On enterprise customer renewal cadence and gross margin expansion:
+                    </div>
+                    <p className="text-gray-300 pl-3 border-l-2 border-white/10 leading-relaxed text-sm">
+                      A (Management): "Renewal retention rates stood firmly at top-tier benchmarks. Customers perceive our infrastructure as mission-critical rather than discretionary spend."
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Agent Takeaway */}
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3">
+                <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <h5 className="font-bold text-white text-xs uppercase tracking-wider mb-1">
+                    Autonomous Intelligence Assessment
+                  </h5>
+                  <p className="text-emerald-200/90 text-xs leading-relaxed">
+                    {results.synthesis}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-white/10 bg-slate-950/70 flex justify-end">
+              <button
+                onClick={() => setShowTranscriptModal(false)}
+                className="btn btn-outline py-2 px-6 text-xs font-bold"
+              >
+                Close Transcript
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

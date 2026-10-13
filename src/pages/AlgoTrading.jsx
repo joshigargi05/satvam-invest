@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 
 const Bot = Lucide.Bot || (() => '🤖');
@@ -14,8 +15,32 @@ const Cpu = Lucide.Cpu || (() => '💻');
 import { useMarket } from '../context/MarketContext';
 import { getAlgoRecommendations, getQuotes } from '../services/api';
 
+const tradeLibraryUS = [
+  { symbol: 'GOOGL', name: 'Alphabet Inc.', type: 'buy', rationale: 'Gemini AI cloud acceleration driving multi-quarter FCF expansion. XGBoost probability > 91%. Bot initiated algorithmic position.' },
+  { symbol: 'NVDA', name: 'NVIDIA Corporation', type: 'buy', rationale: 'Strong breakout detected on 15m chart. XGBoost probability > 88%. Bot executed limit order automatically.' },
+  { symbol: 'AAPL', name: 'Apple Inc.', type: 'monitor', rationale: 'Technical indicators show overbought conditions. Bot is waiting for target entry price to execute BUY order.' },
+  { symbol: 'TSLA', name: 'Tesla Inc.', type: 'sell', rationale: 'Take-profit target hit. Momentum shift detected in underlying options flow. Bot automatically closed position.' },
+  { symbol: 'META', name: 'Meta Platforms', type: 'buy', rationale: 'Volume profile indicates accumulation phase. MACD crossover confirmed on hourly chart.' },
+  { symbol: 'MSFT', name: 'Microsoft Corp.', type: 'monitor', rationale: 'Approaching critical resistance at 50-day moving average. Monitoring for clean breakout.' },
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', type: 'buy', rationale: 'Algorithm detected unusual bullish options activity. Volatility squeeze firing.' },
+  { symbol: 'AMD', name: 'Advanced Micro Devices', type: 'sell', rationale: 'Trailing stop triggered after 5% drop from local high. Capital re-allocated.' },
+  { symbol: 'PLTR', name: 'Palantir Technologies', type: 'buy', rationale: 'Fundamental catalysts detected in recent SEC filings. Sentiment score strongly positive.' }
+];
+
+const tradeLibraryIndia = [
+  { symbol: 'RELIANCE', name: 'Reliance Industries', type: 'buy', rationale: 'Strong breakout detected on 15m chart. XGBoost probability > 88%. Bot executed limit order.' },
+  { symbol: 'TCS', name: 'Tata Consultancy Services', type: 'monitor', rationale: 'Technical indicators show overbought conditions. Waiting for target entry.' },
+  { symbol: 'HDFCBANK', name: 'HDFC Bank', type: 'sell', rationale: 'Take-profit target hit. Momentum shift detected. Position closed.' },
+  { symbol: 'INFY', name: 'Infosys Ltd', type: 'buy', rationale: 'Volume profile indicates accumulation phase. MACD crossover confirmed.' },
+  { symbol: 'ICICIBANK', name: 'ICICI Bank', type: 'monitor', rationale: 'Approaching critical resistance at 50-day SMA. Monitoring.' },
+  { symbol: 'SBIN', name: 'State Bank of India', type: 'buy', rationale: 'Unusual bullish options activity detected. Volatility squeeze firing.' },
+  { symbol: 'BHARTIARTL', name: 'Bharti Airtel', type: 'sell', rationale: 'Trailing stop triggered after 5% drop from local high.' },
+  { symbol: 'ITC', name: 'ITC Limited', type: 'buy', rationale: 'Fundamental catalysts detected. Sentiment score strongly positive.' }
+];
+
 export default function AlgoTrading() {
-  const { market, currency } = useMarket();
+  const navigate = useNavigate();
+  const { market, currency, getCurrency } = useMarket();
   const [activeTab, setActiveTab] = useState('analysis'); // 'analysis' | 'automated'
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,6 +50,7 @@ export default function AlgoTrading() {
   const [botActive, setBotActive] = useState(false);
   const [liveTrades, setLiveTrades] = useState([]);
   const [livePrices, setLivePrices] = useState({ 
+    GOOGL: 343.50,
     NVDA: 114.50, AAPL: 172.50, TSLA: 185.20,
     META: 470.10, MSFT: 430.50, AMZN: 185.60, 
     AMD: 160.20, PLTR: 22.40,
@@ -32,28 +58,6 @@ export default function AlgoTrading() {
     INFY: 1450.60, ICICIBANK: 1080.30, SBIN: 810.15,
     BHARTIARTL: 1320.50, ITC: 430.25
   });
-
-  const tradeLibraryUS = [
-    { symbol: 'NVDA', name: 'NVIDIA Corporation', type: 'buy', rationale: 'Strong breakout detected on 15m chart. XGBoost probability > 88%. Bot executed limit order automatically.' },
-    { symbol: 'AAPL', name: 'Apple Inc.', type: 'monitor', rationale: 'Technical indicators show overbought conditions. Bot is waiting for target entry price to execute BUY order.' },
-    { symbol: 'TSLA', name: 'Tesla Inc.', type: 'sell', rationale: 'Take-profit target hit. Momentum shift detected in underlying options flow. Bot automatically closed position.' },
-    { symbol: 'META', name: 'Meta Platforms', type: 'buy', rationale: 'Volume profile indicates accumulation phase. MACD crossover confirmed on hourly chart.' },
-    { symbol: 'MSFT', name: 'Microsoft Corp.', type: 'monitor', rationale: 'Approaching critical resistance at 50-day moving average. Monitoring for clean breakout.' },
-    { symbol: 'AMZN', name: 'Amazon.com Inc.', type: 'buy', rationale: 'Algorithm detected unusual bullish options activity. Volatility squeeze firing.' },
-    { symbol: 'AMD', name: 'Advanced Micro Devices', type: 'sell', rationale: 'Trailing stop triggered after 5% drop from local high. Capital re-allocated.' },
-    { symbol: 'PLTR', name: 'Palantir Technologies', type: 'buy', rationale: 'Fundamental catalysts detected in recent SEC filings. Sentiment score strongly positive.' }
-  ];
-
-  const tradeLibraryIndia = [
-    { symbol: 'RELIANCE', name: 'Reliance Industries', type: 'buy', rationale: 'Strong breakout detected on 15m chart. XGBoost probability > 88%. Bot executed limit order.' },
-    { symbol: 'TCS', name: 'Tata Consultancy Services', type: 'monitor', rationale: 'Technical indicators show overbought conditions. Waiting for target entry.' },
-    { symbol: 'HDFCBANK', name: 'HDFC Bank', type: 'sell', rationale: 'Take-profit target hit. Momentum shift detected. Position closed.' },
-    { symbol: 'INFY', name: 'Infosys Ltd', type: 'buy', rationale: 'Volume profile indicates accumulation phase. MACD crossover confirmed.' },
-    { symbol: 'ICICIBANK', name: 'ICICI Bank', type: 'monitor', rationale: 'Approaching critical resistance at 50-day SMA. Monitoring.' },
-    { symbol: 'SBIN', name: 'State Bank of India', type: 'buy', rationale: 'Unusual bullish options activity detected. Volatility squeeze firing.' },
-    { symbol: 'BHARTIARTL', name: 'Bharti Airtel', type: 'sell', rationale: 'Trailing stop triggered after 5% drop from local high.' },
-    { symbol: 'ITC', name: 'ITC Limited', type: 'buy', rationale: 'Fundamental catalysts detected. Sentiment score strongly positive.' }
-  ];
 
   const currentLibrary = market === 'US' ? tradeLibraryUS : tradeLibraryIndia;
 
@@ -102,10 +106,11 @@ export default function AlgoTrading() {
     return () => clearInterval(interval);
   }, [botActive, currentLibrary]);
 
-  const handleAnalyze = async () => {
-    if (!query.trim()) return;
+  const handleAnalyze = async (searchQuery) => {
+    const q = (typeof searchQuery === 'string' ? searchQuery : query).trim();
+    if (!q) return;
     setLoading(true);
-    const data = await getAlgoRecommendations(query);
+    const data = await getAlgoRecommendations(q);
     setResults(data);
     setLoading(false);
   };
@@ -139,6 +144,24 @@ export default function AlgoTrading() {
             <p className="text-muted">Multi-factor XGBoost + LLM predictive scoring engine.</p>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <button 
+            type="button"
+            onClick={() => navigate('/')} 
+            className="btn btn-outline"
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            📊 Portfolio
+          </button>
+          <button 
+            type="button"
+            onClick={() => navigate('/markets')} 
+            className="btn btn-primary"
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            📈 Markets
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -163,16 +186,35 @@ export default function AlgoTrading() {
             <div className="flex gap-2">
               <input
                 type="text"
-                className="flex-1 bg-transparent text-white outline-none"
-                style={{ border: '1px solid var(--glass-border)', padding: '1rem', borderRadius: '12px', fontSize: '1rem' }}
-                placeholder="e.g. What are the best US tech stocks to buy today?"
+                className="chat-input flex-1"
+                placeholder="e.g. GOOGL, NVDA, US Tech, Energy, or Indian Equities"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
               />
-              <button onClick={handleAnalyze} className="btn btn-primary" style={{ padding: '0 2rem', borderRadius: '12px' }} disabled={loading}>
+              <button onClick={() => handleAnalyze()} className="btn btn-primary" style={{ padding: '0 2rem', borderRadius: '12px' }} disabled={loading}>
                 {loading ? <div className="inline-block animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" /> : <Sparkles size={20} />}
               </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-white/5">
+              <span className="text-xs text-muted font-semibold">Suggested:</span>
+              {[
+                { label: 'Alphabet (GOOGL)', q: 'GOOGL' },
+                { label: 'NVIDIA (NVDA)', q: 'NVDA' },
+                { label: 'Top AI & Tech', q: 'AI Tech' },
+                { label: 'Financials & Banking', q: 'Finance' },
+                { label: 'Indian Equities', q: 'India' }
+              ].map(item => (
+                <button
+                  key={item.q}
+                  type="button"
+                  onClick={() => { setQuery(item.q); handleAnalyze(item.q); }}
+                  className="text-xs px-2.5 py-1 rounded-full border border-white/10 hover:border-primary/50 text-gray-300 hover:text-white transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.03)' }}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -216,6 +258,77 @@ export default function AlgoTrading() {
                     <div className="text-4xl font-black text-gradient">{stock.finalScore.toFixed(1)}/100</div>
                   </div>
                 </div>
+
+                {/* 4-Layer Institutional Quantitative Matrix */}
+                {stock.layers && (
+                  <div className="p-4 rounded-xl bg-slate-900/90 border border-blue-500/25 mb-5 shadow-inner">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Cpu size={16} className="text-blue-400" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                          Agent 4-Layer Multi-Factor Decision Matrix
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted">Conviction:</span>
+                        <span className="text-sm font-black font-mono text-emerald-400">{stock.layers.agentConvictionScore}%</span>
+                        <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full ${
+                          stock.layers.agentSignal.includes('Buy') 
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+                            : 'bg-orange-500/20 text-orange-300 border border-orange-500/40'
+                        }`}>
+                          {stock.layers.agentSignal}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                      {/* Layer 1: Macro & Regime */}
+                      <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col justify-between">
+                        <div className="flex justify-between items-center text-muted text-[10px] font-bold uppercase mb-1">
+                          <span>1. Macro & Regime</span>
+                          <span className="text-blue-400">25%</span>
+                        </div>
+                        <div className="text-base font-bold text-white mb-1 font-mono">{stock.layers.macro.score}%</div>
+                        <div className="text-[11px] text-emerald-400 font-semibold">{stock.layers.macro.status}</div>
+                        <span className="text-[10px] text-slate-400 truncate mt-0.5">{stock.layers.macro.indicator}</span>
+                      </div>
+
+                      {/* Layer 2: Derivatives & OI */}
+                      <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col justify-between">
+                        <div className="flex justify-between items-center text-muted text-[10px] font-bold uppercase mb-1">
+                          <span>2. Derivatives & OI</span>
+                          <span className="text-purple-400">25%</span>
+                        </div>
+                        <div className="text-base font-bold text-white mb-1 font-mono">{stock.layers.derivatives.score}%</div>
+                        <div className="text-[11px] text-purple-300 font-semibold">{stock.layers.derivatives.status}</div>
+                        <span className="text-[10px] text-slate-400 truncate mt-0.5">{stock.layers.derivatives.indicator}</span>
+                      </div>
+
+                      {/* Layer 3: Quant Momentum */}
+                      <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col justify-between">
+                        <div className="flex justify-between items-center text-muted text-[10px] font-bold uppercase mb-1">
+                          <span>3. Quant Momentum</span>
+                          <span className="text-amber-400">30%</span>
+                        </div>
+                        <div className="text-base font-bold text-white mb-1 font-mono">{stock.layers.technical.score}%</div>
+                        <div className="text-[11px] text-amber-300 font-semibold">{stock.layers.technical.status}</div>
+                        <span className="text-[10px] text-slate-400 truncate mt-0.5">{stock.layers.technical.indicator}</span>
+                      </div>
+
+                      {/* Layer 4: Fundamental & Earnings */}
+                      <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col justify-between">
+                        <div className="flex justify-between items-center text-muted text-[10px] font-bold uppercase mb-1">
+                          <span>4. Fundamentals</span>
+                          <span className="text-emerald-400">20%</span>
+                        </div>
+                        <div className="text-base font-bold text-white mb-1 font-mono">{stock.layers.fundamental.score}%</div>
+                        <div className="text-[11px] text-emerald-300 font-semibold">{stock.layers.fundamental.status}</div>
+                        <span className="text-[10px] text-slate-400 truncate mt-0.5">{stock.layers.fundamental.indicator}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                   <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
@@ -267,6 +380,24 @@ export default function AlgoTrading() {
                         <div className="font-bold text-orange-400">{stock.riskProfile}</div>
                       </div>
                     </div>
+                    <div className="mt-4 pt-3 border-t border-white/10 flex flex-col gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => navigate('/markets')} 
+                        className="btn btn-primary" 
+                        style={{ width: '100%', padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+                      >
+                        Trade {stock.ticker} in Markets &rarr;
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => navigate('/')} 
+                        className="btn btn-outline" 
+                        style={{ width: '100%', padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+                      >
+                        View Portfolio &rarr;
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -306,21 +437,40 @@ export default function AlgoTrading() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
             <h3 className="text-xl font-bold flex items-center gap-2">
               <Activity className="text-primary" /> Live Automated Trades
             </h3>
-            {botActive && (
-              <span className="flex items-center gap-2 text-sm text-emerald-400 font-bold bg-emerald-400/10 px-3 py-1 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                Scanning Market...
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              <button 
+                type="button"
+                onClick={() => navigate('/')} 
+                className="btn btn-outline"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+              >
+                📊 View in Portfolio &rarr;
+              </button>
+              <button 
+                type="button"
+                onClick={() => navigate('/markets')} 
+                className="btn btn-primary"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+              >
+                📈 View Markets &rarr;
+              </button>
+              {botActive && (
+                <span className="flex items-center gap-2 text-sm text-emerald-400 font-bold bg-emerald-400/10 px-3 py-1 rounded-full">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                  Scanning Market...
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative min-h-[400px]">
             {liveTrades.filter(Boolean).map((trade, i) => {
               const price = livePrices[trade.symbol] || (market === 'US' ? 100.00 : 1000.00);
+              const tradeCurrency = getCurrency(trade.symbol);
               
               return (
                 <div key={`${trade.symbol}-${i}`} className={`glass-panel p-6 rounded-xl border border-white/5 relative overflow-hidden animate-fade-in ${trade.type === 'monitor' ? 'opacity-80' : ''}`}>
@@ -348,15 +498,15 @@ export default function AlgoTrading() {
                       <>
                         <div className="flex justify-between items-center border-b border-white/5 pb-2">
                           <span className="text-muted text-sm">Execution Price</span>
-                          <span className="font-bold">{currency}{price.toFixed(2)}</span>
+                          <span className="font-bold">{tradeCurrency}{price.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center border-b border-white/5 pb-2">
                           <span className="text-muted text-sm">Take Profit Target</span>
-                          <span className="font-bold text-emerald-400">{currency}{(price * 1.118).toFixed(2)}</span>
+                          <span className="font-bold text-emerald-400">{tradeCurrency}{(price * 1.118).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-muted text-sm">Risk Stop</span>
-                          <span className="font-bold text-red-400">{currency}{(price * 0.954).toFixed(2)}</span>
+                          <span className="font-bold text-red-400">{tradeCurrency}{(price * 0.954).toFixed(2)}</span>
                         </div>
                       </>
                     )}
@@ -365,11 +515,11 @@ export default function AlgoTrading() {
                       <>
                         <div className="flex justify-between items-center border-b border-white/5 pb-2">
                           <span className="text-muted text-sm">Target Entry Price</span>
-                          <span className="font-bold">{currency}{(price * 0.97).toFixed(2)}</span>
+                          <span className="font-bold">{tradeCurrency}{(price * 0.97).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center border-b border-white/5 pb-2">
                           <span className="text-muted text-sm">Current Price</span>
-                          <span className="font-bold text-white">{currency}{price.toFixed(2)}</span>
+                          <span className="font-bold text-white">{tradeCurrency}{price.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-muted text-sm">Action</span>
@@ -382,11 +532,11 @@ export default function AlgoTrading() {
                       <>
                         <div className="flex justify-between items-center border-b border-white/5 pb-2">
                           <span className="text-muted text-sm">Execution Price</span>
-                          <span className="font-bold">{currency}{price.toFixed(2)}</span>
+                          <span className="font-bold">{tradeCurrency}{price.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center border-b border-white/5 pb-2">
                           <span className="text-muted text-sm">Original Entry</span>
-                          <span className="font-bold">{currency}{(price / 1.089).toFixed(2)}</span>
+                          <span className="font-bold">{tradeCurrency}{(price / 1.089).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-muted text-sm">Realized Profit</span>
@@ -399,6 +549,24 @@ export default function AlgoTrading() {
                   <div className="mt-6 pt-4 border-t border-white/5">
                     <div className="text-xs text-muted mb-2 font-bold uppercase">AI Rationale</div>
                     <p className="text-sm text-gray-300">{trade.rationale}</p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-white/5 flex gap-2">
+                    <button 
+                      type="button"
+                      onClick={() => navigate('/markets')}
+                      className="btn btn-primary"
+                      style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem' }}
+                    >
+                      Trade in Markets
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => navigate('/')}
+                      className="btn btn-outline"
+                      style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem' }}
+                    >
+                      Portfolio
+                    </button>
                   </div>
                 </div>
               );
