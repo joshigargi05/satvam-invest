@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 
 const Bot = Lucide.Bot || (() => '🤖');
@@ -11,35 +11,37 @@ const ActivitySquare = Lucide.ActivitySquare || Lucide.Activity || (() => '📊'
 const AlertTriangle = Lucide.AlertTriangle || (() => '⚠️');
 const Send = Lucide.Send || (() => '🚀');
 const Cpu = Lucide.Cpu || (() => '💻');
+const Target = Lucide.Target || (() => '🎯');
 
 import { useMarket } from '../context/MarketContext';
 import { getAlgoRecommendations, getQuotes } from '../services/api';
 
 const tradeLibraryUS = [
-  { symbol: 'GOOGL', name: 'Alphabet Inc.', type: 'buy', rationale: 'Gemini AI cloud acceleration driving multi-quarter FCF expansion. XGBoost probability > 91%. Bot initiated algorithmic position.' },
-  { symbol: 'NVDA', name: 'NVIDIA Corporation', type: 'buy', rationale: 'Strong breakout detected on 15m chart. XGBoost probability > 88%. Bot executed limit order automatically.' },
+  { symbol: 'GOOGL', name: 'Alphabet Inc.', type: 'buy', rationale: 'Gemini AI cloud acceleration driving multi-quarter FCF expansion. AI conviction > 91%. Bot initiated algorithmic position.' },
+  { symbol: 'NVDA', name: 'NVIDIA Corporation', type: 'buy', rationale: 'Strong breakout detected on 15m chart. AI conviction > 88%. Bot executed limit order automatically.' },
   { symbol: 'AAPL', name: 'Apple Inc.', type: 'monitor', rationale: 'Technical indicators show overbought conditions. Bot is waiting for target entry price to execute BUY order.' },
   { symbol: 'TSLA', name: 'Tesla Inc.', type: 'sell', rationale: 'Take-profit target hit. Momentum shift detected in underlying options flow. Bot automatically closed position.' },
-  { symbol: 'META', name: 'Meta Platforms', type: 'buy', rationale: 'Volume profile indicates accumulation phase. MACD crossover confirmed on hourly chart.' },
-  { symbol: 'MSFT', name: 'Microsoft Corp.', type: 'monitor', rationale: 'Approaching critical resistance at 50-day moving average. Monitoring for clean breakout.' },
-  { symbol: 'AMZN', name: 'Amazon.com Inc.', type: 'buy', rationale: 'Algorithm detected unusual bullish options activity. Volatility squeeze firing.' },
+  { symbol: 'META', name: 'Meta Platforms', type: 'buy', rationale: 'Volume profile indicates accumulation phase. Momentum breakout confirmed on hourly chart.' },
+  { symbol: 'MSFT', name: 'Microsoft Corp.', type: 'monitor', rationale: 'Approaching critical resistance level. Monitoring for clean breakout.' },
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', type: 'buy', rationale: 'Algorithm detected unusual bullish institutional activity. Volatility squeeze firing.' },
   { symbol: 'AMD', name: 'Advanced Micro Devices', type: 'sell', rationale: 'Trailing stop triggered after 5% drop from local high. Capital re-allocated.' },
   { symbol: 'PLTR', name: 'Palantir Technologies', type: 'buy', rationale: 'Fundamental catalysts detected in recent SEC filings. Sentiment score strongly positive.' }
 ];
 
 const tradeLibraryIndia = [
-  { symbol: 'RELIANCE', name: 'Reliance Industries', type: 'buy', rationale: 'Strong breakout detected on 15m chart. XGBoost probability > 88%. Bot executed limit order.' },
+  { symbol: 'RELIANCE', name: 'Reliance Industries', type: 'buy', rationale: 'Strong breakout detected on 15m chart. AI conviction > 88%. Bot executed limit order.' },
   { symbol: 'TCS', name: 'Tata Consultancy Services', type: 'monitor', rationale: 'Technical indicators show overbought conditions. Waiting for target entry.' },
   { symbol: 'HDFCBANK', name: 'HDFC Bank', type: 'sell', rationale: 'Take-profit target hit. Momentum shift detected. Position closed.' },
-  { symbol: 'INFY', name: 'Infosys Ltd', type: 'buy', rationale: 'Volume profile indicates accumulation phase. MACD crossover confirmed.' },
-  { symbol: 'ICICIBANK', name: 'ICICI Bank', type: 'monitor', rationale: 'Approaching critical resistance at 50-day SMA. Monitoring.' },
-  { symbol: 'SBIN', name: 'State Bank of India', type: 'buy', rationale: 'Unusual bullish options activity detected. Volatility squeeze firing.' },
+  { symbol: 'INFY', name: 'Infosys Ltd', type: 'buy', rationale: 'Volume profile indicates accumulation phase. Momentum breakout confirmed.' },
+  { symbol: 'ICICIBANK', name: 'ICICI Bank', type: 'monitor', rationale: 'Approaching critical resistance level. Monitoring.' },
+  { symbol: 'SBIN', name: 'State Bank of India', type: 'buy', rationale: 'Unusual bullish institutional activity detected. Volatility squeeze firing.' },
   { symbol: 'BHARTIARTL', name: 'Bharti Airtel', type: 'sell', rationale: 'Trailing stop triggered after 5% drop from local high.' },
   { symbol: 'ITC', name: 'ITC Limited', type: 'buy', rationale: 'Fundamental catalysts detected. Sentiment score strongly positive.' }
 ];
 
 export default function AlgoTrading() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { market, currency, getCurrency } = useMarket();
   const [activeTab, setActiveTab] = useState('analysis'); // 'analysis' | 'automated'
   const [query, setQuery] = useState('');
@@ -50,13 +52,13 @@ export default function AlgoTrading() {
   const [botActive, setBotActive] = useState(false);
   const [liveTrades, setLiveTrades] = useState([]);
   const [livePrices, setLivePrices] = useState({ 
-    GOOGL: 343.50,
-    NVDA: 114.50, AAPL: 172.50, TSLA: 185.20,
-    META: 470.10, MSFT: 430.50, AMZN: 185.60, 
-    AMD: 160.20, PLTR: 22.40,
-    RELIANCE: 2950.45, TCS: 3840.10, HDFCBANK: 1540.20,
-    INFY: 1450.60, ICICIBANK: 1080.30, SBIN: 810.15,
-    BHARTIARTL: 1320.50, ITC: 430.25
+    GOOGL: 333.06,
+    NVDA: 220.54, AAPL: 343.88, TSLA: 386.69,
+    META: 710.90, MSFT: 531.65, AMZN: 262.67, 
+    AMD: 550.10, PLTR: 199.50,
+    RELIANCE: 1209.00, TCS: 2529.00, HDFCBANK: 706.95,
+    INFY: 1168.00, ICICIBANK: 1385.00, SBIN: 963.00,
+    BHARTIARTL: 1891.70, ITC: 262.00
   });
 
   const currentLibrary = market === 'US' ? tradeLibraryUS : tradeLibraryIndia;
@@ -115,6 +117,20 @@ export default function AlgoTrading() {
     setLoading(false);
   };
 
+  // Auto-run analysis if ?ticker= is passed from Portfolio or Markets Top 3 Picks, or default to initial scan
+  React.useEffect(() => {
+    const tickerParam = searchParams.get('ticker');
+    if (tickerParam) {
+      setActiveTab('analysis');
+      setQuery(tickerParam);
+      handleAnalyze(tickerParam);
+    } else if (!results && !loading) {
+      const defaultQ = market === 'INDIA' ? 'RELIANCE' : 'GOOGL';
+      setQuery(defaultQ);
+      handleAnalyze(defaultQ);
+    }
+  }, [searchParams, market]);
+
   const renderBadge = (score) => {
     let text = 'Avoid';
     let color = '#ef4444';
@@ -141,7 +157,7 @@ export default function AlgoTrading() {
           </div>
           <div>
             <h1 className="text-gradient" style={{ fontSize: '1.75rem' }}>Algorithmic Trading Engine</h1>
-            <p className="text-muted">Multi-factor XGBoost + LLM predictive scoring engine.</p>
+            <p className="text-muted">Proprietary AI Investment Intelligence Engine.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -221,11 +237,11 @@ export default function AlgoTrading() {
       {loading && (
         <div className="flex flex-col items-center justify-center p-12 text-muted glass-panel rounded-xl">
           <div className="inline-block animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mb-6"></div>
-          <p className="font-bold text-lg mb-2 text-white">Running Multi-Factor Analysis...</p>
+          <p className="font-bold text-lg mb-2 text-white">Running AI Market Analysis...</p>
           <ul className="text-sm space-y-2">
-            <li className="flex items-center gap-2"><Activity size={14} className="text-emerald-500"/> Executing XGBoost Probability Trees</li>
-            <li className="flex items-center gap-2"><Activity size={14} className="text-blue-500"/> Evaluating Technical & Fundamental Layers</li>
-            <li className="flex items-center gap-2"><Activity size={14} className="text-purple-500"/> Processing LLM Sentiment Conviction</li>
+            <li className="flex items-center gap-2"><Activity size={14} className="text-emerald-500"/> Analyzing Real-Time Market Action &amp; Volume</li>
+            <li className="flex items-center gap-2"><Activity size={14} className="text-blue-500"/> Evaluating Institutional Conviction Signals</li>
+            <li className="flex items-center gap-2"><Activity size={14} className="text-purple-500"/> Synthesizing Risk-Adjusted Price Targets</li>
           </ul>
         </div>
       )}
@@ -235,7 +251,7 @@ export default function AlgoTrading() {
           <div className="glass-panel p-6 rounded-xl flex items-center gap-4" style={{ borderLeft: '4px solid var(--accent-primary)' }}>
             <Bot size={24} className="text-primary" />
             <p className="text-sm md:text-base leading-relaxed text-white">
-              Based on a 10-year historical training set and real-time streaming data, I have processed your query through the 5-layer predictive engine. Below are the ranked results optimized for a 90-day outperformance probability against the S&P 500.
+              Vestra AI has analyzed real-time market streaming data and proprietary institutional signals for your query. Below are the ranked opportunities optimized for risk-adjusted outperformance.
             </p>
           </div>
 
@@ -246,110 +262,67 @@ export default function AlgoTrading() {
                 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6" style={{ borderBottom: '1px solid var(--glass-border)' }}>
                   <div>
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
                       <h2 className="text-3xl font-black tracking-tight">{stock.ticker}</h2>
                       {renderBadge(stock.finalScore)}
+                      {typeof stock.currentPrice === 'number' && (
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900/90 border border-white/10 font-mono">
+                          <span className="text-base font-bold text-white">
+                            {stock.currency || getCurrency(stock.ticker)}{stock.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          <span className={`text-xs font-bold ${(stock.changePct || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {(stock.changePct || 0) >= 0 ? '+' : ''}{Number(stock.changePct || 0).toFixed(2)}%
+                          </span>
+                        </div>
+                      )}
+                      {(stock.targetPrice || stock.currentPrice) && (
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-950/70 border border-emerald-500/40 font-mono shadow-sm">
+                          <Target size={14} className="text-emerald-400 shrink-0" />
+                          <span className="text-[10px] uppercase font-extrabold tracking-wider text-emerald-300">
+                            Algo Target (12M):
+                          </span>
+                          <span className="text-base font-bold text-emerald-300">
+                            {stock.currency || getCurrency(stock.ticker)}
+                            {Number(stock.targetPrice || (stock.currentPrice * (1 + (stock.upsidePct || 15) / 100))).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          {(stock.upsidePct !== undefined && stock.upsidePct !== null) && (
+                            <span className="text-xs font-black text-emerald-300 bg-emerald-500/25 px-1.5 py-0.5 rounded border border-emerald-500/30 font-sans">
+                              +{stock.upsidePct}%
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <p className="text-muted font-medium">{stock.companyName} • {stock.sector}</p>
                   </div>
                   
-                  <div className="text-right flex-shrink-0">
+                  <div className="text-left md:text-right shrink-0">
                     <div className="text-sm text-muted uppercase tracking-wider mb-1 font-bold">Final Algo Score</div>
                     <div className="text-4xl font-black text-gradient">{stock.finalScore.toFixed(1)}/100</div>
                   </div>
                 </div>
 
-                {/* 4-Layer Institutional Quantitative Matrix */}
-                {stock.layers && (
-                  <div className="p-4 rounded-xl bg-slate-900/90 border border-blue-500/25 mb-5 shadow-inner">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Cpu size={16} className="text-blue-400" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
-                          Agent 4-Layer Multi-Factor Decision Matrix
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted">Conviction:</span>
-                        <span className="text-sm font-black font-mono text-emerald-400">{stock.layers.agentConvictionScore}%</span>
-                        <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full ${
-                          stock.layers.agentSignal.includes('Buy') 
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
-                            : 'bg-orange-500/20 text-orange-300 border border-orange-500/40'
-                        }`}>
-                          {stock.layers.agentSignal}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                      {/* Layer 1: Macro & Regime */}
-                      <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col justify-between">
-                        <div className="flex justify-between items-center text-muted text-[10px] font-bold uppercase mb-1">
-                          <span>1. Macro & Regime</span>
-                          <span className="text-blue-400">25%</span>
-                        </div>
-                        <div className="text-base font-bold text-white mb-1 font-mono">{stock.layers.macro.score}%</div>
-                        <div className="text-[11px] text-emerald-400 font-semibold">{stock.layers.macro.status}</div>
-                        <span className="text-[10px] text-slate-400 truncate mt-0.5">{stock.layers.macro.indicator}</span>
-                      </div>
-
-                      {/* Layer 2: Derivatives & OI */}
-                      <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col justify-between">
-                        <div className="flex justify-between items-center text-muted text-[10px] font-bold uppercase mb-1">
-                          <span>2. Derivatives & OI</span>
-                          <span className="text-purple-400">25%</span>
-                        </div>
-                        <div className="text-base font-bold text-white mb-1 font-mono">{stock.layers.derivatives.score}%</div>
-                        <div className="text-[11px] text-purple-300 font-semibold">{stock.layers.derivatives.status}</div>
-                        <span className="text-[10px] text-slate-400 truncate mt-0.5">{stock.layers.derivatives.indicator}</span>
-                      </div>
-
-                      {/* Layer 3: Quant Momentum */}
-                      <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col justify-between">
-                        <div className="flex justify-between items-center text-muted text-[10px] font-bold uppercase mb-1">
-                          <span>3. Quant Momentum</span>
-                          <span className="text-amber-400">30%</span>
-                        </div>
-                        <div className="text-base font-bold text-white mb-1 font-mono">{stock.layers.technical.score}%</div>
-                        <div className="text-[11px] text-amber-300 font-semibold">{stock.layers.technical.status}</div>
-                        <span className="text-[10px] text-slate-400 truncate mt-0.5">{stock.layers.technical.indicator}</span>
-                      </div>
-
-                      {/* Layer 4: Fundamental & Earnings */}
-                      <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col justify-between">
-                        <div className="flex justify-between items-center text-muted text-[10px] font-bold uppercase mb-1">
-                          <span>4. Fundamentals</span>
-                          <span className="text-emerald-400">20%</span>
-                        </div>
-                        <div className="text-base font-bold text-white mb-1 font-mono">{stock.layers.fundamental.score}%</div>
-                        <div className="text-[11px] text-emerald-300 font-semibold">{stock.layers.fundamental.status}</div>
-                        <span className="text-[10px] text-slate-400 truncate mt-0.5">{stock.layers.fundamental.indicator}</span>
-                      </div>
+                {/* Proprietary AI Conviction Summary Strip */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-white/10">
+                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">AI Conviction Index</div>
+                    <div className="font-bold text-lg text-emerald-400 font-mono">
+                      {(stock.layers?.agentConvictionScore || stock.finalScore)}%
                     </div>
                   </div>
-                )}
-
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                  <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">Factor (35%)</div>
-                    <div className="font-bold text-lg">{stock.scores.factor.toFixed(1)}</div>
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-white/10">
+                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">Agent Signal</div>
+                    <div className="font-bold text-lg text-blue-300">
+                      {stock.layers?.agentSignal || 'Strong Buy'}
+                    </div>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">XGBoost (25%)</div>
-                    <div className="font-bold text-lg text-emerald-400">{stock.scores.xgboost.toFixed(1)}</div>
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-white/10">
+                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">Outperform Probability</div>
+                    <div className="font-bold text-lg text-emerald-300 font-mono">{stock.probability}%</div>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">Sentiment (20%)</div>
-                    <div className="font-bold text-lg">{stock.scores.sentiment.toFixed(1)}</div>
-                  </div>
-                  <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">Technical (10%)</div>
-                    <div className="font-bold text-lg">{stock.scores.technical.toFixed(1)}</div>
-                  </div>
-                  <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">LLM Conviction (10%)</div>
-                    <div className="font-bold text-lg text-purple-400">{stock.scores.llm.toFixed(1)}</div>
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-white/10">
+                    <div className="text-[10px] text-muted uppercase tracking-wider font-bold mb-1">Risk Profile</div>
+                    <div className="font-bold text-lg text-amber-300">{stock.riskProfile}</div>
                   </div>
                 </div>
 
@@ -367,6 +340,22 @@ export default function AlgoTrading() {
                       <AlertTriangle size={14} /> Action Plan
                     </h4>
                     <div className="space-y-3">
+                      <div>
+                        <div className="text-xs text-muted mb-1 flex items-center gap-1">
+                          <Target size={12} className="text-emerald-400" /> Algo Target Price (12M)
+                        </div>
+                        <div className="font-bold text-emerald-300 text-base font-mono flex items-baseline gap-1.5">
+                          <span>
+                            {stock.currency || getCurrency(stock.ticker)}
+                            {Number(stock.targetPrice || (stock.currentPrice * (1 + (stock.upsidePct || 15) / 100))).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          {(stock.upsidePct !== undefined && stock.upsidePct !== null) && (
+                            <span className="text-xs font-black text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded font-sans">
+                              +{stock.upsidePct}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
                       <div>
                         <div className="text-xs text-muted mb-1">Suggested Allocation</div>
                         <div className="font-bold">{stock.allocation}</div>
@@ -420,8 +409,8 @@ export default function AlgoTrading() {
                   When enabled, the system continuously monitors the market, identifies high-probability setups, and executes buy/sell orders directly with your broker—100% automatically with zero human intervention.
                 </p>
               </div>
-              <div className="flex items-center gap-4 bg-black/20 p-4 rounded-xl border border-white/5">
-                <div className="text-right">
+              <div className="flex items-center justify-between md:justify-end flex-wrap gap-4 w-full md:w-auto bg-black/20 p-4 rounded-xl border border-white/5">
+                <div className="text-left md:text-right">
                   <div className="text-xs text-muted uppercase font-bold tracking-wider mb-1">Engine Status</div>
                   <div className={`font-bold ${botActive ? 'text-emerald-400' : 'text-orange-400'}`}>
                     {botActive ? 'ACTIVE & EXECUTING' : 'STANDBY'}
@@ -441,7 +430,7 @@ export default function AlgoTrading() {
             <h3 className="text-xl font-bold flex items-center gap-2">
               <Activity className="text-primary" /> Live Automated Trades
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center flex-wrap gap-2">
               <button 
                 type="button"
                 onClick={() => navigate('/')} 

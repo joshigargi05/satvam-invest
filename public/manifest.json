@@ -1,0 +1,26 @@
+{
+  "name": "VestraAI | Institutional AI Wealth & Quantitative Trading",
+  "short_name": "VestraAI",
+  "description": "AI-Powered Global Investing Intelligence Platform for US & Indian Markets across Web, Android, and iOS.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "categories": ["finance", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

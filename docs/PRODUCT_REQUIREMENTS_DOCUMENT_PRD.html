@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Product Requirements Document (PRD)</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 18mm 16mm 18mm 16mm;
+      @bottom-right {
+        content: counter(page);
+      }
+    }
+    *, *:before, *:after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      line-height: 1.6;
+      font-size: 10.5pt;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* Document Header Banner */
+    .doc-banner {
+      background: linear-gradient(135deg, #0b132b 0%, #1c2541 60%, #10b981 100%);
+      color: #ffffff;
+      padding: 24px 28px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    }
+    .banner-badge {
+      display: inline-block;
+      font-size: 8.5pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.6);
+      color: #6ee7b7;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 10px;
+    }
+    .banner-title {
+      font-size: 20pt;
+      font-weight: 800;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+    .banner-sub {
+      font-size: 11pt;
+      color: #cbd5e1;
+      margin: 0 0 16px 0;
+    }
+    .banner-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 8.5pt;
+      color: #94a3b8;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 12px;
+    }
+    .banner-meta strong {
+      color: #f1f5f9;
+    }
+
+    /* Headings */
+    .doc-h1 {
+      font-size: 16pt;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 24px 0 12px 0;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      page-break-after: avoid;
+    }
+    .doc-h2 {
+      font-size: 13.5pt;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 20px 0 10px 0;
+      border-bottom: 1.5px solid #f1f5f9;
+      padding-bottom: 4px;
+      page-break-after: avoid;
+    }
+    .doc-h3 {
+      font-size: 11.5pt;
+      font-weight: 700;
+      color: #334155;
+      margin: 16px 0 6px 0;
+      page-break-after: avoid;
+    }
+    .doc-h4 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #475569;
+      margin: 12px 0 4px 0;
+      page-break-after: avoid;
+    }
+
+    .doc-p {
+      margin: 0 0 10px 0;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .section-divider {
+      border: 0;
+      height: 1px;
+      background: #e2e8f0;
+      margin: 22px 0;
+    }
+
+    /* Links & Code */
+    .inline-code {
+      font-family: 'Consolas', 'JetBrains Mono', monospace;
+      font-size: 9pt;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+    .doc-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Code Container */
+    .code-container {
+      background: #0b132b;
+      border-radius: 8px;
+      margin: 12px 0 16px 0;
+      border: 1px solid #1e293b;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+    .code-header {
+      background: #1c2541;
+      padding: 6px 14px;
+      font-size: 8pt;
+      font-weight: 700;
+      color: #94a3b8;
+      border-bottom: 1px solid #334155;
+    }
+    .code-container pre {
+      margin: 0;
+      padding: 12px 14px;
+      color: #e2e8f0;
+      font-family: 'Consolas', monospace;
+      font-size: 8.5pt;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+
+    /* Tables */
+    .table-container {
+      margin: 14px 0 18px 0;
+      page-break-inside: avoid;
+    }
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      text-align: left;
+    }
+    .doc-table th {
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-top: 1.5px solid #cbd5e1;
+      border-bottom: 1.5px solid #cbd5e1;
+    }
+    .doc-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    .doc-table tr:nth-child(even) td {
+      background: #fbfcfe;
+    }
+
+    /* Math Display */
+    .math-display {
+      background: #f8fafc;
+      border-left: 4px solid #3b82f6;
+      padding: 10px 16px;
+      font-family: 'Cambria Math', 'Georgia', serif;
+      font-size: 11pt;
+      color: #1e293b;
+      margin: 12px 0;
+      border-radius: 0 8px 8px 0;
+      page-break-inside: avoid;
+    }
+    .math-inline {
+      font-family: 'Cambria Math', 'Georgia', serif;
+      font-style: italic;
+      color: #1e293b;
+    }
+
+    /* Blockquote */
+    .doc-quote {
+      margin: 12px 0;
+      padding: 8px 16px;
+      background: #f0fdf4;
+      border-left: 4px solid #10b981;
+      color: #166534;
+      border-radius: 0 6px 6px 0;
+      font-size: 9.5pt;
+    }
+
+    /* Lists */
+    .doc-list {
+      margin: 6px 0 12px 0;
+      padding-left: 24px;
+      color: #334155;
+    }
+    .doc-list li {
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    /* Architecture Visual Components */
+    .architecture-diagram {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+      page-break-inside: avoid;
+    }
+    .arch-stage {
+      margin-bottom: 10px;
+    }
+    .stage-tag {
+      font-size: 7.5pt;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+    .stage-cards {
+      display: flex;
+      gap: 10px;
+    }
+    .stage-cards.grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .stage-cards.grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .arch-card {
+      flex: 1;
+      background: #ffffff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+    }
+    .blue-border { border-top: 3px solid #3b82f6; }
+    .purple-border { border-top: 3px solid #8b5cf6; }
+    .emerald-border { border-top: 3px solid #10b981; }
+    .amber-border { border-top: 3px solid #f59e0b; }
+    .gold-border { border-top: 3px solid #6366f1; }
+    .card-icon { font-size: 14pt; margin-bottom: 4px; }
+    .card-title { font-weight: 700; font-size: 9pt; color: #0f172a; }
+    .card-desc { font-size: 7.5pt; color: #64748b; margin-top: 2px; line-height: 1.3; }
+    .weight-badge { font-size: 7pt; font-weight: 800; background: #ecfdf5; color: #047857; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+    .layer-num { font-size: 7pt; font-weight: 800; background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+    .flow-connector { text-align: center; color: #94a3b8; font-size: 9pt; margin: 4px 0; }
+
+    /* Topography */
+    .topography-container {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .topo-layer {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+    }
+    .layer-header { font-size: 8pt; font-weight: 800; letter-spacing: 0.08em; color: #475569; margin-bottom: 6px; }
+    .topo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 8pt; color: #334155; }
+    .layer-wire { text-align: center; font-size: 7.5pt; font-weight: 700; color: #3b82f6; padding: 4px 0; }
+
+    /* Sequence Box */
+    .sequence-box {
+      background: #f8fafc;
+      border-left: 4px solid #6366f1;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .seq-header { font-weight: 800; font-size: 9.5pt; color: #1e1b4b; margin-bottom: 8px; }
+    .seq-steps { margin: 0; padding-left: 20px; font-size: 8.5pt; color: #334155; }
+    .seq-steps li { margin-bottom: 4px; }
+
+    /* Matrix Flow */
+    .matrix-flow-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .matrix-grid { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .matrix-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .col-title { font-size: 8pt; font-weight: 800; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .pill { background: #ffffff; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 7.5pt; font-weight: 600; color: #334155; }
+    .layer-card { background: #eff6ff; border: 1px solid #bfdbfe; padding: 6px 8px; border-radius: 6px; font-size: 7.5pt; color: #1e3a8a; }
+    .matrix-arrow { font-size: 14pt; color: #94a3b8; font-weight: bold; }
+    .signal-card.buy { background: #ecfdf5; border: 1.5px solid #10b981; padding: 10px; border-radius: 8px; text-align: center; font-size: 8pt; color: #065f46; }
+
+    /* Warmer Flow */
+    .warmer-flow-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .warmer-step { background: #ffffff; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 7.5pt; font-weight: 600; color: #1e293b; }
+    .warmer-step span { background: #3b82f6; color: white; padding: 1px 5px; border-radius: 50%; font-size: 7pt; margin-right: 4px; }
+    .warmer-arrow { color: #94a3b8; font-weight: bold; font-size: 10pt; }
+
+    /* Mindmap */
+    .mindmap-container {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .mindmap-root {
+      background: #1e293b;
+      color: #ffffff;
+      text-align: center;
+      padding: 8px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 10pt;
+      margin-bottom: 12px;
+    }
+    .mindmap-branches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .branch {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #10b981;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .branch-title { font-weight: 700; font-size: 8.5pt; color: #0f172a; margin-bottom: 6px; }
+    .branch ul { margin: 0; padding-left: 16px; font-size: 7.5pt; color: #475569; }
+    .branch li { margin-bottom: 3px; }
+
+    /* Comparison Box */
+    .comparison-grid {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .comp-col { flex: 1; padding: 14px; border-radius: 8px; }
+    .comp-col.pain { background: #fff1f2; border: 1px solid #fecdd3; }
+    .comp-col.solution { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .comp-header { font-size: 9pt; font-weight: 800; margin-bottom: 10px; }
+    .comp-col.pain .comp-header { color: #9f1239; }
+    .comp-col.solution .comp-header { color: #166534; }
+    .comp-item { font-size: 8pt; margin-bottom: 6px; line-height: 1.4; color: #334155; }
+    .comp-vs { display: flex; align-items: center; justify-content: center; font-weight: 900; color: #94a3b8; font-size: 11pt; }
+
+    /* Allocation Box */
+    .allocation-flow-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .alloc-top { display: flex; gap: 12px; margin-bottom: 10px; }
+    .alloc-card { flex: 1; padding: 12px; border-radius: 8px; background: #ffffff; }
+    .alloc-card.core { border-top: 4px solid #3b82f6; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+    .alloc-card.tactical { border-top: 4px solid #10b981; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+    .alloc-title { font-weight: 800; font-size: 9pt; color: #0f172a; }
+    .alloc-subtitle { font-size: 7.5pt; color: #64748b; margin-bottom: 6px; }
+    .alloc-features { font-size: 8pt; color: #334155; line-height: 1.4; }
+    .alloc-signals { font-size: 8pt; color: #475569; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+    .signal-tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 7.5pt; font-weight: 700; margin-left: 6px; }
+
+    .code-diagram-box {
+      background: #0b132b;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .code-diagram-header { font-size: 8pt; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .code-diagram-box pre { margin: 0; color: #94a3b8; font-size: 8pt; }
+  </style>
+</head>
+<body>
+  <div class="doc-banner">
+    <div class="banner-badge">Official Institutional Specification</div>
+    <div class="banner-title">Product Requirements Document (PRD)</div>
+    <div class="banner-sub">VestraAI (Satvam Invest) Quantitative Platform</div>
+    <div class="banner-meta">
+      <div><strong>Version:</strong> 2.4.0-PROD</div>
+      <div><strong>Status:</strong> Approved / Active</div>
+      <div><strong>Release Date:</strong> October 2026</div>
+      <div><strong>Markets:</strong> US Equities (S&amp;P 500 / NASDAQ) &amp; Indian Equities (NSE / NIFTY 50)</div>
+    </div>
+  </div>
+
+  <h1 class="doc-h1">Product Requirements Document (PRD)</h1>
+<h2 class="doc-h2">VestraAI / Satvam Invest: Autonomous Global Investing Intelligence Platform</h2>
+<hr class="section-divider" />
+<h3 class="doc-h3">Document Information</h3>
+<ul class="doc-list">
+<li><strong>Product Name:</strong> VestraAI (Satvam Invest)</li>
+<li><strong>Document Version:</strong> 1.0.0</li>
+<li><strong>Document Status:</strong> Complete / Ready for Production Review</li>
+<li><strong>Owner:</strong> Product Management & Quantitative Strategy Team</li>
+<li><strong>Target Release:</strong> Q4 2026 - Q1 2027</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">1. Executive Summary & Product Vision</h2>
+<h3 class="doc-h3">1.1 Product Vision</h3>
+<p class="doc-p"><strong>VestraAI</strong> is an AI-native financial intelligence platform that democratizes institutional-grade quantitative investing for modern retail investors, family offices, and active wealth managers. By unifying <strong>US Equities (S&P 500 / NASDAQ)</strong> and <strong>Indian Equities (NSE / NIFTY 50)</strong> into a cohesive, multi-currency command center, VestraAI bridges the gap between complex algorithmic hedge-fund models and accessible, actionable portfolio execution.</p>
+<h3 class="doc-h3">1.2 Core Value Proposition</h3>
+<ul class="doc-list">
+<li><strong>Institutional Multi-Factor Rigor:</strong> Eliminates emotional trading by evaluating assets through an explainable <strong>5-Module Ensemble Engine</strong> (Factor 35%, XGBoost ML 25%, FinBERT Sentiment 20%, Live VWAP/Momentum 10%, LLM Moat 10%).</li>
+<li><strong>Live Market Outlier Capture:</strong> Identifies intraday market momentum and breakout volume via real-time <strong>Live Market Movers</strong> screeners.</li>
+<li><strong>Dual-Bucket Autonomous Portfolio:</strong> Protects long-term wealth through an untouchable <strong>Core Bucket (100% user-directed)</strong> while optimizing opportunistic upside via an autonomous <strong>Tactical Vault (zero-intervention rebalancing)</strong>.</li>
+<li><strong>Cross-Border Intelligence:</strong> Native dual-currency ($ USD and ₹ INR) engine supporting seamless asset tracking across global markets.</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">2. Problem Statement & Market Opportunity</h2>
+
+    <div class="comparison-grid">
+      <div class="comp-col pain">
+        <div class="comp-header">Current Market Pain Points</div>
+        <div class="comp-item"><strong>Information Overload:</strong> Noise from social media, biased analyst opinions, and lagging reports.</div>
+        <div class="comp-item"><strong>Black-Box AI Models:</strong> Generic LLM responses with zero mathematical explainability or factor rigor.</div>
+        <div class="comp-item"><strong>Emotional Bias:</strong> 80%+ retail underperformance caused by panic selling and FOMO chasing.</div>
+        <div class="comp-item"><strong>Fragmented Platforms:</strong> Disconnected tools for US and Indian equities with no unified risk view.</div>
+      </div>
+      <div class="comp-vs">VS</div>
+      <div class="comp-col solution">
+        <div class="comp-header">VestraAI Platform Solutions</div>
+        <div class="comp-item"><strong>Transparent 5-Module Math:</strong> Strict multi-factor scoring (Factor 35%, ML 25%, NLP 20%, VWAP 10%, Moat 10%).</div>
+        <div class="comp-item"><strong>Live Outlier Detection:</strong> Real-time screener integration tracking volume breakouts and VWAP crossovers.</div>
+        <div class="comp-item"><strong>Autonomous Dual-Bucket:</strong> Core long-term assets untouched; Tactical Vault dynamically rebalanced.</div>
+        <div class="comp-item"><strong>Unified Cross-Border:</strong> Native dual-currency terminal seamlessly switching between USD ($) and INR (₹).</div>
+      </div>
+    </div><h3 class="doc-h3">2.1 The Retail-Institutional Divide</h3>
+<ol class="doc-list">
+<li><strong>Information Asymmetry:</strong> Quantitative hedge funds deploy high-frequency sentiment models (FinBERT), alternative data, and low-latency order book analysis. Retail investors rely on lagging quarterly reports and social media hype.</li>
+<li><strong>Emotional Execution:</strong> More than 80% of retail traders underperform benchmark indices due to panic-selling during macroeconomic volatility and chasing overbought peaks.</li>
+<li><strong>Siloed Ecosystems:</strong> Investors managing portfolios across US and Indian growth stocks must juggle disconnected brokerage platforms, conversions, and news sources without a unified portfolio risk model.</li>
+</ol>
+<hr class="section-divider" />
+<h2 class="doc-h2">3. User Personas & Target Demographics</h2>
+<h3 class="doc-h3">Persona A: The Systematic Retail Trader ("Arjun")</h3>
+<ul class="doc-list">
+<li><strong>Profile:</strong> 29-year-old software engineer and active equity trader based in Bengaluru / San Francisco.</li>
+<li><strong>Goals:</strong> Wants data-driven buy signals, clear entry target prices, and probability metrics rather than generic market tips.</li>
+<li><strong>Pain Point:</strong> Lacks time during market hours to run Python backtests and scan hundreds of stock charts across US and NSE markets.</li>
+<li><strong>Key Feature Used:</strong> <strong>Top 3 Algo Picks</strong> and <strong>Live Market Movers Scanner</strong>.</li>
+</ul>
+<h3 class="doc-h3">Persona B: The Long-Term Wealth Compounder ("Sarah")</h3>
+<ul class="doc-list">
+<li><strong>Profile:</strong> 42-year-old corporate executive building generational wealth across US Tech leaders and Indian infrastructure.</li>
+<li><strong>Goals:</strong> Wants capital preservation, strong free cash flow companies, and automated risk management without constant monitoring.</li>
+<li><strong>Pain Point:</strong> Anxiety over geopolitical shocks and inflation destroying portfolio purchasing power.</li>
+<li><strong>Key Feature Used:</strong> <strong>Dual-Bucket Portfolio (Core Protected)</strong> and <strong>Macro Intelligence Stream</strong>.</li>
+</ul>
+<h3 class="doc-h3">Persona C: The Fundamental & Macro Allocator ("Devon")</h3>
+<ul class="doc-list">
+<li><strong>Profile:</strong> 35-year-old RIA (Registered Investment Advisor) / Family Office Analyst.</li>
+<li><strong>Goals:</strong> Requires institutional-grade factor analysis, Put/Call open interest ratios, and transcript forensics to justify allocations to clients.</li>
+<li><strong>Pain Point:</strong> Traditional Bloomberg / FactSet terminals are prohibitively expensive and lack native generative AI synthesis.</li>
+<li><strong>Key Feature Used:</strong> <strong>Earnings Agent</strong>, <strong>Algorithmic Trading Lab</strong>, and <strong>AI Copilot</strong>.</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">4. Key Product Epics & Functional Requirements</h2>
+
+    <div class="mindmap-container">
+      <div class="mindmap-root">VestraAI Platform Architecture</div>
+      <div class="mindmap-branches">
+        <div class="branch">
+          <div class="branch-title">Top Algo Picks</div>
+          <ul>
+            <li>5-Module Ensemble Formula</li>
+            <li>Live Market Movers Integration</li>
+            <li>Top 3 Daily Ranked Picks</li>
+            <li>One-Click Instant Trade Modal</li>
+          </ul>
+        </div>
+        <div class="branch">
+          <div class="branch-title">Dual-Bucket Portfolio</div>
+          <ul>
+            <li>Core Holdings (100% User Protected)</li>
+            <li>Tactical Vault (Auto-Rebalanced)</li>
+            <li>Headline Price Impact Vectors</li>
+            <li>Multi-Period Performance (1D to ALL)</li>
+          </ul>
+        </div>
+        <div class="branch">
+          <div class="branch-title">Macro & Earnings</div>
+          <ul>
+            <li>Macro Intelligence Regime Stream</li>
+            <li>Live Commodity Inflation Hedges</li>
+            <li>Earnings Calendar & Guidance Forensics</li>
+            <li>FinBERT Transcript Sentiment</li>
+          </ul>
+        </div>
+        <div class="branch">
+          <div class="branch-title">Algorithmic Lab & Copilot</div>
+          <ul>
+            <li>XGBoost Probability Trees</li>
+            <li>Single-Stock Factor Diagnostics</li>
+            <li>Context-Grounded Financial Copilot</li>
+            <li>Cross-Border Currency Switcher (USD/INR)</li>
+          </ul>
+        </div>
+      </div>
+    </div><hr class="section-divider" />
+<h3 class="doc-h3">Epic 1: Top Algo Picks & Live Market Movers Engine</h3>
+<h4 class="doc-h4">Functional Requirements:</h4>
+<ul class="doc-list">
+<li><strong>FR-1.1 Real-Time Dynamic Universe Scan:</strong> The system must evaluate a continuous universe of 55+ US equities and 52 NIFTY 50 Indian equities.</li>
+<li><strong>FR-1.2 Dynamic Live Mover Integration:</strong> The engine must automatically ingest real-time <code class="inline-code">day_gainers</code> and <code class="inline-code">most_actives</code> screeners, filtering for liquid US equities (<span class="math-inline">P  &ge;  \</span>10.00$), and dynamically merging them into the candidate pool.</li>
+<li><strong>FR-1.3 5-Module Score Computation:</strong> The system must compute and display individual module breakdowns:</li>
+<li>Factor Score (<span class="math-inline">35\%</span>)</li>
+<li>XGBoost Win Probability (<span class="math-inline">25\%</span>)</li>
+<li>FinBERT Sentiment Score (<span class="math-inline">20\%</span>)</li>
+<li>Live VWAP / Momentum Score (<span class="math-inline">10\%</span>)</li>
+<li>LLM Moat Qualitative Score (<span class="math-inline">10\%</span>)</li>
+<li><strong>FR-1.4 4-Layer Conviction Matrix Display:</strong> Each top recommendation card must show sub-scores for:</li>
+<li>Macro & Central Bank Regime (<span class="math-inline">25\%</span>)</li>
+<li>Derivatives Structure & PCR (<span class="math-inline">25\%</span>)</li>
+<li>Quant & Technical Momentum (<span class="math-inline">30\%</span>)</li>
+<li>Fundamental & Earnings (<span class="math-inline">20\%</span>)</li>
+<li><strong>FR-1.5 Dynamic Target & Upside Projection:</strong> Provide a 12-month algorithmic target price (<span class="math-inline">P<sub><span class="math-text">target</span></sub></span>) and estimated percentage upside based on the conviction formula.</li>
+<li><strong>FR-1.6 One-Click Instant Trade Execution:</strong> Users must be able to trigger an instant buy modal directly from any Top Pick card, selecting order quantity and target bucket (Core vs Tactical).</li>
+</ul>
+<hr class="section-divider" />
+<h3 class="doc-h3">Epic 2: Algorithmic Trading Lab & Single-Stock Deep Dive</h3>
+<h4 class="doc-h4">Functional Requirements:</h4>
+<ul class="doc-list">
+<li><strong>FR-2.1 Ticker Search & Direct Link Routing:</strong> Users can search any supported ticker or arrive via URL query parameter (e.g., <code class="inline-code">/algo?ticker=NVDA</code>) from other pages.</li>
+<li><strong>FR-2.2 Feature Tree Visualization:</strong> Display XGBoost historical pattern recognition, RSI(14), MACD status, and technical breakout zones.</li>
+<li><strong>FR-2.3 Qualitative AI Thesis:</strong> Render an automated qualitative investment thesis explaining fundamental tailwinds, competitive moat, and potential risk factors.</li>
+<li><strong>FR-2.4 Action Badges:</strong> Categorize signals into five distinct tiers: <code class="inline-code">Strong Buy</code> (<span class="math-inline">>85</span>), <code class="inline-code">Buy</code> (<span class="math-inline">70-85</span>), <code class="inline-code">Hold</code> (<span class="math-inline">55-70</span>), <code class="inline-code">Reduce</code> (<span class="math-inline">40-55</span>), and <code class="inline-code">Avoid</code> (<span class="math-inline"><40</span>).</li>
+</ul>
+<hr class="section-divider" />
+<h3 class="doc-h3">Epic 3: Autonomous Dual-Bucket Portfolio Architecture</h3>
+
+    <div class="allocation-flow-box">
+      <div class="alloc-top">
+        <div class="alloc-card core">
+          <div class="alloc-title">Core Bucket (70% - 80%)</div>
+          <div class="alloc-subtitle">Long-Term Wealth Compounders</div>
+          <div class="alloc-features">
+            <div>✓ 100% User Discretion</div>
+            <div>✓ Zero Automated Intervention</div>
+            <div>✓ Preserved through all macro volatility</div>
+          </div>
+        </div>
+        <div class="alloc-card tactical">
+          <div class="alloc-title">Tactical Vault (20% - 30%)</div>
+          <div class="alloc-subtitle">Opportunistic High-Alpha Holdings</div>
+          <div class="alloc-features">
+            <div>✓ Autonomous Quantitative Agent</div>
+            <div>✓ Real-time Risk-Parity Rebalancing</div>
+            <div>✓ Automated Profit-Taking & Hedge Protection</div>
+          </div>
+        </div>
+      </div>
+      <div class="alloc-signals">
+        <strong>Triggered By Live Market Catalysts:</strong>
+        <span class="signal-tag">News Impact Vectors</span>
+        <span class="signal-tag">Macro Rate Shifts</span>
+        <span class="signal-tag">Earnings EPS Surprises</span>
+      </div>
+    </div><h4 class="doc-h4">Functional Requirements:</h4>
+<ul class="doc-list">
+<li><strong>FR-3.1 Dual-Bucket Isolation:</strong> Segregate user portfolio into:</li>
+<li><strong>Core Bucket:</strong> Long-term blue chips, untouchable by automated rebalancing rules.</li>
+<li><strong>Tactical Vault:</strong> High-alpha, opportunistic holdings managed with automated risk-parity rules.</li>
+<li><strong>FR-3.2 Portfolio News & Price Impact Vectors:</strong> Ingest financial news and tag holdings with positive, neutral, or negative price impact vector alerts.</li>
+<li><strong>FR-3.3 Multi-Period Performance Visualization:</strong> Render interactive Recharts performance curves across 1D, 1W, 1M, 1Y, and ALL timeframes.</li>
+<li><strong>FR-3.4 Local Persistence:</strong> Persist all holdings, transactions, and cash balance to browser storage to maintain state across sessions.</li>
+</ul>
+<hr class="section-divider" />
+<h3 class="doc-h3">Epic 4: Macro Intelligence Stream & Commodity Hedges</h3>
+<h4 class="doc-h4">Functional Requirements:</h4>
+<ul class="doc-list">
+<li><strong>FR-4.1 Macro Regime Detection:</strong> Stream real-time synthesized macro themes (inflation sticky vs cooling, Fed rate trajectory, RBI liquidity, geopolitical supply chain shocks).</li>
+<li><strong>FR-4.2 Real-Time Commodity Benchmarks:</strong> Live price tracking of inflation and energy hedges:</li>
+<li>Gold Futures (<code class="inline-code">GC=F</code>) & SPDR Gold (<code class="inline-code">GLD</code>)</li>
+<li>Silver Futures (<code class="inline-code">SI=F</code>) & iShares Silver (<code class="inline-code">SLV</code>)</li>
+<li>WTI Crude Oil (<code class="inline-code">CL=F</code>) & Brent Crude (<code class="inline-code">BZ=F</code>)</li>
+<li>Copper Futures (<code class="inline-code">HG=F</code>), Platinum (<code class="inline-code">PL=F</code>), Natural Gas (<code class="inline-code">NG=F</code>)</li>
+<li><strong>FR-4.3 AI Asset Allocation Recommendation:</strong> Interactive modal allowing users to generate an optimal risk-parity allocation (e.g., 40% Chips/Memory, 30% Gold, 20% Crude Oil, 10% Cloud/E-Commerce) based on current macro headwinds.</li>
+</ul>
+<hr class="section-divider" />
+<h3 class="doc-h3">Epic 5: Autonomous Earnings Intelligence Agent</h3>
+<h4 class="doc-h4">Functional Requirements:</h4>
+<ul class="doc-list">
+<li><strong>FR-5.1 Upcoming Earnings Calendar:</strong> Filter earnings dates and consensus EPS estimates for both US and Indian holdings.</li>
+<li><strong>FR-5.2 Transcript Sentiment Forensics:</strong> Score CEO/CFO conference call remarks using FinBERT polarity models.</li>
+<li><strong>FR-5.3 Guidance Catalyst Scoring:</strong> Flag forward revenue guidance revisions and enterprise deal pipeline momentum.</li>
+</ul>
+<hr class="section-divider" />
+<h3 class="doc-h3">Epic 6: AI Financial Copilot</h3>
+<h4 class="doc-h4">Functional Requirements:</h4>
+<ul class="doc-list">
+<li><strong>FR-6.1 Portfolio-Grounded Context:</strong> Automatically inject current cash balance, portfolio holdings, active currency, and top algo picks into the prompt context.</li>
+<li><strong>FR-6.2 Multi-Provider LLM Fallback:</strong> Support seamless switching between Google Gemini, Anthropic Claude, and OpenAI models.</li>
+<li><strong>FR-6.3 Financial Query Understanding:</strong> Accurately explain technical terms, calculate risk-reward ratios, and synthesize complex multi-factor metrics into conversational prose.</li>
+</ul>
+<hr class="section-divider" />
+<h3 class="doc-h3">Epic 7: Global Multi-Market Terminal (US & India)</h3>
+<h4 class="doc-h4">Functional Requirements:</h4>
+<ul class="doc-list">
+<li><strong>FR-7.1 One-Click Currency Switcher:</strong> Global navbar toggle instantly switches UI display between <code class="inline-code">$ USD</code> and <code class="inline-code">₹ INR</code>.</li>
+<li><strong>FR-7.2 Real-Time FX Conversion:</strong> Automatically convert portfolio asset valuations based on live USD/INR exchange rates (<span class="math-inline">1<span class="math-text"> USD</span>  &asymp;  87.5<span class="math-text"> INR</span></span>).</li>
+<li><strong>FR-7.3 Unified Search & Quotes:</strong> Single unified search bar capable of resolving US tickers (<code class="inline-code">NVDA</code>, <code class="inline-code">AAPL</code>) and Indian NSE tickers (<code class="inline-code">RELIANCE</code>, <code class="inline-code">TCS</code>, <code class="inline-code">TATAMOTORS</code>).</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">5. User Journey & Workflow Specifications</h2>
+<h3 class="doc-h3">Journey 1: Morning Briefing & Instant Execution</h3>
+
+  <div class="code-diagram-box">
+    <div class="code-diagram-header">Architecture Diagram Specification</div>
+    <pre><code>sequenceDiagram
+    autonumber
+    actor Investor as User
+    participant Dash as Dashboard UI
+    participant Algo as TopAlgoPicks Component
+    participant Modal as Instant Trade Modal
+    participant Context as PortfolioContext
+
+    Investor-&gt;&gt;Dash: Opens VestraAI Dashboard
+    Dash-&gt;&gt;Algo: Fetches Top 3 Daily Picks for Active Market (US)
+    Algo--&gt;&gt;Dash: Displays #1 Pick (e.g., GOOGL, 88.7% Score)
+    Investor-&gt;&gt;Algo: Reviews 4-Layer Conviction &amp; XGBoost Win Prob (84.2%)
+    Investor-&gt;&gt;Algo: Clicks "Buy #1 Pick"
+    Algo-&gt;&gt;Modal: Opens Trade Execution Dialog
+    Investor-&gt;&gt;Modal: Selects 5 Shares, assigns to "Core Bucket"
+    Investor-&gt;&gt;Modal: Clicks "Confirm Execution"
+    Modal-&gt;&gt;Context: Deducts Cash Balance &amp; Adds 5 Shares of GOOGL
+    Context--&gt;&gt;Dash: Portfolio Valuation &amp; Allocation Pie Chart Update</code></pre>
+  </div><hr class="section-divider" />
+<h2 class="doc-h2">6. User Experience & Design Guidelines</h2>
+<h3 class="doc-h3">6.1 Visual Aesthetics & Design System</h3>
+<ul class="doc-list">
+<li><strong>Theme:</strong> Modern Cyber-Institutional Dark Mode.</li>
+<li><strong>Background:</strong> Deep slate (<code class="inline-code">#0b0f19</code> to <code class="inline-code">#0f172a</code>) with subtle ambient radial gradients.</li>
+<li><strong>Panels:</strong> Glassmorphism styling (<code class="inline-code">backdrop-blur-md</code>, subtle translucent white borders <code class="inline-code">border-white/10</code>).</li>
+<li><strong>Typography:</strong> Inter / SF Pro Display for body text; JetBrains Mono for prices, percentages, and ticker badges.</li>
+<li><strong>Color Semantics:</strong></li>
+<li><strong>Emerald Green (<code class="inline-code">#10b981</code>):</strong> Positive returns, Strong Buy, High Conviction, Tailwinds.</li>
+<li><strong>Electric Blue (<code class="inline-code">#3b82f6</code>):</strong> Algorithmic metrics, Derivatives/PCR, US Market tags.</li>
+<li><strong>Purple / Indigo (<code class="inline-code">#8b5cf6</code>):</strong> AI Synthesizer, LLM Moat, Quantum technicals.</li>
+<li><strong>Amber / Orange (<code class="inline-code">#f59e0b</code>):</strong> Warning, Neutral Guidance, High Risk Tactical allocations.</li>
+<li><strong>Rose Red (<code class="inline-code">#ef4444</code>):</strong> Losses, Negative Guidance, Headwinds, De-Risk signals.</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">7. Non-Functional Requirements (NFRs)</h2>
+<div class="table-container"><table class="doc-table"><thead><tr><th>Category</th><th>Requirement</th><th>Target Metric</th></tr></thead><tbody>
+<tr><td><strong>Performance</strong></td><td>API Response Time (Cached)</td><td><span class="math-inline">< 50<span class="math-text"> ms</span></span></td></tr>
+<tr><td><strong>Performance</strong></td><td>Time to Interactive (TTI)</td><td><span class="math-inline">< 1.2<span class="math-text"> s</span></span> on 4G / broadband</td></tr>
+<tr><td><strong>Data Freshness</strong></td><td>Live Market Movers Cache TTL</td><td><span class="math-inline"> &le;  45<span class="math-text"> seconds</span></span></td></tr>
+<tr><td><strong>Data Freshness</strong></td><td>Background Universe Refresher</td><td>Runs every <span class="math-inline">28<span class="math-text"> seconds</span></span></td></tr>
+<tr><td><strong>Availability</strong></td><td>Server Uptime</td><td><span class="math-inline">99.9\%</span> with resilient mock fallbacks</td></tr>
+<tr><td><strong>Resilience</strong></td><td>Upstream API Throttling Tolerance</td><td>Zero user-visible crashes; immediate institutional baseline fallback</td></tr>
+<tr><td><strong>Compatibility</strong></td><td>Browser Support</td><td>Chrome, Edge, Safari, Firefox (last 2 major versions)</td></tr>
+</tbody></table></div>
+<hr class="section-divider" />
+<h2 class="doc-h2">8. Success Metrics & Key Performance Indicators (KPIs)</h2>
+
+  <div class="code-diagram-box">
+    <div class="code-diagram-header">Architecture Diagram Specification</div>
+    <pre><code>graph LR
+    subgraph AlgoKPIs ["1. Quantitative Performance"]
+        Alpha["Alpha Generation vs S&amp;P 500 / Nifty 50 (&gt; +4.5% annualized)"]
+        Sharpe["Sharpe Ratio (&gt; 1.85)"]
+        MaxDD["Maximum Drawdown (&lt; -12.0%)"]
+    end
+
+    subgraph UserKPIs ["2. Product Engagement"]
+        DAU["Daily Active Users (DAU) &amp; Stickiness (DAU/MAU &gt; 40%)"]
+        TopPickClicks["Top Algo Pick Conversion (&gt; 22% of views lead to trade modal)"]
+        CopilotChats["AI Copilot Inquiries per Active Session (&gt; 3.5 queries)"]
+    end
+
+    subgraph ReliabilityKPIs ["3. System Reliability"]
+        Latency["P95 API Latency (&lt; 120ms)"]
+        CacheHit["Cache Hit Ratio (&gt; 94%)"]
+    end</code></pre>
+  </div><hr class="section-divider" />
+<h2 class="doc-h2">9. Product Roadmap</h2>
+<h3 class="doc-h3">Phase 1: MVP & Foundation (Current Milestone - Completed)</h3>
+<ul class="doc-list">
+<li>✅ 5-Module Quantitative Ensemble Engine implementation.</li>
+<li>✅ Dynamic Live Market Movers scanner with screener integration.</li>
+<li>✅ 4-Layer Institutional Quantitative Matrix.</li>
+<li>✅ Top 3 Algo Picks for both US (S&P 500) and Indian (NIFTY 50) markets.</li>
+<li>✅ Dual-Bucket Portfolio architecture (Core vs Tactical Vault).</li>
+<li>✅ Macro Intelligence Stream and real-time Commodities tracking.</li>
+<li>✅ AI Financial Copilot and Earnings Agent.</li>
+</ul>
+<h3 class="doc-h3">Phase 2: Live Broker Integrations & Automated Execution (Q1 - Q2 2027)</h3>
+<ul class="doc-list">
+<li>🔄 Direct OAuth2 Broker APIs:</li>
+<li><strong>US:</strong> Interactive Brokers (IBKR), Alpaca, Charles Schwab.</li>
+<li><strong>India:</strong> Zerodha Kite Connect, Groww, Angel One.</li>
+<li>🔄 Real-time webhook notifications for target price triggers and stop-losses.</li>
+<li>🔄 Automated limit order placement for Tactical Vault rebalancing.</li>
+</ul>
+<h3 class="doc-h3">Phase 3: Advanced Options & Volatility Surface Modeling (Q3 2027)</h3>
+<ul class="doc-list">
+<li>📅 Live Options Chain ingestion (Delta, Gamma, Vega, Theta).</li>
+<li>📅 Real-time Zero-DTE (0DTE) Gamma exposure alerts.</li>
+<li>📅 Automated covered-call and protective-put hedging strategies for Core holdings.</li>
+</ul>
+<h3 class="doc-h3">Phase 4: Mobile Native Apps & Institutional Multi-Tenancy (Q4 2027)</h3>
+<ul class="doc-list">
+<li>📅 React Native iOS and Android applications with biometrics.</li>
+<li>📅 Multi-user roles for RIA advisory firms and family office reporting.</li>
+<li>📅 Automated tax-loss harvesting engine for US & Indian capital gains.</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">10. Regulatory, Compliance & Risk Management</h2>
+<ol class="doc-list">
+<li><strong>Investment Advice Disclaimer:</strong></li>
+</ol>
+<ul class="doc-list">
+<li>The platform is strictly an <strong>algorithmic research and information tool</strong>, not a registered investment advisor (RIA) or broker-dealer.</li>
+<li>Prominent disclaimers must appear on all trade modals and algo recommendation cards stating: <em>"Past algorithmic performance is no guarantee of future returns. Invest at your own risk."</em></li>
+</ul>
+<ol class="doc-list">
+<li><strong>SEBI & SEC Compliance:</strong></li>
+</ol>
+<ul class="doc-list">
+<li>Adhere to SEBI algorithmic trading guidelines in India and SEC/FINRA non-advisory technology vendor provisions in the United States.</li>
+</ul>
+<ol class="doc-list">
+<li><strong>Data Provider Attribution:</strong></li>
+</ol>
+<ul class="doc-list">
+<li>Appropriate attribution and compliance with Yahoo Finance, SEC EDGAR, and macroeconomic public API terms of service.</li>
+</ul>
+
+</body>
+</html>

@@ -8,7 +8,11 @@ export const isIndianTicker = (ticker) => {
     'ITC', 'HINDUNILVR', 'LT', 'BAJFINANCE', 'HCLTECH', 'AXISBANK', 'MARUTI',
     'SUNPHARMA', 'KOTAKBANK', 'TATAMOTORS', 'ONGC', 'GOLDBEES', 'SILVERBEES',
     'CRUDEOIL', 'NATGAS', 'COPPER', 'WIPRO', 'ADANIENT', 'ADANIPORTS', 'COALINDIA',
-    'NTPC', 'POWERGRID', 'TITAN', 'ULTRACEMCO', 'NESTLEIND', 'JSWSTEEL', 'TATASTEEL'
+    'NTPC', 'POWERGRID', 'TITAN', 'ULTRACEMCO', 'NESTLEIND', 'JSWSTEEL', 'TATASTEEL',
+    'M&M', 'BAJAJ-AUTO', 'BAJAJFINSV', 'GRASIM', 'TECHM', 'HINDALCO', 'CIPLA',
+    'DRREDDY', 'EICHERMOT', 'SBILIFE', 'HDFCLIFE', 'BPCL', 'BRITANNIA', 'APOLLOHOSP',
+    'DIVISLAB', 'TATACONSUM', 'HEROMOTOCO', 'ASIANPAINT', 'INDUSINDBK', 'SHRIRAMFIN',
+    'BEL', 'HAL', 'TRENT'
   ]);
   return indianTickers.has(sym) || String(ticker).toUpperCase().endsWith('.NS') || String(ticker).toUpperCase().endsWith('.BO');
 };

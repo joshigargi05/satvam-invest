@@ -13,24 +13,68 @@ const Zap = Lucide.Zap || (() => '⚡');
 import { getQuotes } from '../services/api';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useMarket } from '../context/MarketContext';
+import TopAlgoPicks from '../components/TopAlgoPicks';
 
 const defaultStocksUS = [
-  // Equities
-  { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Technology', assetType: 'stock' },
-  { ticker: 'MSFT', name: 'Microsoft Corp.', sector: 'Technology', assetType: 'stock' },
-  { ticker: 'AMZN', name: 'Amazon.com Inc.', sector: 'E-Commerce / Tech', assetType: 'stock' },
-  { ticker: 'NVDA', name: 'NVIDIA Corp.', sector: 'Semiconductors', assetType: 'stock' },
-  { ticker: 'TSLA', name: 'Tesla Inc.', sector: 'Automotive / Tech', assetType: 'stock' },
-  { ticker: 'GOOGL', name: 'Alphabet Inc. (Class A)', sector: 'Technology', assetType: 'stock' },
-  { ticker: 'GOOG', name: 'Alphabet Inc. (Class C)', sector: 'Technology', assetType: 'stock' },
-  { ticker: 'META', name: 'Meta Platforms', sector: 'Technology', assetType: 'stock' },
-  { ticker: 'MU', name: 'Micron Technology', sector: 'Semiconductors', assetType: 'stock' },
-  { ticker: 'AMD', name: 'Advanced Micro Devices', sector: 'Semiconductors', assetType: 'stock' },
+  // Top 50+ US Equities (S&P 500 & NASDAQ-100)
+  { ticker: 'NVDA', name: 'NVIDIA Corp.', sector: 'Semiconductors / AI', assetType: 'stock' },
+  { ticker: 'GOOGL', name: 'Alphabet Inc. (Class A)', sector: 'Technology / AI', assetType: 'stock' },
+  { ticker: 'MSFT', name: 'Microsoft Corp.', sector: 'Cloud / Software', assetType: 'stock' },
+  { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Consumer Technology', assetType: 'stock' },
+  { ticker: 'AMZN', name: 'Amazon.com Inc.', sector: 'E-Commerce / Cloud', assetType: 'stock' },
+  { ticker: 'META', name: 'Meta Platforms', sector: 'Social Media / AI', assetType: 'stock' },
+  { ticker: 'AVGO', name: 'Broadcom Inc.', sector: 'Semiconductors / AI', assetType: 'stock' },
+  { ticker: 'MU', name: 'Micron Technology', sector: 'Semiconductors / Memory', assetType: 'stock' },
   { ticker: 'TSM', name: 'Taiwan Semiconductor', sector: 'Semiconductors', assetType: 'stock' },
+  { ticker: 'LLY', name: 'Eli Lilly & Co.', sector: 'Biopharma / Healthcare', assetType: 'stock' },
+  { ticker: 'TSLA', name: 'Tesla Inc.', sector: 'Automotive / AI', assetType: 'stock' },
+  { ticker: 'AMD', name: 'Advanced Micro Devices', sector: 'Semiconductors', assetType: 'stock' },
+  { ticker: 'PLTR', name: 'Palantir Technologies', sector: 'Enterprise AI', assetType: 'stock' },
+  { ticker: 'ORCL', name: 'Oracle Corp.', sector: 'Cloud / Database', assetType: 'stock' },
+  { ticker: 'NOW', name: 'ServiceNow Inc.', sector: 'Enterprise Workflow AI', assetType: 'stock' },
+  { ticker: 'CRWD', name: 'CrowdStrike Holdings', sector: 'Cybersecurity', assetType: 'stock' },
+  { ticker: 'PANW', name: 'Palo Alto Networks', sector: 'Cybersecurity', assetType: 'stock' },
+  { ticker: 'NFLX', name: 'Netflix Inc.', sector: 'Streaming Media', assetType: 'stock' },
+  { ticker: 'CRM', name: 'Salesforce Inc.', sector: 'Enterprise Software', assetType: 'stock' },
+  { ticker: 'ADBE', name: 'Adobe Inc.', sector: 'Creative Software', assetType: 'stock' },
+  { ticker: 'COST', name: 'Costco Wholesale', sector: 'Consumer Retail', assetType: 'stock' },
+  { ticker: 'WMT', name: 'Walmart Inc.', sector: 'Consumer Retail', assetType: 'stock' },
+  { ticker: 'HD', name: 'Home Depot', sector: 'Home Improvement', assetType: 'stock' },
+  { ticker: 'JPM', name: 'JPMorgan Chase', sector: 'Banking / Financials', assetType: 'stock' },
+  { ticker: 'GS', name: 'Goldman Sachs', sector: 'Investment Banking', assetType: 'stock' },
+  { ticker: 'MS', name: 'Morgan Stanley', sector: 'Investment Banking', assetType: 'stock' },
+  { ticker: 'BLK', name: 'BlackRock Inc.', sector: 'Asset Management', assetType: 'stock' },
+  { ticker: 'BAC', name: 'Bank of America', sector: 'Banking / Financials', assetType: 'stock' },
+  { ticker: 'V', name: 'Visa Inc.', sector: 'Payments / FinTech', assetType: 'stock' },
+  { ticker: 'MA', name: 'Mastercard Inc.', sector: 'Payments / FinTech', assetType: 'stock' },
+  { ticker: 'AXP', name: 'American Express', sector: 'Consumer Finance', assetType: 'stock' },
+  { ticker: 'PYPL', name: 'PayPal Holdings', sector: 'Digital Payments', assetType: 'stock' },
+  { ticker: 'UNH', name: 'UnitedHealth Group', sector: 'Healthcare', assetType: 'stock' },
+  { ticker: 'ISRG', name: 'Intuitive Surgical', sector: 'Medical Robotics', assetType: 'stock' },
+  { ticker: 'ABBV', name: 'AbbVie Inc.', sector: 'Biotechnology', assetType: 'stock' },
+  { ticker: 'JNJ', name: 'Johnson & Johnson', sector: 'Healthcare', assetType: 'stock' },
+  { ticker: 'MRK', name: 'Merck & Co.', sector: 'Pharmaceuticals', assetType: 'stock' },
+  { ticker: 'TMO', name: 'Thermo Fisher Scientific', sector: 'Life Sciences', assetType: 'stock' },
+  { ticker: 'AMAT', name: 'Applied Materials', sector: 'Semiconductor Equip', assetType: 'stock' },
+  { ticker: 'LRCX', name: 'Lam Research', sector: 'Semiconductor Equip', assetType: 'stock' },
+  { ticker: 'QCOM', name: 'Qualcomm Inc.', sector: 'Semiconductors', assetType: 'stock' },
+  { ticker: 'TXN', name: 'Texas Instruments', sector: 'Semiconductors', assetType: 'stock' },
   { ticker: 'INTC', name: 'Intel Corp.', sector: 'Semiconductors', assetType: 'stock' },
-  { ticker: 'JPM', name: 'JPMorgan Chase', sector: 'Financial', assetType: 'stock' },
-  { ticker: 'CRM', name: 'Salesforce Inc.', sector: 'Software', assetType: 'stock' },
-  
+  { ticker: 'IBM', name: 'IBM Corp.', sector: 'Enterprise Cloud / AI', assetType: 'stock' },
+  { ticker: 'CSCO', name: 'Cisco Systems', sector: 'Networking', assetType: 'stock' },
+  { ticker: 'GE', name: 'GE Aerospace', sector: 'Aerospace & Defense', assetType: 'stock' },
+  { ticker: 'RTX', name: 'RTX Corp.', sector: 'Aerospace & Defense', assetType: 'stock' },
+  { ticker: 'LMT', name: 'Lockheed Martin', sector: 'Aerospace & Defense', assetType: 'stock' },
+  { ticker: 'CAT', name: 'Caterpillar Inc.', sector: 'Heavy Industrials', assetType: 'stock' },
+  { ticker: 'XOM', name: 'Exxon Mobil', sector: 'Energy / Oil & Gas', assetType: 'stock' },
+  { ticker: 'CVX', name: 'Chevron Corp.', sector: 'Energy / Oil & Gas', assetType: 'stock' },
+  { ticker: 'UBER', name: 'Uber Technologies', sector: 'Mobility / Tech', assetType: 'stock' },
+  { ticker: 'PG', name: 'Procter & Gamble', sector: 'Consumer Staples', assetType: 'stock' },
+  { ticker: 'KO', name: 'Coca-Cola Co.', sector: 'Beverages', assetType: 'stock' },
+  { ticker: 'PEP', name: 'PepsiCo Inc.', sector: 'Beverages & Snacks', assetType: 'stock' },
+  { ticker: 'MCD', name: 'McDonald\'s Corp.', sector: 'Restaurants', assetType: 'stock' },
+  { ticker: 'DIS', name: 'Walt Disney Co.', sector: 'Entertainment', assetType: 'stock' },
+
   // Commodities & Precious Metals
   { ticker: 'GC=F', name: 'Gold Futures', sector: 'Precious Metals', assetType: 'commodity', unit: 'oz' },
   { ticker: 'GLD', name: 'SPDR Gold Trust', sector: 'Precious Metals', assetType: 'commodity', unit: 'shares' },
@@ -45,19 +89,60 @@ const defaultStocksUS = [
 ];
 
 const defaultStocksIndia = [
-  // Equities
-  { ticker: 'RELIANCE', name: 'Reliance Industries', sector: 'Energy/Conglomerate', assetType: 'stock' },
+  // All 52 Indian NSE / Nifty 50 Constituents
+  { ticker: 'RELIANCE', name: 'Reliance Industries', sector: 'Energy / Conglomerate', assetType: 'stock' },
   { ticker: 'TCS', name: 'Tata Consultancy Services', sector: 'IT Services', assetType: 'stock' },
-  { ticker: 'HDFCBANK', name: 'HDFC Bank', sector: 'Banking', assetType: 'stock' },
+  { ticker: 'HDFCBANK', name: 'HDFC Bank', sector: 'Private Banking', assetType: 'stock' },
+  { ticker: 'ICICIBANK', name: 'ICICI Bank', sector: 'Private Banking', assetType: 'stock' },
+  { ticker: 'BHARTIARTL', name: 'Bharti Airtel', sector: 'Telecom / 5G', assetType: 'stock' },
   { ticker: 'INFY', name: 'Infosys Ltd.', sector: 'IT Services', assetType: 'stock' },
-  { ticker: 'ICICIBANK', name: 'ICICI Bank', sector: 'Banking', assetType: 'stock' },
-  { ticker: 'SBIN', name: 'State Bank of India', sector: 'Banking', assetType: 'stock' },
-  { ticker: 'BHARTIARTL', name: 'Bharti Airtel', sector: 'Telecommunications', assetType: 'stock' },
-  { ticker: 'ITC', name: 'ITC Limited', sector: 'Consumer Goods', assetType: 'stock' },
-  { ticker: 'LT', name: 'Larsen & Toubro', sector: 'Engineering', assetType: 'stock' },
-  { ticker: 'TATAMOTORS', name: 'Tata Motors', sector: 'Automotive', assetType: 'stock' },
-  { ticker: 'ONGC', name: 'Oil & Natural Gas Corp', sector: 'Energy', assetType: 'stock' },
-  
+  { ticker: 'SBIN', name: 'State Bank of India', sector: 'PSU Banking', assetType: 'stock' },
+  { ticker: 'LT', name: 'Larsen & Toubro', sector: 'Engineering & Infra', assetType: 'stock' },
+  { ticker: 'ITC', name: 'ITC Limited', sector: 'FMCG / Consumer', assetType: 'stock' },
+  { ticker: 'HINDUNILVR', name: 'Hindustan Unilever', sector: 'FMCG / Consumer', assetType: 'stock' },
+  { ticker: 'HAL', name: 'Hindustan Aeronautics', sector: 'Aerospace & Defense', assetType: 'stock' },
+  { ticker: 'BEL', name: 'Bharat Electronics', sector: 'Defense Electronics', assetType: 'stock' },
+  { ticker: 'TRENT', name: 'Trent Ltd.', sector: 'Retail & Fashion', assetType: 'stock' },
+  { ticker: 'M&M', name: 'Mahindra & Mahindra', sector: 'Automotive / SUVs', assetType: 'stock' },
+  { ticker: 'TATAMOTORS', name: 'Tata Motors', sector: 'Automotive / EV', assetType: 'stock' },
+  { ticker: 'MARUTI', name: 'Maruti Suzuki India', sector: 'Automotive', assetType: 'stock' },
+  { ticker: 'BAJAJ-AUTO', name: 'Bajaj Auto', sector: 'Two-Wheelers / EV', assetType: 'stock' },
+  { ticker: 'EICHERMOT', name: 'Eicher Motors', sector: 'Motorcycles / CV', assetType: 'stock' },
+  { ticker: 'HEROMOTOCO', name: 'Hero MotoCorp', sector: 'Two-Wheelers', assetType: 'stock' },
+  { ticker: 'SUNPHARMA', name: 'Sun Pharmaceutical', sector: 'Pharmaceuticals', assetType: 'stock' },
+  { ticker: 'CIPLA', name: 'Cipla Ltd.', sector: 'Pharmaceuticals', assetType: 'stock' },
+  { ticker: 'DRREDDY', name: 'Dr. Reddy\'s Labs', sector: 'Pharmaceuticals', assetType: 'stock' },
+  { ticker: 'DIVISLAB', name: 'Divi\'s Laboratories', sector: 'Pharma APIs', assetType: 'stock' },
+  { ticker: 'APOLLOHOSP', name: 'Apollo Hospitals', sector: 'Healthcare', assetType: 'stock' },
+  { ticker: 'BAJFINANCE', name: 'Bajaj Finance', sector: 'Consumer NBFC', assetType: 'stock' },
+  { ticker: 'BAJAJFINSV', name: 'Bajaj Finserv', sector: 'Financial Services', assetType: 'stock' },
+  { ticker: 'KOTAKBANK', name: 'Kotak Mahindra Bank', sector: 'Private Banking', assetType: 'stock' },
+  { ticker: 'AXISBANK', name: 'Axis Bank', sector: 'Private Banking', assetType: 'stock' },
+  { ticker: 'INDUSINDBK', name: 'IndusInd Bank', sector: 'Private Banking', assetType: 'stock' },
+  { ticker: 'SHRIRAMFIN', name: 'Shriram Finance', sector: 'Commercial NBFC', assetType: 'stock' },
+  { ticker: 'SBILIFE', name: 'SBI Life Insurance', sector: 'Life Insurance', assetType: 'stock' },
+  { ticker: 'HDFCLIFE', name: 'HDFC Life Insurance', sector: 'Life Insurance', assetType: 'stock' },
+  { ticker: 'HCLTECH', name: 'HCL Technologies', sector: 'IT Services', assetType: 'stock' },
+  { ticker: 'TECHM', name: 'Tech Mahindra', sector: 'IT Services', assetType: 'stock' },
+  { ticker: 'WIPRO', name: 'Wipro Ltd.', sector: 'IT Services', assetType: 'stock' },
+  { ticker: 'NTPC', name: 'NTPC Ltd.', sector: 'Power Utilities', assetType: 'stock' },
+  { ticker: 'POWERGRID', name: 'Power Grid Corp.', sector: 'Power Transmission', assetType: 'stock' },
+  { ticker: 'ONGC', name: 'Oil & Natural Gas Corp', sector: 'Energy Upstream', assetType: 'stock' },
+  { ticker: 'COALINDIA', name: 'Coal India', sector: 'Mining & Energy', assetType: 'stock' },
+  { ticker: 'BPCL', name: 'Bharat Petroleum', sector: 'Oil Refining', assetType: 'stock' },
+  { ticker: 'TITAN', name: 'Titan Company', sector: 'Luxury & Jewellery', assetType: 'stock' },
+  { ticker: 'ADANIENT', name: 'Adani Enterprises', sector: 'Infra & Incubator', assetType: 'stock' },
+  { ticker: 'ADANIPORTS', name: 'Adani Ports & SEZ', sector: 'Ports & Logistics', assetType: 'stock' },
+  { ticker: 'ULTRACEMCO', name: 'UltraTech Cement', sector: 'Cement', assetType: 'stock' },
+  { ticker: 'GRASIM', name: 'Grasim Industries', sector: 'Diversified Materials', assetType: 'stock' },
+  { ticker: 'TATASTEEL', name: 'Tata Steel', sector: 'Metals & Steel', assetType: 'stock' },
+  { ticker: 'JSWSTEEL', name: 'JSW Steel', sector: 'Metals & Steel', assetType: 'stock' },
+  { ticker: 'HINDALCO', name: 'Hindalco Industries', sector: 'Aluminium & Copper', assetType: 'stock' },
+  { ticker: 'NESTLEIND', name: 'Nestle India', sector: 'FMCG Food', assetType: 'stock' },
+  { ticker: 'BRITANNIA', name: 'Britannia Industries', sector: 'Packaged Foods', assetType: 'stock' },
+  { ticker: 'TATACONSUM', name: 'Tata Consumer Products', sector: 'Beverages & Foods', assetType: 'stock' },
+  { ticker: 'ASIANPAINT', name: 'Asian Paints', sector: 'Consumer Paints', assetType: 'stock' },
+
   // Commodities & Metals
   { ticker: 'GOLDBEES', name: 'Nippon India Gold ETF', sector: 'Precious Metals', assetType: 'commodity', unit: 'units' },
   { ticker: 'SILVERBEES', name: 'Nippon India Silver ETF', sector: 'Precious Metals', assetType: 'commodity', unit: 'units' },
@@ -68,7 +153,7 @@ const defaultStocksIndia = [
 
 export default function Markets() {
   const navigate = useNavigate();
-  const { buyAsset } = usePortfolio();
+  const { buyAsset, balance } = usePortfolio();
   const { market, currency, getCurrency } = useMarket();
   const currentStocksList = market === 'US' ? defaultStocksUS : defaultStocksIndia;
   
@@ -76,6 +161,12 @@ export default function Markets() {
   const [selectedTab, setSelectedTab] = useState('ALL'); // ALL, STOCKS, COMMODITIES
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [buyModalAsset, setBuyModalAsset] = useState(null);
+  const [buyUnits, setBuyUnits] = useState('1');
+  const [buyExitMode, setBuyExitMode] = useState('none'); // Default: 'none' (Manual Sell); secondary: 'percentage' | 'price'
+  const [buyExitPct, setBuyExitPct] = useState('10');
+  const [buyExitPrice, setBuyExitPrice] = useState('');
+  const [marketToast, setMarketToast] = useState('');
 
   // Unified asset catalog with market tagging
   const allAvailableStocks = React.useMemo(() => {
@@ -103,7 +194,10 @@ export default function Markets() {
 
   const fetchLiveData = async () => {
     setLoading(true);
-    const symbols = allAvailableStocks.map(s => s.ticker).join(',');
+    const targetPool = searchTerm.trim() !== ''
+      ? allAvailableStocks
+      : allAvailableStocks.filter(s => !s.isOtherMarket);
+    const symbols = targetPool.map(s => s.ticker).join(',');
     const quotes = await getQuotes(symbols);
     
     const updatedStocks = allAvailableStocks.map(stock => {
@@ -135,24 +229,61 @@ export default function Markets() {
 
   const handleBuy = (asset) => {
     if (asset.currentPrice > 0) {
-      const unitPrompt = asset.unit ? ` (${asset.unit})` : ' shares';
-      const inputUnits = prompt(`How many units${unitPrompt} of ${asset.name} (${asset.ticker}) would you like to buy?`, "1");
-      if (inputUnits && !isNaN(inputUnits) && Number(inputUnits) > 0) {
-        const units = Number(inputUnits);
-        const success = buyAsset({
-          ticker: asset.ticker,
-          name: asset.name,
-          price: asset.currentPrice,
-          units: units,
-          category: asset.sector,
-          assetType: asset.assetType
-        });
-        if (success) {
-          alert(`Successfully purchased ${units} unit(s) of ${asset.ticker}! Check your Portfolio dashboard.`);
-        }
-      }
+      setBuyModalAsset(asset);
+      setBuyUnits('1');
+      setBuyExitMode('none');
+      setBuyExitPct('10');
+      setBuyExitPrice((asset.currentPrice * 1.10).toFixed(2));
     } else {
       alert("Cannot buy asset: Real-time price currently updating.");
+    }
+  };
+
+  const handleConfirmMarketBuy = (e) => {
+    e.preventDefault();
+    if (!buyModalAsset) return;
+    const units = Number(buyUnits);
+    if (isNaN(units) || units <= 0) {
+      alert("Please enter a valid number of units.");
+      return;
+    }
+
+    let autoExitRule = null;
+    if (buyExitMode === 'percentage') {
+      const pctVal = Number(buyExitPct);
+      if (!isNaN(pctVal) && pctVal > -99) {
+        autoExitRule = { enabled: true, mode: 'percentage', targetProfitPct: pctVal };
+      }
+    } else if (buyExitMode === 'price') {
+      const priceVal = Number(buyExitPrice);
+      if (isNaN(priceVal) || priceVal <= 0) {
+        alert("Please enter a valid target exit price.");
+        return;
+      }
+      autoExitRule = { enabled: true, mode: 'price', targetPrice: priceVal };
+    }
+
+    const success = buyAsset({
+      ticker: buyModalAsset.ticker,
+      name: buyModalAsset.name,
+      price: buyModalAsset.currentPrice,
+      units,
+      category: buyModalAsset.sector,
+      assetType: buyModalAsset.assetType,
+      bucket: 'core',
+      autoExit: autoExitRule
+    });
+
+    if (success) {
+      const curr = getCurrency(buyModalAsset.ticker);
+      const exitMsg = autoExitRule
+        ? (buyExitMode === 'percentage'
+            ? ` • Auto-Exit armed at +${buyExitPct}% (${curr}${(buyModalAsset.currentPrice * (1 + Number(buyExitPct) / 100)).toFixed(2)})`
+            : ` • Auto-Exit armed at ${curr}${Number(buyExitPrice).toFixed(2)}`)
+        : '';
+      setMarketToast(`Purchased ${units} unit(s) of ${buyModalAsset.ticker}${exitMsg}!`);
+      setTimeout(() => setMarketToast(''), 5500);
+      setBuyModalAsset(null);
     }
   };
 
@@ -202,9 +333,9 @@ export default function Markets() {
         </div>
         
         <div className="flex gap-3 w-full md:w-auto">
-          <div style={{ position: 'relative', flex: 1, width: '100%', minWidth: '240px' }}>
+          <div style={{ position: 'relative', flex: 1, width: '100%', minWidth: 0 }}>
             <Search 
-              style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} 
+              style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} 
               className="text-muted" 
               size={18} 
             />
@@ -212,22 +343,25 @@ export default function Markets() {
               type="text" 
               placeholder="Search stocks, gold, oil..." 
               className="chat-input w-full"
-              style={{ paddingLeft: '2.5rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem' }}
+              style={{ paddingLeft: '3rem', paddingRight: '1rem', paddingTop: '0.85rem', paddingBottom: '0.85rem', minHeight: '50px' }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className="btn btn-outline" style={{ padding: '0.75rem' }} onClick={fetchLiveData}>
+          <button className="btn btn-outline shrink-0" style={{ padding: '0.75rem' }} onClick={fetchLiveData}>
             <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
 
+      {/* Top 3 Algorithmic Stock Picks (US & India Markets) */}
+      <TopAlgoPicks pageContext="markets" />
+
       {/* Asset Segment Switcher */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
         <button
           onClick={() => setSelectedTab('ALL')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
             selectedTab === 'ALL'
               ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
               : 'bg-slate-800 text-slate-400 hover:text-white'
@@ -237,7 +371,7 @@ export default function Markets() {
         </button>
         <button
           onClick={() => setSelectedTab('COMMODITIES')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
             selectedTab === 'COMMODITIES'
               ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/20'
               : 'bg-slate-800 text-slate-400 hover:text-white'
@@ -247,7 +381,7 @@ export default function Markets() {
         </button>
         <button
           onClick={() => setSelectedTab('STOCKS')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
             selectedTab === 'STOCKS'
               ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20'
               : 'bg-slate-800 text-slate-400 hover:text-white'
@@ -337,6 +471,221 @@ export default function Markets() {
           </tbody>
         </table>
       </div>
+
+      {marketToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl bg-emerald-950/95 border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-2xl flex items-center gap-3 animate-fade-in">
+          <span>✅ {marketToast}</span>
+          <button onClick={() => setMarketToast('')} className="text-slate-400 hover:text-white underline text-[11px]">
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Buy Asset + Auto-Exit Configuration Modal */}
+      {buyModalAsset && (() => {
+        const assetCurr = getCurrency(buyModalAsset.ticker);
+        const livePrice = Number(buyModalAsset.currentPrice || 100);
+        const qty = Number(buyUnits || 1);
+        const totalOrderCost = Number((livePrice * qty).toFixed(2));
+        const previewExitPrice = buyExitMode === 'percentage'
+          ? Number((livePrice * (1 + (Number(buyExitPct) || 0) / 100)).toFixed(2))
+          : (buyExitMode === 'price' ? Number(buyExitPrice || 0) : null);
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="glass-panel p-6 rounded-2xl max-w-md w-full border border-blue-500/40 shadow-2xl bg-slate-900/95">
+              <div className="flex justify-between items-start mb-4 pb-3 border-b border-white/10">
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                    Instant Order + Auto-Exit
+                  </span>
+                  <h3 className="text-lg font-bold text-white mt-1.5">
+                    Buy {buyModalAsset.ticker} — {buyModalAsset.name}
+                  </h3>
+                  <p className="text-xs text-slate-400">{buyModalAsset.sector}</p>
+                </div>
+                <button
+                  onClick={() => setBuyModalAsset(null)}
+                  className="text-slate-400 hover:text-white text-sm font-bold px-2 py-1"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleConfirmMarketBuy} className="space-y-4">
+                <div className="p-3.5 rounded-xl bg-slate-950 border border-white/10 flex justify-between items-center">
+                  <div>
+                    <span className="text-xs text-slate-400 block">Live Market Price</span>
+                    <span className="text-lg font-bold text-white font-mono">
+                      {assetCurr}{livePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400 block">Available Cash</span>
+                    <span className="text-sm font-bold text-emerald-400 font-mono">
+                      {currency}{Number(balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Quantity */}
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                    Number of {buyModalAsset.unit ? `Units (${buyModalAsset.unit})` : 'Shares'} to Buy
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={buyUnits}
+                      onChange={(e) => setBuyUnits(e.target.value)}
+                      className="chat-input w-full font-mono text-base py-2 px-3"
+                      required
+                    />
+                    {[1, 5, 10, 25].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setBuyUnits(String(preset))}
+                        className="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-white/10"
+                      >
+                        +{preset}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Exit Strategy: Manual Sell (Default) vs Optional Auto-Exit */}
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                    Exit Strategy <span className="text-[10px] text-slate-400 font-normal">(Manual Sell is Default • Auto-Exit Optional)</span>
+                  </label>
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setBuyExitMode('none')}
+                      className={`p-2 rounded-xl border text-left transition-all ${
+                        buyExitMode === 'none'
+                          ? 'bg-slate-800 border-white/40 text-white'
+                          : 'bg-slate-900/60 border-white/10 text-slate-400'
+                      }`}
+                    >
+                      <div className="text-xs font-bold text-white">Manual Sell</div>
+                      <div className="text-[10px] text-slate-400">Default exit</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBuyExitMode('percentage')}
+                      className={`p-2 rounded-xl border text-left transition-all ${
+                        buyExitMode === 'percentage'
+                          ? 'bg-emerald-500/20 border-emerald-500/60 text-white'
+                          : 'bg-slate-900/60 border-white/10 text-slate-400'
+                      }`}
+                    >
+                      <div className="text-xs font-bold text-emerald-300">Auto: % Profit</div>
+                      <div className="text-[10px] text-slate-400">e.g. +10%</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBuyExitMode('price');
+                        if (!buyExitPrice) setBuyExitPrice((livePrice * 1.10).toFixed(2));
+                      }}
+                      className={`p-2 rounded-xl border text-left transition-all ${
+                        buyExitMode === 'price'
+                          ? 'bg-blue-500/20 border-blue-500/60 text-white'
+                          : 'bg-slate-900/60 border-white/10 text-slate-400'
+                      }`}
+                    >
+                      <div className="text-xs font-bold text-blue-300">Auto: Price</div>
+                      <div className="text-[10px] text-slate-400">Define {assetCurr}</div>
+                    </button>
+                  </div>
+
+                  {buyExitMode === 'percentage' && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          step="0.5"
+                          value={buyExitPct}
+                          onChange={(e) => setBuyExitPct(e.target.value)}
+                          className="chat-input w-full font-mono text-sm py-1.5 px-3"
+                          placeholder="10"
+                          required
+                        />
+                        {[5, 10, 15, 20].map((p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setBuyExitPct(String(p))}
+                            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border ${
+                              Number(buyExitPct) === p
+                                ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50'
+                                : 'bg-slate-800 text-slate-300 border-white/10'
+                            }`}
+                          >
+                            +{p}%
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {buyExitMode === 'price' && (
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value={buyExitPrice}
+                      onChange={(e) => setBuyExitPrice(e.target.value)}
+                      className="chat-input w-full font-mono text-sm py-1.5 px-3"
+                      placeholder={(livePrice * 1.10).toFixed(2)}
+                      required
+                    />
+                  )}
+                </div>
+
+                {/* Order Total & Auto-Exit Preview */}
+                <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-300 font-medium">Estimated Order Total</span>
+                    <span className="text-base font-black text-white font-mono">
+                      {assetCurr}{totalOrderCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  {previewExitPrice && previewExitPrice > 0 && (
+                    <div className="flex justify-between items-center text-xs pt-1 border-t border-white/10">
+                      <span className="text-emerald-300 font-medium">🎯 Auto-Sell Trigger Price</span>
+                      <span className="font-bold text-emerald-400 font-mono">
+                        {assetCurr}{previewExitPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setBuyModalAsset(null)}
+                    className="btn btn-outline flex-1 py-2.5 text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary flex-1 py-2.5 text-xs font-bold shadow-lg shadow-emerald-500/20"
+                    style={{ background: 'linear-gradient(135deg, #10b981, #2563eb)' }}
+                  >
+                    Confirm Buy Order
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );

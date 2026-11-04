@@ -1,6 +1,8 @@
+import { apiFetch } from './platform';
+
 export const getLiveStockQuote = async (symbol) => {
   try {
-    const response = await fetch(`/api/quote?symbol=${symbol}`);
+    const response = await apiFetch(`/api/quote?symbol=${symbol}`);
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
@@ -11,7 +13,7 @@ export const getLiveStockQuote = async (symbol) => {
 
 export const getMarketNews = async () => {
   try {
-    const response = await fetch(`/api/news`);
+    const response = await apiFetch(`/api/news`);
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -22,7 +24,7 @@ export const getMarketNews = async () => {
 
 export const getPortfolioNews = async (symbols) => {
   try {
-    const response = await fetch(`/api/portfolio-news?symbols=${symbols}`);
+    const response = await apiFetch(`/api/portfolio-news?symbols=${symbols}`);
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -33,7 +35,7 @@ export const getPortfolioNews = async (symbols) => {
 
 export const getUpcomingEarnings = async (symbols) => {
   try {
-    const response = await fetch(`/api/upcoming-earnings?symbols=${symbols}`);
+    const response = await apiFetch(`/api/upcoming-earnings?symbols=${symbols}`);
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -44,7 +46,7 @@ export const getUpcomingEarnings = async (symbols) => {
 
 export const getQuotes = async (symbols) => {
   try {
-    const response = await fetch(`/api/quotes?symbols=${symbols}`);
+    const response = await apiFetch(`/api/quotes?symbols=${symbols}`);
     if (!response.ok) return {};
     return await response.json();
   } catch (error) {
@@ -55,9 +57,8 @@ export const getQuotes = async (symbols) => {
 
 export const getPortfolioHistory = async (holdings, balance, period) => {
   try {
-    const response = await fetch('/api/portfolio-history', {
+    const response = await apiFetch('/api/portfolio-history', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ holdings, balance, period })
     });
     if (!response.ok) return [];
@@ -70,9 +71,8 @@ export const getPortfolioHistory = async (holdings, balance, period) => {
 
 export const getAlgoRecommendations = async (query) => {
   try {
-    const response = await fetch('/api/algo-trading', {
+    const response = await apiFetch('/api/algo-trading', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
     });
     if (!response.ok) return null;
@@ -83,9 +83,22 @@ export const getAlgoRecommendations = async (query) => {
   }
 };
 
+export const getTopAlgoPicks = async (market = 'US', forceRefresh = false, rotateAfterTicker = '') => {
+  try {
+    const rotateParam = rotateAfterTicker ? `&rotateAfterTicker=${encodeURIComponent(rotateAfterTicker)}` : '';
+    const url = `/api/algo-top-picks?market=${market}${forceRefresh ? '&forceRefresh=true' : ''}${rotateParam}`;
+    const response = await apiFetch(url);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching top algo picks:', error);
+    return null;
+  }
+};
+
 export const getFundamentals = async (symbol) => {
   try {
-    const response = await fetch(`/api/fundamentals?symbol=${symbol}`);
+    const response = await apiFetch(`/api/fundamentals?symbol=${symbol}`);
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
@@ -94,9 +107,10 @@ export const getFundamentals = async (symbol) => {
   }
 };
 
-export const getMacroIntelligenceStream = async () => {
+export const getMacroIntelligenceStream = async (force = false) => {
   try {
-    const response = await fetch('/api/macro-intelligence/stream');
+    const url = force ? '/api/macro-intelligence/stream?force=true' : '/api/macro-intelligence/stream';
+    const response = await apiFetch(url);
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
@@ -107,9 +121,8 @@ export const getMacroIntelligenceStream = async () => {
 
 export const getMacroAllocationRecommendation = async (payload) => {
   try {
-    const response = await fetch('/api/macro-intelligence/recommend-allocation', {
+    const response = await apiFetch('/api/macro-intelligence/recommend-allocation', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     if (!response.ok) return null;
@@ -122,7 +135,7 @@ export const getMacroAllocationRecommendation = async (payload) => {
 
 export const getCommodities = async (market = 'US') => {
   try {
-    const response = await fetch(`/api/commodities?market=${market}`);
+    const response = await apiFetch(`/api/commodities?market=${market}`);
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -131,3 +144,50 @@ export const getCommodities = async (market = 'US') => {
   }
 };
 
+export const getMLModelStatus = async () => {
+  try {
+    const response = await apiFetch('/api/ml-model-status');
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching ML model status:', error);
+    return null;
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Cloud Portfolio Sync & Multi-Platform Release APIs
+// ---------------------------------------------------------------------------
+
+export const getCloudPortfolio = async () => {
+  try {
+    const response = await apiFetch('/api/user/portfolio');
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    return null;
+  }
+};
+
+export const syncCloudPortfolio = async (market, portfolioState) => {
+  try {
+    const response = await apiFetch('/api/user/portfolio', {
+      method: 'PUT',
+      body: JSON.stringify({ market, portfolioState })
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getMobileReleaseManifest = async () => {
+  try {
+    const response = await apiFetch('/api/mobile/release-manifest');
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    return null;
+  }
+};

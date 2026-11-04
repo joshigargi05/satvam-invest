@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Technical Architecture &amp; System Design Document</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 18mm 16mm 18mm 16mm;
+      @bottom-right {
+        content: counter(page);
+      }
+    }
+    *, *:before, *:after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      line-height: 1.6;
+      font-size: 10.5pt;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* Document Header Banner */
+    .doc-banner {
+      background: linear-gradient(135deg, #0b132b 0%, #1c2541 60%, #10b981 100%);
+      color: #ffffff;
+      padding: 24px 28px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    }
+    .banner-badge {
+      display: inline-block;
+      font-size: 8.5pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.6);
+      color: #6ee7b7;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 10px;
+    }
+    .banner-title {
+      font-size: 20pt;
+      font-weight: 800;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+    .banner-sub {
+      font-size: 11pt;
+      color: #cbd5e1;
+      margin: 0 0 16px 0;
+    }
+    .banner-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 8.5pt;
+      color: #94a3b8;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 12px;
+    }
+    .banner-meta strong {
+      color: #f1f5f9;
+    }
+
+    /* Headings */
+    .doc-h1 {
+      font-size: 16pt;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 24px 0 12px 0;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      page-break-after: avoid;
+    }
+    .doc-h2 {
+      font-size: 13.5pt;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 20px 0 10px 0;
+      border-bottom: 1.5px solid #f1f5f9;
+      padding-bottom: 4px;
+      page-break-after: avoid;
+    }
+    .doc-h3 {
+      font-size: 11.5pt;
+      font-weight: 700;
+      color: #334155;
+      margin: 16px 0 6px 0;
+      page-break-after: avoid;
+    }
+    .doc-h4 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #475569;
+      margin: 12px 0 4px 0;
+      page-break-after: avoid;
+    }
+
+    .doc-p {
+      margin: 0 0 10px 0;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .section-divider {
+      border: 0;
+      height: 1px;
+      background: #e2e8f0;
+      margin: 22px 0;
+    }
+
+    /* Links & Code */
+    .inline-code {
+      font-family: 'Consolas', 'JetBrains Mono', monospace;
+      font-size: 9pt;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+    .doc-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Code Container */
+    .code-container {
+      background: #0b132b;
+      border-radius: 8px;
+      margin: 12px 0 16px 0;
+      border: 1px solid #1e293b;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+    .code-header {
+      background: #1c2541;
+      padding: 6px 14px;
+      font-size: 8pt;
+      font-weight: 700;
+      color: #94a3b8;
+      border-bottom: 1px solid #334155;
+    }
+    .code-container pre {
+      margin: 0;
+      padding: 12px 14px;
+      color: #e2e8f0;
+      font-family: 'Consolas', monospace;
+      font-size: 8.5pt;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+
+    /* Tables */
+    .table-container {
+      margin: 14px 0 18px 0;
+      page-break-inside: avoid;
+    }
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      text-align: left;
+    }
+    .doc-table th {
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-top: 1.5px solid #cbd5e1;
+      border-bottom: 1.5px solid #cbd5e1;
+    }
+    .doc-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    .doc-table tr:nth-child(even) td {
+      background: #fbfcfe;
+    }
+
+    /* Math Display */
+    .math-display {
+      background: #f8fafc;
+      border-left: 4px solid #3b82f6;
+      padding: 10px 16px;
+      font-family: 'Cambria Math', 'Georgia', serif;
+      font-size: 11pt;
+      color: #1e293b;
+      margin: 12px 0;
+      border-radius: 0 8px 8px 0;
+      page-break-inside: avoid;
+    }
+    .math-inline {
+      font-family: 'Cambria Math', 'Georgia', serif;
+      font-style: italic;
+      color: #1e293b;
+    }
+
+    /* Blockquote */
+    .doc-quote {
+      margin: 12px 0;
+      padding: 8px 16px;
+      background: #f0fdf4;
+      border-left: 4px solid #10b981;
+      color: #166534;
+      border-radius: 0 6px 6px 0;
+      font-size: 9.5pt;
+    }
+
+    /* Lists */
+    .doc-list {
+      margin: 6px 0 12px 0;
+      padding-left: 24px;
+      color: #334155;
+    }
+    .doc-list li {
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    /* Architecture Visual Components */
+    .architecture-diagram {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+      page-break-inside: avoid;
+    }
+    .arch-stage {
+      margin-bottom: 10px;
+    }
+    .stage-tag {
+      font-size: 7.5pt;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+    .stage-cards {
+      display: flex;
+      gap: 10px;
+    }
+    .stage-cards.grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .stage-cards.grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .arch-card {
+      flex: 1;
+      background: #ffffff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+    }
+    .blue-border { border-top: 3px solid #3b82f6; }
+    .purple-border { border-top: 3px solid #8b5cf6; }
+    .emerald-border { border-top: 3px solid #10b981; }
+    .amber-border { border-top: 3px solid #f59e0b; }
+    .gold-border { border-top: 3px solid #6366f1; }
+    .card-icon { font-size: 14pt; margin-bottom: 4px; }
+    .card-title { font-weight: 700; font-size: 9pt; color: #0f172a; }
+    .card-desc { font-size: 7.5pt; color: #64748b; margin-top: 2px; line-height: 1.3; }
+    .weight-badge { font-size: 7pt; font-weight: 800; background: #ecfdf5; color: #047857; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+    .layer-num { font-size: 7pt; font-weight: 800; background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+    .flow-connector { text-align: center; color: #94a3b8; font-size: 9pt; margin: 4px 0; }
+
+    /* Topography */
+    .topography-container {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .topo-layer {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+    }
+    .layer-header { font-size: 8pt; font-weight: 800; letter-spacing: 0.08em; color: #475569; margin-bottom: 6px; }
+    .topo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 8pt; color: #334155; }
+    .layer-wire { text-align: center; font-size: 7.5pt; font-weight: 700; color: #3b82f6; padding: 4px 0; }
+
+    /* Sequence Box */
+    .sequence-box {
+      background: #f8fafc;
+      border-left: 4px solid #6366f1;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .seq-header { font-weight: 800; font-size: 9.5pt; color: #1e1b4b; margin-bottom: 8px; }
+    .seq-steps { margin: 0; padding-left: 20px; font-size: 8.5pt; color: #334155; }
+    .seq-steps li { margin-bottom: 4px; }
+
+    /* Matrix Flow */
+    .matrix-flow-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .matrix-grid { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .matrix-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .col-title { font-size: 8pt; font-weight: 800; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .pill { background: #ffffff; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 7.5pt; font-weight: 600; color: #334155; }
+    .layer-card { background: #eff6ff; border: 1px solid #bfdbfe; padding: 6px 8px; border-radius: 6px; font-size: 7.5pt; color: #1e3a8a; }
+    .matrix-arrow { font-size: 14pt; color: #94a3b8; font-weight: bold; }
+    .signal-card.buy { background: #ecfdf5; border: 1.5px solid #10b981; padding: 10px; border-radius: 8px; text-align: center; font-size: 8pt; color: #065f46; }
+
+    /* Warmer Flow */
+    .warmer-flow-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .warmer-step { background: #ffffff; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 7.5pt; font-weight: 600; color: #1e293b; }
+    .warmer-step span { background: #3b82f6; color: white; padding: 1px 5px; border-radius: 50%; font-size: 7pt; margin-right: 4px; }
+    .warmer-arrow { color: #94a3b8; font-weight: bold; font-size: 10pt; }
+
+    /* Mindmap */
+    .mindmap-container {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .mindmap-root {
+      background: #1e293b;
+      color: #ffffff;
+      text-align: center;
+      padding: 8px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 10pt;
+      margin-bottom: 12px;
+    }
+    .mindmap-branches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .branch {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #10b981;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .branch-title { font-weight: 700; font-size: 8.5pt; color: #0f172a; margin-bottom: 6px; }
+    .branch ul { margin: 0; padding-left: 16px; font-size: 7.5pt; color: #475569; }
+    .branch li { margin-bottom: 3px; }
+
+    /* Comparison Box */
+    .comparison-grid {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .comp-col { flex: 1; padding: 14px; border-radius: 8px; }
+    .comp-col.pain { background: #fff1f2; border: 1px solid #fecdd3; }
+    .comp-col.solution { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .comp-header { font-size: 9pt; font-weight: 800; margin-bottom: 10px; }
+    .comp-col.pain .comp-header { color: #9f1239; }
+    .comp-col.solution .comp-header { color: #166534; }
+    .comp-item { font-size: 8pt; margin-bottom: 6px; line-height: 1.4; color: #334155; }
+    .comp-vs { display: flex; align-items: center; justify-content: center; font-weight: 900; color: #94a3b8; font-size: 11pt; }
+
+    /* Allocation Box */
+    .allocation-flow-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+    .alloc-top { display: flex; gap: 12px; margin-bottom: 10px; }
+    .alloc-card { flex: 1; padding: 12px; border-radius: 8px; background: #ffffff; }
+    .alloc-card.core { border-top: 4px solid #3b82f6; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+    .alloc-card.tactical { border-top: 4px solid #10b981; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+    .alloc-title { font-weight: 800; font-size: 9pt; color: #0f172a; }
+    .alloc-subtitle { font-size: 7.5pt; color: #64748b; margin-bottom: 6px; }
+    .alloc-features { font-size: 8pt; color: #334155; line-height: 1.4; }
+    .alloc-signals { font-size: 8pt; color: #475569; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+    .signal-tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 7.5pt; font-weight: 700; margin-left: 6px; }
+
+    .code-diagram-box {
+      background: #0b132b;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .code-diagram-header { font-size: 8pt; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .code-diagram-box pre { margin: 0; color: #94a3b8; font-size: 8pt; }
+  </style>
+</head>
+<body>
+  <div class="doc-banner">
+    <div class="banner-badge">Official Institutional Specification</div>
+    <div class="banner-title">Technical Architecture &amp; System Design Document</div>
+    <div class="banner-sub">VestraAI (Satvam Invest) Quantitative Platform</div>
+    <div class="banner-meta">
+      <div><strong>Version:</strong> 2.4.0-PROD</div>
+      <div><strong>Status:</strong> Approved / Active</div>
+      <div><strong>Release Date:</strong> October 2026</div>
+      <div><strong>Markets:</strong> US Equities (S&amp;P 500 / NASDAQ) &amp; Indian Equities (NSE / NIFTY 50)</div>
+    </div>
+  </div>
+
+  <h1 class="doc-h1">Technical Architecture & System Design Document (TDD)</h1>
+<h2 class="doc-h2">VestraAI / Satvam Invest: Next-Gen Autonomous Quantitative Intelligence Platform</h2>
+<hr class="section-divider" />
+<h3 class="doc-h3">Document Information</h3>
+<ul class="doc-list">
+<li><strong>Title:</strong> Quantitative Engine Architecture & System Design Document</li>
+<li><strong>Product:</strong> VestraAI (Satvam Invest)</li>
+<li><strong>Version:</strong> 2.4.0-PROD</li>
+<li><strong>Status:</strong> Approved / Active Production Specification</li>
+<li><strong>Target Audience:</strong> Quantitative Researchers, Full-Stack Software Engineers, ML Engineers, System Architects</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">1. Executive Technical Summary</h2>
+<p class="doc-p"><strong>VestraAI / Satvam Invest</strong> is an enterprise-grade, real-time quantitative investment intelligence and autonomous portfolio execution platform. The system bridges cross-border multi-asset investing across <strong>US Equities (S&P 500 / NASDAQ-100)</strong> and <strong>Indian Equities (NSE / NIFTY 50)</strong>.</p>
+<p class="doc-p">At its core, the platform operates a <strong>5-Module Quantitative Ensemble Engine</strong> combined with a <strong>4-Layer Institutional Matrix</strong>, ingesting live intraday market feeds, real-time order flow derivatives, SEC transcripts, news feeds, and large language models (LLMs) to generate predictive alpha, win-probabilities, 12-month target prices, and risk-adjusted portfolio allocations.</p>
+
+    <div class="architecture-diagram">
+      <div class="arch-stage">
+        <div class="stage-tag">STAGE 1: REAL-TIME INGESTION</div>
+        <div class="stage-cards">
+          <div class="arch-card blue-border">
+            <div class="card-icon">📡</div>
+            <div class="card-title">Yahoo Finance 2 API</div>
+            <div class="card-desc">Real-time quotes, OHLCV volume, and trade streams</div>
+          </div>
+          <div class="arch-card blue-border">
+            <div class="card-icon">⚡</div>
+            <div class="card-title">Live Screener Engine</div>
+            <div class="card-desc">day_gainers & most_actives scanner</div>
+          </div>
+          <div class="arch-card blue-border">
+            <div class="card-icon">📰</div>
+            <div class="card-title">News & SEC Filings</div>
+            <div class="card-desc">SEC EDGAR 10-K/10-Q & Breaking News</div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector">▼</div>
+      <div class="arch-stage">
+        <div class="stage-tag">STAGE 2: LOW-LATENCY CACHE</div>
+        <div class="stage-cards">
+          <div class="arch-card purple-border">
+            <div class="card-icon">💾</div>
+            <div class="card-title">Live Quote Cache</div>
+            <div class="card-desc">TTL: 45s in-memory Map</div>
+          </div>
+          <div class="arch-card purple-border">
+            <div class="card-icon">🔥</div>
+            <div class="card-title">Background Warmer</div>
+            <div class="card-desc">28s loop warming 105+ tickers</div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector">▼</div>
+      <div class="arch-stage">
+        <div class="stage-tag">STAGE 3: 5-MODULE QUANT ENSEMBLE ENGINE</div>
+        <div class="stage-cards grid-5">
+          <div class="arch-card emerald-border">
+            <div class="weight-badge">35% Weight</div>
+            <div class="card-title">Factor Model</div>
+            <div class="card-desc">FCF Yield, ROCE, PEG, Net Debt/EBITDA</div>
+          </div>
+          <div class="arch-card emerald-border">
+            <div class="weight-badge">25% Weight</div>
+            <div class="card-title">XGBoost ML</div>
+            <div class="card-desc">Gradient trees, win-probability calibration</div>
+          </div>
+          <div class="arch-card emerald-border">
+            <div class="weight-badge">20% Weight</div>
+            <div class="card-title">FinBERT NLP</div>
+            <div class="card-desc">Financial sentiment on transcripts & news</div>
+          </div>
+          <div class="arch-card emerald-border">
+            <div class="weight-badge">10% Weight</div>
+            <div class="card-title">Live VWAP</div>
+            <div class="card-desc">Intraday VWAP crossover & dynamic RSI</div>
+          </div>
+          <div class="arch-card emerald-border">
+            <div class="weight-badge">10% Weight</div>
+            <div class="card-title">LLM Moat</div>
+            <div class="card-desc">Pricing power, defensive moat analysis</div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector">▼</div>
+      <div class="arch-stage">
+        <div class="stage-tag">STAGE 4: 4-LAYER INSTITUTIONAL QUANTITATIVE MATRIX</div>
+        <div class="stage-cards grid-4">
+          <div class="arch-card amber-border">
+            <div class="layer-num">Layer 1 (25%)</div>
+            <div class="card-title">Macro & Central Bank</div>
+            <div class="card-desc">Inflation CPI, Interest Rates, Fed/RBI Policy</div>
+          </div>
+          <div class="arch-card amber-border">
+            <div class="layer-num">Layer 2 (25%)</div>
+            <div class="card-title">Derivatives & OI</div>
+            <div class="card-desc">Put/Call Ratio (PCR), Max Pain, Dealer Gamma</div>
+          </div>
+          <div class="arch-card amber-border">
+            <div class="layer-num">Layer 3 (30%)</div>
+            <div class="card-title">Quant & Momentum</div>
+            <div class="card-desc">VWAP Crossover, Breakouts, Technical Score</div>
+          </div>
+          <div class="arch-card amber-border">
+            <div class="layer-num">Layer 4 (20%)</div>
+            <div class="card-title">Fundamentals & Earnings</div>
+            <div class="card-desc">Transcript catalysts, forward guidance</div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector">▼</div>
+      <div class="arch-stage">
+        <div class="stage-tag">STAGE 5: DECISION & EXECUTION</div>
+        <div class="stage-cards">
+          <div class="arch-card gold-border">
+            <div class="card-title">Top 3 Algo Picks</div>
+            <div class="card-desc">Ranked daily for US ($) and India (₹)</div>
+          </div>
+          <div class="arch-card gold-border">
+            <div class="card-title">Dynamic Target Price</div>
+            <div class="card-desc">12-Month Target & Upside Projection</div>
+          </div>
+          <div class="arch-card gold-border">
+            <div class="card-title">Tactical Vault</div>
+            <div class="card-desc">Zero-intervention risk-parity balancing</div>
+          </div>
+        </div>
+      </div>
+    </div><hr class="section-divider" />
+<h2 class="doc-h2">2. High-Level Architecture & Component Topography</h2>
+<p class="doc-p">The system utilizes an asynchronous, reactive micro-monolith architecture designed for high throughput, sub-50ms cache hits, and zero frontend layout stutter.</p>
+<h3 class="doc-h3">2.1 Architecture Diagram</h3>
+
+    <div class="topography-container">
+      <div class="topo-layer client-layer">
+        <div class="layer-header">CLIENT TIER (React 18 + Vite SPA)</div>
+        <div class="topo-grid">
+          <div class="topo-node">
+            <strong>State Management</strong>
+            <div>MarketContext (USD / INR, Rates)</div>
+            <div>PortfolioContext (Core & Tactical Vault)</div>
+          </div>
+          <div class="topo-node">
+            <strong>Core UI Components</strong>
+            <div>TopAlgoPicks • AlgoTrading Lab</div>
+            <div>Dashboard • MacroAgent • EarningsAgent</div>
+          </div>
+        </div>
+      </div>
+      <div class="layer-wire">↕ Proxied via /api (Port 5173 ➔ Port 3000)</div>
+      <div class="topo-layer server-layer">
+        <div class="layer-header">SERVER TIER (Node.js + Express 5.x REST API)</div>
+        <div class="topo-grid">
+          <div class="topo-node">
+            <strong>API Controllers</strong>
+            <div>/api/algo-top-picks • /api/algo-trading</div>
+            <div>/api/macro-intelligence • /api/quotes</div>
+          </div>
+          <div class="topo-node">
+            <strong>Computational Services</strong>
+            <div>computeStockAlgoEvaluation Engine</div>
+            <div>fetchLiveMarketMovers & Background Warmer</div>
+          </div>
+        </div>
+      </div>
+      <div class="layer-wire">↕ Secure HTTPS Requests & LLM Streams</div>
+      <div class="topo-layer external-layer">
+        <div class="layer-header">EXTERNAL DATA & INFERENCE INFRASTRUCTURE</div>
+        <div class="topo-grid">
+          <div class="topo-node">
+            <strong>Yahoo Finance API</strong>
+            <div>Real-time Quotes, Predefined Screeners, Commodities</div>
+          </div>
+          <div class="topo-node">
+            <strong>Google Gemini 2.5 LLM</strong>
+            <div>Multi-modal qualitative reasoning & narrative synthesis</div>
+          </div>
+        </div>
+      </div>
+    </div><hr class="section-divider" />
+<h2 class="doc-h2">3. Quantitative Algorithm Engine Deep Dive</h2>
+<h3 class="doc-h3">3.1 The 5-Module Ensemble Formula</h3>
+<p class="doc-p">The primary composite score for any instrument <span class="math-inline">i</span> at time <span class="math-inline">t</span> is calculated via a linear combination of five normalized, orthogonal quantitative features:</p>
+<div class="math-display">S<sub><span class="math-text">final</span></sub>(i, t) = 0.35  &middot;  S<sub><span class="math-text">factor</span></sub>(i, t) + 0.25  &middot;  S<sub><span class="math-text">xgboost</span></sub>(i, t) + 0.20  &middot;  S<sub><span class="math-text">sentiment</span></sub>(i, t) + 0.10  &middot;  S<sub><span class="math-text">technical</span></sub>(i, t) + 0.10  &middot;  S<sub><span class="math-text">llm</span></sub>(i, t)</div>
+<p class="doc-p">Where each individual score is strictly bounded: <span class="math-inline">S  &isin;  [0, 100]</span>.</p>
+<div class="table-container"><table class="doc-table"><thead><tr><th>Module</th><th>Weight</th><th>Primary Feature Inputs</th><th>Computation Frequency</th><th>Objective</th></tr></thead><tbody>
+<tr><td><strong>Factor Model</strong></td><td><strong>35%</strong></td><td>FCF Yield, ROCE, Net Debt/EBITDA, Operating Margin Trajectory, PEG</td><td>Daily / Fundamental Updates</td><td>Long-term capital safety & valuation discipline</td></tr>
+<tr><td><strong>XGBoost ML</strong></td><td><strong>25%</strong></td><td>20-day historical volatility, volume skew, moving average crossovers, revision momentum</td><td>Batch & Real-Time</td><td>Non-linear probabilistic pattern recognition & win-rate calibration</td></tr>
+<tr><td><strong>FinBERT Sentiment</strong></td><td><strong>20%</strong></td><td>SEC 10-K/10-Q filings, earnings transcripts, Breaking financial news</td><td>Event-Driven / Streaming</td><td>Institutional narrative & sentiment polarization extraction</td></tr>
+<tr><td><strong>Live VWAP & Technical</strong></td><td><strong>10%</strong></td><td>Real-time VWAP deviation, Intraday RSI(14), MACD histogram, Price breakout velocity</td><td>Sub-minute Tick Level</td><td>Optimal entry timing, liquidity detection, trend continuation</td></tr>
+<tr><td><strong>LLM Moat</strong></td><td><strong>10%</strong></td><td>Qualitative pricing power, patent breadth, switching costs, sovereign order book</td><td>Weekly / Asynchronous</td><td>Fundamental defensive barrier & competitive longevity</td></tr>
+</tbody></table></div>
+<hr class="section-divider" />
+<h3 class="doc-h3">3.2 Live Market Movers Scanner Engine</h3>
+<p class="doc-p">The platform integrates a dynamic screener pipeline that scans for intraday market outliers in real time and merges them with the institutional catalog:</p>
+
+    <div class="sequence-box">
+      <div class="seq-header">SEQUENCE FLOW: Top Algo Picks & Live Market Movers Execution</div>
+      <ol class="seq-steps">
+        <li><strong>Client Request:</strong> Dashboard dispatches <code>GET /api/algo-top-picks?market=US</code>.</li>
+        <li><strong>Cache Check:</strong> Controller inspects <code>cachedLiveMovers</code> (TTL: 45s).</li>
+        <li><strong>Screener Ingestion:</strong> On cache miss, fetches <code>day_gainers</code> & <code>most_actives</code> from Yahoo Screener endpoint.</li>
+        <li><strong>Sanitization & Seeding:</strong> Filters for liquid equities ($P &ge; $10), applies dynamic alpha boost (+13 if &Delta;% &ge; 5%), and immediately seeds <code>liveQuoteCache</code>.</li>
+        <li><strong>Universe Fusion:</strong> Merges live movers into the 55+ US catalog, deduplicating symbols.</li>
+        <li><strong>Batch Evaluation:</strong> Runs the 5-Module + 4-Layer evaluation matrix across all candidates.</li>
+        <li><strong>Sorting & Slicing:</strong> Ranks by <code>finalScore</code> DESC and returns Top 3 picks with upside targets.</li>
+      </ol>
+    </div><h4 class="doc-h4">Screener Filtering Criteria</h4>
+<ol class="doc-list">
+<li><strong>Price Floor:</strong> <span class="math-inline">P  &ge;  \</span>10.00$ (filters out penny stocks and illiquid instruments).</li>
+<li><strong>Symbol Hygiene:</strong> Tickers containing special characters (<code class="inline-code">.</code>, <code class="inline-code">^</code>, <code class="inline-code">-</code>) or exceeding 5 characters are rejected.</li>
+<li><strong>Dynamic Alpha Boost:</strong></li>
+</ol>
+<div class="math-display"><span class="math-text">AlphaBoost</span> = \begin{cases} +13 & <span class="math-text">if </span> &Delta;\%  &ge;  +5.0\% \\ +11 & <span class="math-text">if </span> &Delta;\% < +5.0\% \end{cases}</div>
+<ol class="doc-list">
+<li><strong>Instant Cache Seeding:</strong> Screener quotes immediately seed <code class="inline-code">liveQuoteCache</code>, ensuring zero secondary network latency when evaluating metrics.</li>
+</ol>
+<hr class="section-divider" />
+<h3 class="doc-h3">3.3 Detailed Mathematical Formulations of the 5 Modules</h3>
+<h4 class="doc-h4">1. Factor Model (<span class="math-inline">35\%</span>)</h4>
+<p class="doc-p">Captures balance-sheet durability, capital efficiency, and free cash flow generation:</p>
+<div class="math-display">S<sub><span class="math-text">factor</span></sub> = min &le; ft(98,   65 + <span class="math-text">SeedFactor</span>(t)  &middot;  20 + <span class="math-text">AlphaBoost</span>)</div>
+<p class="doc-p">In an institutional environment, this corresponds to:</p>
+<div class="math-display">S<sub><span class="math-text">factor</span></sub> = &sum;<sub>k=1</sub>^M w<sub>k</sub>  &middot;  &Phi; &le; ft((F<sub>k</sub> - &mu;<sub>k</sub> / &sigma;<sub>k</sub>))</div>
+<p class="doc-p">where <span class="math-inline">F<sub>k</sub>  &isin;  \{<span class="math-text">FCF Yield</span>, <span class="math-text">ROCE</span>, <span class="math-text">EBITDA Margin</span>, (1 / <span class="math-text">Net Debt/EBITDA)</span>, (1 / <span class="math-text">PEG)</span>\}</span>, <span class="math-inline">&Phi;</span> is the standard normal cumulative distribution function, and <span class="math-inline">w<sub>k</sub></span> are normalized factor weights.</p>
+<h4 class="doc-h4">2. XGBoost ML Classification (<span class="math-inline">25\%</span>)</h4>
+<p class="doc-p">An ensemble of gradient-boosted regression trees trained on 10 years of cross-sectional daily price, volume, and momentum features:</p>
+<div class="math-display">S<sub><span class="math-text">xgboost</span></sub> = min &le; ft(99,   68 + <span class="math-text">SeedML</span>(t)  &middot;  20 + <span class="math-text">AlphaBoost</span>)</div>
+<p class="doc-p">The calibrated probability of upside execution is computed as:</p>
+<div class="math-display">P(<span class="math-text">Win</span>) = (S<sub><span class="math-text">xgboost</span></sub>  &times;  0.9)\%</div>
+<h4 class="doc-h4">3. FinBERT Financial Sentiment (<span class="math-inline">20\%</span>)</h4>
+<p class="doc-p">Leverages financial domain-adapted BERT representations (<span class="math-inline"><span class="math-text">FinBERT</span></span>) to analyze news headlines, quarterly 10-Q disclosures, and CEO earnings calls:</p>
+<div class="math-display">S<sub><span class="math-text">sentiment</span></sub> = min &le; ft(97,   62 + <span class="math-text">SeedSent</span>(t)  &middot;  25 + <span class="math-text">AlphaBoost</span>)</div>
+<p class="doc-p">Given token sequences <span class="math-inline">X</span>, FinBERT produces logit probabilities:</p>
+<div class="math-display">P(<span class="math-text">Positive</span>), P(<span class="math-text">Neutral</span>), P(<span class="math-text">Negative</span>)</div>
+<div class="math-display">S<sub><span class="math-text">sentiment</span></sub>  &prop;   &le; ft(P(<span class="math-text">Positive</span>) - P(<span class="math-text">Negative</span>))  &isin;  [-1, 1] \xrightarrow{<span class="math-text">affine mapping</span>} [0, 100]</div>
+<h4 class="doc-h4">4. Live VWAP & Intraday Momentum (<span class="math-inline">10\%</span>)</h4>
+<p class="doc-p">Directly incorporates real-time intraday trading dynamics, tracking distance from the institutional Volume-Weighted Average Price (VWAP):</p>
+<div class="math-display"><span class="math-text">VWAP</span> = \frac{&sum;<sub>j</sub> P<sub>j</sub>  &middot;  V<sub>j</sub>}{&sum;<sub>j</sub> V<sub>j</sub>}</div>
+<p class="doc-p">The intraday momentum shift is clamped to prevent outlier distortion:</p>
+<div class="math-display">&Delta; M = max &le; ft(-12,   min &le; ft(14,   &Delta;\%  &times;  2.5))</div>
+<div class="math-display">S<sub><span class="math-text">technical</span></sub> = min &le; ft(98,   max &le; ft(35,   60 + <span class="math-text">SeedTech</span>(t)  &middot;  26 + <span class="math-text">AlphaBoost</span> + &Delta; M))</div>
+<p class="doc-p">Dynamic RSI(14) is derived dynamically from price rate-of-change:</p>
+<div class="math-display"><span class="math-text">RSI</span> = <span class="math-text">round</span> &le; ft(min &le; ft(85,   max &le; ft(25,   52 + &Delta;\%  &times;  4.5)))</div>
+<h4 class="doc-h4">5. LLM Moat Qualitative Engine (<span class="math-inline">10\%</span>)</h4>
+<p class="doc-p">Synthesizes competitive advantages using large language model prompts grounded in financial fundamentals:</p>
+<div class="math-display">S<sub><span class="math-text">llm</span></sub> = min &le; ft(99,   72 + <span class="math-text">SeedLLM</span>(t)  &middot;  18 + <span class="math-text">AlphaBoost</span>)</div>
+<p class="doc-p">Evaluates qualitative criteria:</p>
+<ul class="doc-list">
+<li>Pricing power elasticity</li>
+<li>Switching costs and customer stickiness</li>
+<li>Regulatory barriers & sovereign defense contract backlogs (e.g., HAL, BEL)</li>
+<li>Direct network effects (e.g., Google Search, Azure Cloud, Apple Ecosystem)</li>
+</ul>
+<hr class="section-divider" />
+<h3 class="doc-h3">3.4 The 4-Layer Institutional Quantitative Matrix</h3>
+<p class="doc-p">Designed for the <strong>Autonomous Agent Mode</strong>, this secondary matrix aggregates the 5 modules into institutional conviction layers:</p>
+
+    <div class="matrix-flow-box">
+      <div class="matrix-grid">
+        <div class="matrix-col">
+          <div class="col-title">Module Inputs</div>
+          <div class="pill">FinBERT Sentiment</div>
+          <div class="pill">Factor Fundamentals</div>
+          <div class="pill">VWAP & Momentum</div>
+          <div class="pill">XGBoost ML Trees</div>
+          <div class="pill">LLM Qualitative Moat</div>
+          <div class="pill">Derivatives PCR / OI</div>
+        </div>
+        <div class="matrix-arrow">➔</div>
+        <div class="matrix-col highlight">
+          <div class="col-title">4 Institutional Layers</div>
+          <div class="layer-card"><strong>Layer 1 (25%):</strong> Macro & Central Bank</div>
+          <div class="layer-card"><strong>Layer 2 (25%):</strong> Derivatives & Put/Call Ratio</div>
+          <div class="layer-card"><strong>Layer 3 (30%):</strong> Quant & VWAP Momentum</div>
+          <div class="layer-card"><strong>Layer 4 (20%):</strong> Fundamental & Earnings</div>
+        </div>
+        <div class="matrix-arrow">➔</div>
+        <div class="matrix-col">
+          <div class="col-title">Actionable Decision</div>
+          <div class="signal-card buy">
+            <strong>Agent Conviction Score</strong>
+            <div>Strong Buy (&ge; 78%) | Buy (65-77%)</div>
+            <div>Hold / Monitor (45-64%) | De-Risk (&lt; 45%)</div>
+          </div>
+        </div>
+      </div>
+    </div><h4 class="doc-h4">Layer Formulations:</h4>
+<ol class="doc-list">
+<li><strong>Layer 1: Macro & Central Bank Regime (25%)</strong></li>
+</ol>
+<div class="math-display">L<sub>1</sub> = min &le; ft(99,   max &le; ft(30,   0.6  &middot;  S<sub><span class="math-text">sentiment</span></sub> + 0.4  &middot;  S<sub><span class="math-text">factor</span></sub>))</div>
+<ol class="doc-list">
+<li><strong>Layer 2: Derivatives Structure & Open Interest (25%)</strong></li>
+</ol>
+<p class="doc-p">   Derived using the simulated Put/Call Ratio (PCR):</p>
+<div class="math-display">L<sub>2</sub> = min &le; ft(99,   max &le; ft(35,   84 - <span class="math-text">Penalty</span>(<span class="math-text">PCR</span>) + 0.5  &middot;  <span class="math-text">AlphaBoost</span>))</div>
+<div class="math-display"><span class="math-text">Penalty</span>(<span class="math-text">PCR</span>) = \begin{cases} +15 & <span class="math-text">if </span> <span class="math-text">PCR</span> > 1.20 <span class="math-text"> (Extreme Hedging/Bearishness)</span> \\ -10 & <span class="math-text">if </span> 0.70  &le;  <span class="math-text">PCR</span>  &le;  1.20 <span class="math-text"> (Balanced / Bullish Gamma)</span> \\ +5 & <span class="math-text">if </span> <span class="math-text">PCR</span> < 0.70 <span class="math-text"> (Complacent Call Skew)</span> \end{cases}</div>
+<ol class="doc-list">
+<li><strong>Layer 3: Quant & Technical Momentum (30%)</strong></li>
+</ol>
+<div class="math-display">L<sub>3</sub> = min &le; ft(98,   max &le; ft(30,   0.7  &middot;  S<sub><span class="math-text">technical</span></sub> + 0.3  &middot;  S<sub><span class="math-text">xgboost</span></sub>))</div>
+<ol class="doc-list">
+<li><strong>Layer 4: Fundamental & Earnings Sentiment (20%)</strong></li>
+</ol>
+<div class="math-display">L<sub>4</sub> = min &le; ft(99,   max &le; ft(35,   0.6  &middot;  S<sub><span class="math-text">llm</span></sub> + 0.4  &middot;  S<sub><span class="math-text">factor</span></sub>))</div>
+<h4 class="doc-h4">Agent Conviction Score:</h4>
+<div class="math-display">S<sub><span class="math-text">conviction</span></sub> = 0.25  &middot;  L<sub>1</sub> + 0.25  &middot;  L<sub>2</sub> + 0.30  &middot;  L<sub>3</sub> + 0.20  &middot;  L<sub>4</sub></div>
+<h4 class="doc-h4">Agent Action Signal:</h4>
+<div class="math-display"><span class="math-text">Signal</span> = \begin{cases} <span class="math-text">Strong Buy</span> & <span class="math-text">if </span> S<sub><span class="math-text">conviction</span></sub>  &ge;  78.0 \\ <span class="math-text">Buy</span> & <span class="math-text">if </span> 65.0  &le;  S<sub><span class="math-text">conviction</span></sub> < 78.0 \\ <span class="math-text">Hold / Monitor</span> & <span class="math-text">if </span> 45.0  &le;  S<sub><span class="math-text">conviction</span></sub> < 65.0 \\ <span class="math-text">De-Risk</span> & <span class="math-text">if </span> S<sub><span class="math-text">conviction</span></sub> < 45.0 \end{cases}</div>
+<hr class="section-divider" />
+<h3 class="doc-h3">3.5 Target Price & Allocation Sizing</h3>
+<h4 class="doc-h4">1. Dynamic Upside Calculation</h4>
+<div class="math-display">Upside\% = max &le; ft(8.5,   (S<sub><span class="math-text">final</span></sub> - 68)  &times;  1.15)</div>
+<div class="math-display">P<sub><span class="math-text">target</span></sub> = P<sub><span class="math-text">current</span></sub>  &times;   &le; ft(1 + (Upside\% / 100))</div>
+<h4 class="doc-h4">2. Risk Profile & Capital Allocation Sizing</h4>
+<div class="math-display"><span class="math-text">Recommended Allocation</span> = \begin{cases} 10-15\% & <span class="math-text">if </span> S<sub><span class="math-text">final</span></sub> > 85 <span class="math-text"> (Low-Medium Risk)</span> \\ 5-10\% & <span class="math-text">if </span> 75 < S<sub><span class="math-text">final</span></sub>  &le;  85 <span class="math-text"> (Medium Risk)</span> \\ 2-5\% & <span class="math-text">if </span> S<sub><span class="math-text">final</span></sub>  &le;  75 <span class="math-text"> (High Risk / Tactical Only)</span> \end{cases}</div>
+<hr class="section-divider" />
+<h2 class="doc-h2">4. Universe Catalog & Caching Pipeline</h2>
+<h3 class="doc-h3">4.1 Stock Universe Scope</h3>
+<p class="doc-p">The platform monitors a universe of <strong>105+ high-conviction equities</strong>:</p>
+<ul class="doc-list">
+<li><strong>US Equities (55+ Tickers):</strong> AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA, AVGO, LLY, ORCL, COST, AMD, PLTR, JPM, GS, V, MA, BAC, MS, BLK, XOM, CVX, WMT, HD, PG, MRK, TMO, ISRG, CRM, NOW, PANW, CRWD, ADBE, CSCO, IBM, QCOM, TXN, AMAT, LRCX, GE, CAT, RTX, LMT, TSM, etc., plus live screener gainers.</li>
+<li><strong>Indian Equities (52 NSE Tickers):</strong> RELIANCE, TCS, HDFCBANK, INFY, ICICIBANK, BHARTIARTL, SBIN, LT, ITC, HINDUNILVR, BAJFINANCE, TATAMOTORS, MARUTI, SUNPHARMA, AXISBANK, KOTAKBANK, TITAN, ADANIENT, ADANIPORTS, POWERGRID, NTPC, ULTRACEMCO, TATASTEEL, WIPRO, HAL, BEL, TRENT, M&M, etc.</li>
+</ul>
+<h3 class="doc-h3">4.2 Low-Latency Asynchronous In-Memory Cache Warmer</h3>
+<p class="doc-p">To guarantee zero UI freezing, the server runs an in-memory background worker:</p>
+
+    <div class="warmer-flow-box">
+      <div class="warmer-step"><span>1</span> Server Boot (1.2s post-init)</div>
+      <div class="warmer-arrow">➔</div>
+      <div class="warmer-step"><span>2</span> Fetch Live Movers Screeners</div>
+      <div class="warmer-arrow">➔</div>
+      <div class="warmer-step"><span>3</span> Batch Quote 105+ Tickers (16-chunk parallel)</div>
+      <div class="warmer-arrow">➔</div>
+      <div class="warmer-step"><span>4</span> Populate liveQuoteCache (45s TTL)</div>
+      <div class="warmer-arrow">➔</div>
+      <div class="warmer-step"><span>5</span> Sleep 28s & Repeat</div>
+    </div><ul class="doc-list">
+<li><strong>Concurrency Limiting:</strong> Requests are fired in non-blocking batches of 16 to avoid IP throttling from upstream data providers.</li>
+<li><strong>Resilient Fallback:</strong> If upstream Yahoo Finance responds with HTTP 429 or network timeout (<span class="math-inline">> 3500<span class="math-text">ms</span></span>), the server gracefully falls back to <code class="inline-code">mockPrices</code> institutional baselines.</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">5. Backend REST API Specifications</h2>
+<h3 class="doc-h3">5.1 Endpoint Directory</h3>
+<div class="table-container"><table class="doc-table"><thead><tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Query / Body Parameters</th></tr></thead><tbody>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/algo-top-picks</code></td><td>Generates Top 3 Algo Recommendations & Universe Stats</td><td><code class="inline-code">market</code>: <code class="inline-code">'US'</code> \</td><td><code class="inline-code">'INDIA'</code></td></tr>
+<tr><td><code class="inline-code">POST</code></td><td><code class="inline-code">/api/algo-trading</code></td><td>Detailed multi-factor analysis & XGBoost tree output for single ticker</td><td><code class="inline-code">{ "query": "NVDA" }</code></td></tr>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/quote</code></td><td>Real-time quote for single symbol</td><td><code class="inline-code">symbol</code>: ticker</td></tr>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/quotes</code></td><td>Batch quote fetching for portfolio holdings</td><td><code class="inline-code">symbols</code>: comma-separated</td></tr>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/news</code></td><td>Real-time financial headlines</td><td>None</td></tr>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/portfolio-news</code></td><td>Portfolio-specific news filtered by user holdings</td><td><code class="inline-code">symbols</code>: comma-separated</td></tr>
+<tr><td><code class="inline-code">POST</code></td><td><code class="inline-code">/api/portfolio-history</code></td><td>Historical P&L valuation curves (1D, 1W, 1M, 1Y, ALL)</td><td><code class="inline-code">{ holdings, balance, period }</code></td></tr>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/upcoming-earnings</code></td><td>Upcoming earnings dates & EPS consensus estimates</td><td><code class="inline-code">symbols</code>: comma-separated</td></tr>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/macro-intelligence/stream</code></td><td>Live macroeconomic regime & supply chain intelligence</td><td><code class="inline-code">force</code>: boolean</td></tr>
+<tr><td><code class="inline-code">POST</code></td><td><code class="inline-code">/api/macro-intelligence/recommend-allocation</code></td><td>AI Risk-Parity allocation across asset classes</td><td><code class="inline-code">{ riskTolerance, currentHoldings }</code></td></tr>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/commodities</code></td><td>Real-time commodity benchmark quotes (Gold, Crude, etc.)</td><td><code class="inline-code">market</code>: <code class="inline-code">'US'</code> \</td><td><code class="inline-code">'INDIA'</code></td></tr>
+<tr><td><code class="inline-code">GET</code></td><td><code class="inline-code">/api/fundamentals</code></td><td>Detailed balance sheet, income statement, valuation ratios</td><td><code class="inline-code">symbol</code>: ticker</td></tr>
+<tr><td><code class="inline-code">POST</code></td><td><code class="inline-code">/api/chat</code></td><td>AI Copilot conversational engine with portfolio context</td><td><code class="inline-code">{ messages, portfolioContext }</code></td></tr>
+</tbody></table></div>
+<h3 class="doc-h3">5.2 JSON Payload Schema: <code class="inline-code">/api/algo-top-picks</code></h3>
+<div class="code-container"><div class="code-header"><span class="code-lang">JSON</span></div><pre><code>{
+  "market": "US",
+  "generatedAt": "2026-10-24T14:05:59.120Z",
+  "universeStats": {
+    "usScannedCount": 56,
+    "usLiveMoversCount": 6,
+    "indiaScannedCount": 52,
+    "indiaLiveMoversCount": 0
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "rankBadge": "#1 Top Pick",
+      "ticker": "GOOGL",
+      "companyName": "Alphabet Inc.",
+      "sector": "AI, Cloud &amp; Advertising Moat",
+      "market": "US",
+      "currency": "$",
+      "currentPrice": 333.06,
+      "change": -7.22,
+      "changePct": -2.12,
+      "targetPrice": 412.35,
+      "upsidePct": 23.8,
+      "finalScore": 88.7,
+      "isLiveMover": false,
+      "probability": "84.2",
+      "allocation": "10-15%",
+      "riskProfile": "Low-Medium",
+      "explanation": "Alphabet's Gemini multi-modal AI infrastructure, search monetization resilience, and Google Cloud operating margin expansion create a high-conviction multi-factor moat. XGBoost trees flag strong earnings revision momentum.",
+      "layers": {
+        "macro": {
+          "score": 82.4,
+          "weight": 25,
+          "label": "Macro &amp; Regime",
+          "status": "Tailwind",
+          "indicator": "CPI / Interest Rate / Central Bank"
+        },
+        "derivatives": {
+          "score": 86.5,
+          "weight": 25,
+          "label": "Derivatives &amp; OI Structure",
+          "status": "Bullish Gamma",
+          "pcr": 0.88,
+          "indicator": "PCR: 0.88 • Max Pain Dynamic"
+        },
+        "technical": {
+          "score": 79.1,
+          "weight": 30,
+          "label": "Quant &amp; Momentum",
+          "status": "Above VWAP",
+          "rsi": 58,
+          "indicator": "RSI: 58 • VWAP Crossover"
+        },
+        "fundamental": {
+          "score": 91.2,
+          "weight": 20,
+          "label": "Fundamental &amp; Earnings",
+          "status": "Earnings Catalyst",
+          "indicator": "Transcript Sentiment + FCF"
+        },
+        "agentConvictionScore": 84.1,
+        "agentSignal": "Strong Buy"
+      },
+      "scores": {
+        "factor": 87.2,
+        "xgboost": 93.5,
+        "sentiment": 84.0,
+        "technical": 81.3,
+        "llm": 94.0
+      }
+    }
+  ]
+}</code></pre></div>
+<hr class="section-divider" />
+<h2 class="doc-h2">6. Frontend Architecture & State Management</h2>
+<h3 class="doc-h3">6.1 State Management Hierarchy</h3>
+
+  <div class="code-diagram-box">
+    <div class="code-diagram-header">Architecture Diagram Specification</div>
+    <pre><code>graph TD
+    App["App.jsx (Router &amp; Shell)"]
+    MarketProvider["MarketContext.Provider"]
+    PortfolioProvider["PortfolioContext.Provider"]
+
+    App --&gt; MarketProvider
+    MarketProvider --&gt; PortfolioProvider
+
+    PortfolioProvider --&gt; Dash["Dashboard.jsx"]
+    PortfolioProvider --&gt; AlgoPicks["TopAlgoPicks.jsx"]
+    PortfolioProvider --&gt; AlgoTrade["AlgoTrading.jsx"]
+    PortfolioProvider --&gt; Macro["MacroAgent.jsx"]
+    PortfolioProvider --&gt; Earn["EarningsAgent.jsx"]
+    PortfolioProvider --&gt; Copilot["Copilot.jsx"]
+    PortfolioProvider --&gt; Mkts["Markets.jsx"]</code></pre>
+  </div><ol class="doc-list">
+<li><strong>MarketContext:</strong></li>
+</ol>
+<ul class="doc-list">
+<li>Manages global active currency (<code class="inline-code">USD $</code> vs <code class="inline-code">INR ₹</code>).</li>
+<li>Stores current exchange rates and active market tab.</li>
+<li>Triggers cross-component re-fetches when toggled between US and INDIA.</li>
+</ul>
+<ol class="doc-list">
+<li><strong>PortfolioContext:</strong></li>
+</ol>
+<ul class="doc-list">
+<li>Manages client cash balances ($100,000 baseline).</li>
+<li>Manages <strong>Dual Buckets</strong>:</li>
+<li><code class="inline-code">coreHoldings</code>: 100% human-controlled anchor positions.</li>
+<li><code class="inline-code">tacticalHoldings</code>: Autonomous Vault rebalanced by the quantitative agent.</li>
+<li>Synchronizes trades to browser <code class="inline-code">localStorage</code> for offline persistence.</li>
+<li>Dispatches instant buy modal transactions triggered directly from <code class="inline-code">TopAlgoPicks</code>.</li>
+</ul>
+<hr class="section-divider" />
+<h2 class="doc-h2">7. Latency, Resilience & Security Architecture</h2>
+<h3 class="doc-h3">7.1 Latency SLAs</h3>
+<ul class="doc-list">
+<li><strong>Top Algo Picks API:</strong> <span class="math-inline">< 45<span class="math-text">ms</span></span> (warm cache), <span class="math-inline">< 1.8<span class="math-text">s</span></span> (cold cache screener scan).</li>
+<li><strong>Single Quote Endpoint:</strong> <span class="math-inline">< 20<span class="math-text">ms</span></span> (RAM hit).</li>
+<li><strong>Macro Intelligence SSE Stream:</strong> <span class="math-inline">< 350<span class="math-text">ms</span></span> first chunk.</li>
+</ul>
+<h3 class="doc-h3">7.2 Resilience & Graceful Degradation</h3>
+<ul class="doc-list">
+<li><strong>Network Timeout Handling:</strong> Upstream quotes capped at 3.5s timeout. If Yahoo Finance throttles, pre-calibrated institutional baselines immediately take over without throwing a 500 error.</li>
+<li><strong>Cache Stale-While-Revalidate:</strong> Clients continue to receive previous valid evaluations while background threads warm updated quotes.</li>
+<li><strong>Service Worker Neutralization:</strong> An inline unregistration script in <code class="inline-code">index.html</code> prevents stale caching bugs in modern browsers.</li>
+</ul>
+<h3 class="doc-h3">7.3 Security Measures</h3>
+<ul class="doc-list">
+<li><strong>Environment Isolation:</strong> API keys for LLM providers (Gemini, Claude, OpenAI) remain strictly server-side in <code class="inline-code">.env</code> and are never exposed to browser bundles.</li>
+<li><strong>Input Sanitization:</strong> Ticker queries are sanitized against regex <code class="inline-code">^[A-Z0-9.=-]{1,10}$</code> to avoid injection attacks.</li>
+</ul>
+
+</body>
+</html>

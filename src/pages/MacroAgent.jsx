@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useMarket } from '../context/MarketContext';
@@ -37,6 +38,12 @@ export default function MacroAgent() {
     vaultHoldings,
     coreValue,
     vaultValue,
+    coreInvested = 0,
+    vaultInvested = 0,
+    corePnl = 0,
+    vaultPnl = 0,
+    corePnlPct = 0,
+    vaultPnlPct = 0,
     totalPortfolioValue,
     vaultAutoPilot,
     setVaultAutoPilot,
@@ -44,12 +51,81 @@ export default function MacroAgent() {
     setVaultDivertPct,
     agentModeEnabled,
     setAgentModeEnabled,
+    topPickAgent,
+    topPickCycleHistory = [],
+    topPickComplianceMode = 'compliant_1click_gtt',
+    setTopPickComplianceMode,
+    approveStagedTopPickOrder,
+    updateTopPickAgentConfig,
+    simulateTopPickProfitCycle,
+    forceRotateTopPickNow,
     buyAsset, 
     rebalancePortfolio, 
     rebalanceHistory 
   } = usePortfolio();
 
   const { market, currency } = useMarket();
+  const navigate = useNavigate();
+
+  // State for #1 Top Conviction Custom Input Controls (US & INDIA separately)
+  const [customFundInputs, setCustomFundInputs] = useState({
+    US: String(topPickAgent?.US?.fundPct ?? 10),
+    INDIA: String(topPickAgent?.INDIA?.fundPct ?? 10)
+  });
+  const [customProfitInputs, setCustomProfitInputs] = useState({
+    US: String(topPickAgent?.US?.profitTargetPct ?? 2),
+    INDIA: String(topPickAgent?.INDIA?.profitTargetPct ?? 2)
+  });
+  const [simulatingTopPickMkt, setSimulatingTopPickMkt] = useState(null);
+  const [rotatingTopPickMkt, setRotatingTopPickMkt] = useState(null);
+  const [podExecutionReceipt, setPodExecutionReceipt] = useState({ US: null, INDIA: null });
+
+  useEffect(() => {
+    if (topPickAgent?.US) {
+      setCustomFundInputs(prev => ({ ...prev, US: String(topPickAgent.US.fundPct ?? 10) }));
+      setCustomProfitInputs(prev => ({ ...prev, US: String(topPickAgent.US.profitTargetPct ?? 2) }));
+    }
+    if (topPickAgent?.INDIA) {
+      setCustomFundInputs(prev => ({ ...prev, INDIA: String(topPickAgent.INDIA.fundPct ?? 10) }));
+      setCustomProfitInputs(prev => ({ ...prev, INDIA: String(topPickAgent.INDIA.profitTargetPct ?? 2) }));
+    }
+  }, [
+    topPickAgent?.US?.fundPct,
+    topPickAgent?.US?.profitTargetPct,
+    topPickAgent?.INDIA?.fundPct,
+    topPickAgent?.INDIA?.profitTargetPct
+  ]);
+
+  const handleSimulateTopPickCycle = async (mkt) => {
+    setSimulatingTopPickMkt(mkt);
+    try {
+      const rec = await simulateTopPickProfitCycle(mkt);
+      if (rec) {
+        setPodExecutionReceipt(prev => ({ ...prev, [mkt]: rec }));
+      }
+    } finally {
+      setTimeout(() => setSimulatingTopPickMkt(null), 350);
+    }
+  };
+
+  const handleRotateTopPick = async (mkt) => {
+    setRotatingTopPickMkt(mkt);
+    try {
+      const rec = await forceRotateTopPickNow(mkt);
+      if (rec) {
+        setPodExecutionReceipt(prev => ({ ...prev, [mkt]: rec }));
+      }
+    } finally {
+      setTimeout(() => setRotatingTopPickMkt(null), 350);
+    }
+  };
+
+  const handleApproveStagedTopPick = (mkt) => {
+    const rec = approveStagedTopPickOrder(mkt);
+    if (rec) {
+      setPodExecutionReceipt(prev => ({ ...prev, [mkt]: rec }));
+    }
+  };
 
   // State for World Intelligence Stream
   const [intelStream, setIntelStream] = useState([]);
@@ -58,6 +134,7 @@ export default function MacroAgent() {
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [loadingStream, setLoadingStream] = useState(true);
+  const [wireRefreshedMsg, setWireRefreshedMsg] = useState('');
 
   // State for Commodities Desk
   const [commodities, setCommodities] = useState([]);
@@ -77,8 +154,7 @@ export default function MacroAgent() {
   const [divertPct, setDivertPct] = useState(vaultDivertPct || 20);
   const [rebalanceScope, setRebalanceScope] = useState('vault'); // 'vault' (protects long term) or 'full' (all assets)
 
-  // Auto-Shuffle Execution & Modal State
-  const [showShuffleConfirmModal, setShowShuffleConfirmModal] = useState(false);
+  // Auto-Shuffle Execution State
   const [isShuffling, setIsShuffling] = useState(false);
   const [shuffleStep, setShuffleStep] = useState('');
   const [shuffleSuccessReceipt, setShuffleSuccessReceipt] = useState(null);
@@ -111,13 +187,17 @@ export default function MacroAgent() {
     loadRecommendation(selectedScenario);
   }, [selectedScenario, market]);
 
-  const loadStreamData = async () => {
+  const loadStreamData = async (force = false) => {
     setLoadingStream(true);
-    const data = await getMacroIntelligenceStream();
+    const data = await getMacroIntelligenceStream(force);
     if (data) {
       setIntelStream(data.stream || []);
       setMacroIndices(data.macroIndices || null);
       setTelemetryLogs(data.telemetryLogs || []);
+      if (force) {
+        setWireRefreshedMsg('Intelligence wire updated & synced');
+        setTimeout(() => setWireRefreshedMsg(''), 4000);
+      }
     }
     setLoadingStream(false);
   };
@@ -264,10 +344,12 @@ export default function MacroAgent() {
           });
 
           setIsShuffling(false);
-          setShowShuffleConfirmModal(false);
 
           if (result && result.success) {
             setShuffleSuccessReceipt(result.auditRecord);
+            setTimeout(() => {
+              document.getElementById('auto-shuffle-execution-card')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
           }
         }, 700);
       }, 700);
@@ -311,17 +393,30 @@ export default function MacroAgent() {
         </div>
 
         {/* Action badges */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => loadStreamData(true)} 
+              disabled={loadingStream}
+              className={`btn btn-outline flex items-center gap-1.5 text-xs py-2 px-3 transition-all ${
+                loadingStream ? 'opacity-70 cursor-not-allowed' : 'hover:border-blue-400'
+              }`}
+              title="Force-fetch live strategic headlines from Finnhub & AI Radar"
+            >
+              <RefreshCw size={14} className={loadingStream ? "animate-spin text-blue-400" : ""} /> 
+              {loadingStream ? 'Refreshing Wire...' : 'Refresh Wire'}
+            </button>
+            {wireRefreshedMsg && (
+              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-emerald-950/50 border border-emerald-500/30 px-2 py-1 rounded-md animate-fade-in shadow-sm">
+                <CheckCircle2 size={13} /> {wireRefreshedMsg}
+              </span>
+            )}
+          </div>
           <button 
-            onClick={() => loadStreamData()} 
-            className="btn btn-outline flex items-center gap-1.5 text-xs py-2 px-3"
-          >
-            <RefreshCw size={14} /> Refresh Wire
-          </button>
-          <button 
-            onClick={() => setShowShuffleConfirmModal(true)} 
-            className="btn btn-primary flex items-center gap-1.5 text-sm py-2 px-4 shadow-lg shadow-blue-500/20"
+            onClick={() => document.getElementById('auto-shuffle-execution-card')?.scrollIntoView({ behavior: 'smooth' })} 
+            className="btn btn-primary flex items-center gap-1.5 text-xs sm:text-sm py-2 px-4 shadow-lg shadow-blue-500/20"
             style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
+            title="Jump to Autonomous Portfolio Shuffle execution station"
           >
             <Zap size={16} /> Auto-Shuffle ({rebalanceScope === 'vault' ? `${divertPct}% Vault` : '100%'})
           </button>
@@ -332,50 +427,112 @@ export default function MacroAgent() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         
         {/* Core Long-Term Portfolio (Protected) */}
-        <div className="glass-panel p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <ShieldCheck size={22} />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-white">Long-Term Core Portfolio</span>
-                <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">
-                  Protected 🛡️
-                </span>
+        <div className="glass-panel p-5 rounded-2xl border border-emerald-500/30 bg-emerald-950/10 flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <ShieldCheck size={22} />
               </div>
-              <p className="text-[11px] text-muted">Never touched by automated rebalances</p>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-white">Long-Term Core Portfolio</span>
+                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">
+                    Protected 🛡️
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted">{coreHoldings.length} assets held</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold text-white font-mono">
+                {currency}{coreValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <span className={`text-xs font-bold font-mono ${corePnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {corePnl >= 0 ? '+' : ''}{currency}{corePnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({corePnlPct >= 0 ? '+' : ''}{corePnlPct.toFixed(2)}%)
+              </span>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-lg font-bold text-white font-mono">
-              {currency}{coreValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+          {/* Linear Progress Bar for Core */}
+          <div className="space-y-1">
+            <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden flex border border-white/5">
+              <div 
+                className="h-full bg-slate-600 transition-all duration-500" 
+                style={{ width: `${Math.min(100, (coreInvested / Math.max(1, coreValue, coreInvested)) * 100)}%` }}
+              ></div>
+              {corePnl >= 0 ? (
+                <div 
+                  className="h-full bg-emerald-400 transition-all duration-500 shadow-sm shadow-emerald-400/50" 
+                  style={{ width: `${Math.min(40, (corePnl / Math.max(1, coreInvested)) * 100)}%` }}
+                ></div>
+              ) : (
+                <div 
+                  className="h-full bg-rose-500 transition-all duration-500 shadow-sm shadow-rose-500/50" 
+                  style={{ width: `${Math.min(40, (Math.abs(corePnl) / Math.max(1, coreInvested)) * 100)}%` }}
+                ></div>
+              )}
             </div>
-            <span className="text-xs text-emerald-400">{coreHoldings.length} assets held</span>
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-400">
+              <span>Original: <strong className="text-slate-200">{currency}{coreInvested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+              <span className={corePnl >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                {corePnl >= 0 ? 'Profit (Green)' : 'Loss (Red)'}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Global Agent Tactical Vault */}
-        <div className="glass-panel p-4 rounded-xl border border-blue-500/30 bg-blue-950/15 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-              <Zap size={22} />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-white">Global Agent Tactical Vault</span>
-                <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300">
-                  {vaultAutoPilot ? 'Auto-Pilot Active' : 'Manual'}
-                </span>
+        <div className="glass-panel p-5 rounded-2xl border border-blue-500/30 bg-blue-950/15 flex flex-col justify-between space-y-3 shadow-inner">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                <Zap size={22} />
               </div>
-              <p className="text-[11px] text-muted">Allocated {divertPct}% for tactical rotation</p>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-white">Global Agent Tactical Vault</span>
+                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300">
+                    {vaultAutoPilot ? 'Auto-Pilot' : 'Manual'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted">Allocated {divertPct}% for tactical rotation</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold text-blue-300 font-mono">
+                {currency}{vaultValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <span className={`text-xs font-bold font-mono ${vaultPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {vaultPnl >= 0 ? '+' : ''}{currency}{vaultPnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({vaultPnlPct >= 0 ? '+' : ''}{vaultPnlPct.toFixed(2)}%)
+              </span>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-lg font-bold text-blue-300 font-mono">
-              {currency}{vaultValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+          {/* Linear Progress Bar for Vault */}
+          <div className="space-y-1">
+            <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden flex border border-white/5">
+              <div 
+                className="h-full bg-slate-600 transition-all duration-500" 
+                style={{ width: `${Math.min(100, (vaultInvested / Math.max(1, vaultValue, vaultInvested)) * 100)}%` }}
+              ></div>
+              {vaultPnl >= 0 ? (
+                <div 
+                  className="h-full bg-emerald-400 transition-all duration-500 shadow-sm shadow-emerald-400/50" 
+                  style={{ width: `${Math.min(40, (vaultPnl / Math.max(1, vaultInvested)) * 100)}%` }}
+                ></div>
+              ) : (
+                <div 
+                  className="h-full bg-rose-500 transition-all duration-500 shadow-sm shadow-rose-500/50" 
+                  style={{ width: `${Math.min(40, (Math.abs(vaultPnl) / Math.max(1, vaultInvested)) * 100)}%` }}
+                ></div>
+              )}
             </div>
-            <span className="text-xs text-blue-400">{vaultHoldings.length} tactical assets</span>
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-400">
+              <span>Original: <strong className="text-slate-200">{currency}{vaultInvested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+              <span className={vaultPnl >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                {vaultPnl >= 0 ? 'Profit (Green)' : 'Loss (Red)'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -404,9 +561,9 @@ export default function MacroAgent() {
         </div>
       </div>
 
-      {/* 4-LAYER AUTONOMOUS AGENT MODE COCKPIT */}
+      {/* AUTONOMOUS AGENT MODE COCKPIT */}
       <div className="glass-panel p-5 rounded-2xl border border-blue-500/40 bg-gradient-to-r from-blue-950/70 via-slate-900 to-purple-950/40 shadow-2xl mb-6">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-white/10">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-lg ${
               agentModeEnabled 
@@ -427,7 +584,7 @@ export default function MacroAgent() {
                 </span>
               </div>
               <p className="text-xs text-slate-300">
-                Agent continuously combines 4 institutional layers: Macro Regime (25%) + Derivatives OI (25%) + Technical Quant (30%) + Earnings Sentiment (20%).
+                Agent continuously monitors global macroeconomic trends, institutional capital flows, and corporate momentum to manage your Tactical Vault.
               </p>
             </div>
           </div>
@@ -446,45 +603,607 @@ export default function MacroAgent() {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* 4 Multi-Factor Layers Matrix */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-          <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10">
-            <div className="flex justify-between items-center text-muted text-[10px] uppercase font-bold mb-1">
-              <span>Layer 1: Macro & Regime</span>
-              <span className="text-blue-400 font-mono">25% Wgt</span>
+      {/* 🎯 #1 TOP CONVICTION AUTO-COMPOUNDER (SEBI / SEC COMPLIANT 1-CLICK GTT DEFAULT + SANDBOX MODE) */}
+      <div className="glass-panel p-5 rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/35 via-slate-900/95 to-blue-950/35 shadow-2xl mb-6">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-white/10">
+          <div className="flex items-start gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-lg shadow-emerald-500/10">
+              <ShieldCheck size={24} />
             </div>
-            <div className="text-sm font-bold text-white mb-0.5">Geopolitical & Fed / RBI</div>
-            <p className="text-[11px] text-slate-300">Monitors CPI, Middle East conflict, rates & sovereign reserves.</p>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h3 className="text-lg font-extrabold text-white tracking-tight">
+                  #1 Top Conviction Auto-Compounder (US &amp; India)
+                </h3>
+                <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+                  topPickComplianceMode === 'compliant_1click_gtt'
+                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40'
+                    : 'bg-amber-500/25 text-amber-300 border-amber-500/40'
+                }`}>
+                  {topPickComplianceMode === 'compliant_1click_gtt'
+                    ? '🛡️ SEBI & SEC Compliant: 1-Click GTT Stage + 100% Auto-Sale'
+                    : '🧪 Sandbox Mode: 100% Zero-Touch Auto Loop'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Assign an exclusive capital allocation (e.g., <strong className="text-emerald-300">10%</strong>) and target profit goal (<strong className="text-emerald-300">1%, 2%, or custom %</strong>) separately for <strong className="text-white">🇺🇸 US ($)</strong> and <strong className="text-white">🇮🇳 India (₹)</strong>. In <strong className="text-emerald-300">Compliant 1-Click GTT Mode</strong> (default), the Agent attaches a native <strong className="text-amber-300">Broker GTT / OCO Take-Profit Order</strong> so the <strong className="text-emerald-300">sale happens 100% automatically when your profit limit hits</strong>, then stages the newest <strong className="text-amber-300">#1 Top Conviction</strong> stock with your compounded fund for 1-click re-entry.
+              </p>
+            </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10">
-            <div className="flex justify-between items-center text-muted text-[10px] uppercase font-bold mb-1">
-              <span>Layer 2: Derivatives & OI</span>
-              <span className="text-purple-400 font-mono">25% Wgt</span>
+          {/* Regulatory Compliance Execution Mode Switcher */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+            <div className="p-1 rounded-xl bg-slate-950/90 border border-white/10 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setTopPickComplianceMode && setTopPickComplianceMode('compliant_1click_gtt')}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  topPickComplianceMode === 'compliant_1click_gtt'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+                title="SEBI (India) & SEC/FINRA (US) Retail Compliant: 1-Click Entry + 100% Automatic GTT Target Sale"
+              >
+                <ShieldCheck size={13} />
+                <span>🛡️ 1-Click GTT (Compliant Default)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTopPickComplianceMode && setTopPickComplianceMode('sandbox_full_auto')}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  topPickComplianceMode === 'sandbox_full_auto'
+                    ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+                title="100% Zero-Click Paper Sandbox / Personal API Mode"
+              >
+                <Zap size={13} />
+                <span>🧪 Zero-Touch Sandbox</span>
+              </button>
             </div>
-            <div className="text-sm font-bold text-white mb-0.5">Options Gamma & PCR</div>
-            <p className="text-[11px] text-slate-300">Tracks dealer gamma hedging, Max Pain strikes & open contract buildup.</p>
-          </div>
 
-          <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10">
-            <div className="flex justify-between items-center text-muted text-[10px] uppercase font-bold mb-1">
-              <span>Layer 3: Quant Momentum</span>
-              <span className="text-amber-400 font-mono">30% Wgt</span>
-            </div>
-            <div className="text-sm font-bold text-white mb-0.5">VWAP, RSI & Breakouts</div>
-            <p className="text-[11px] text-slate-300">Evaluates 50/200 EMA crossovers, Cumulative Volume Delta (CVD) & volatility.</p>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10">
-            <div className="flex justify-between items-center text-muted text-[10px] uppercase font-bold mb-1">
-              <span>Layer 4: Fundamentals</span>
-              <span className="text-emerald-400 font-mono">20% Wgt</span>
-            </div>
-            <div className="text-sm font-bold text-white mb-0.5">Earnings & Transcripts</div>
-            <p className="text-[11px] text-slate-300">LLM NLP analysis of management guidance, Capex and analyst revisions.</p>
+            <span className="text-[11px] font-mono px-3 py-1.5 rounded-xl bg-slate-900/90 border border-white/10 text-slate-300 text-center">
+              Cycles: <strong className="text-emerald-400">{(topPickAgent?.US?.completedCycles || 0) + (topPickAgent?.INDIA?.completedCycles || 0)}</strong>
+            </span>
           </div>
         </div>
+
+        {/* Side-by-Side US ($) and INDIA (₹) Autonomous #1 Conviction Pods */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {['US', 'INDIA'].map((mktKey) => {
+            const pod = topPickAgent?.[mktKey] || {
+              enabled: true,
+              fundPct: 10,
+              profitTargetPct: 2,
+              allocatedCapital: 0,
+              initialBaselineCapital: 0,
+              totalRealizedProfit: 0,
+              completedCycles: 0,
+              activePosition: null,
+              stagedOrder: null,
+              lastCandidatePool: []
+            };
+            const mktSym = mktKey === 'US' ? '$' : '₹';
+            const mktFlag = mktKey === 'US' ? '🇺🇸' : '🇮🇳';
+            const mktLabel = mktKey === 'US' ? 'US Market (NYSE / NASDAQ)' : 'India Market (NSE / BSE)';
+            const isCurrentActiveMkt = market === mktKey;
+            const pos = pod.activePosition;
+            const staged = pod.stagedOrder;
+            const pnlPct = Number(pos?.unrealizedPnlPct || 0);
+            const profitGoal = Number(pod.profitTargetPct || 2);
+            const progressTowardGoal = profitGoal > 0
+              ? Math.max(8, Math.min(100, ((Math.max(0, pnlPct) / profitGoal) * 100)))
+              : 15;
+
+            return (
+              <div
+                key={mktKey}
+                className={`rounded-2xl p-4 border transition-all ${
+                  isCurrentActiveMkt
+                    ? 'bg-slate-900/90 border-emerald-500/50 shadow-xl shadow-emerald-950/30'
+                    : 'bg-slate-950/75 border-white/10'
+                }`}
+              >
+                {/* Pod Header */}
+                <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10 flex-wrap">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">{mktFlag}</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-extrabold text-white">{mktLabel}</span>
+                        {isCurrentActiveMkt && (
+                          <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                            Active View
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-emerald-400 font-mono mt-0.5">
+                        {pod.statusMessage || '100% Autonomous #1 Conviction Loop Armed'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => updateTopPickAgentConfig(mktKey, { enabled: !pod.enabled })}
+                    className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all ${
+                      pod.enabled && agentModeEnabled
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-slate-800 text-slate-400 border border-white/10'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${pod.enabled && agentModeEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`}></span>
+                    <span>{pod.enabled ? '100% Agent Loop: ON' : 'Loop: PAUSED'}</span>
+                  </button>
+                </div>
+
+                {/* Controls Row: 1) Exclusive Fund % and 2) Profit Limit % */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                  {/* Exclusive Fund % Selector */}
+                  <div className="p-3 rounded-xl bg-slate-950/90 border border-white/10">
+                    <div className="flex items-center justify-between text-[11px] mb-2">
+                      <span className="text-slate-300 font-bold">1. Exclusive Agent Fund %</span>
+                      <span className="font-mono font-extrabold text-emerald-400">
+                        {pod.fundPct}% ({mktSym}{Number(pod.allocatedCapital || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {[5, 10, 15, 20].map((pctPreset) => (
+                        <button
+                          key={pctPreset}
+                          type="button"
+                          onClick={() => {
+                            setCustomFundInputs(prev => ({ ...prev, [mktKey]: String(pctPreset) }));
+                            updateTopPickAgentConfig(mktKey, { fundPct: pctPreset });
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                            Number(pod.fundPct) === pctPreset
+                              ? 'bg-emerald-500 text-slate-950 font-black'
+                              : 'bg-slate-800 text-slate-300 hover:text-white border border-white/5'
+                          }`}
+                        >
+                          {pctPreset}%
+                        </button>
+                      ))}
+                      <div className="flex items-center gap-1 ml-auto">
+                        <input
+                          type="number"
+                          min="1"
+                          max="80"
+                          step="0.5"
+                          value={customFundInputs[mktKey] ?? pod.fundPct}
+                          onChange={(e) => setCustomFundInputs(prev => ({ ...prev, [mktKey]: e.target.value }))}
+                          onBlur={() => {
+                            const val = parseFloat(customFundInputs[mktKey]);
+                            if (!isNaN(val) && val >= 1 && val <= 80) {
+                              updateTopPickAgentConfig(mktKey, { fundPct: val });
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const val = parseFloat(customFundInputs[mktKey]);
+                              if (!isNaN(val) && val >= 1 && val <= 80) {
+                                updateTopPickAgentConfig(mktKey, { fundPct: val });
+                              }
+                            }
+                          }}
+                          className="w-14 px-2 py-1 rounded-lg bg-slate-900 border border-white/15 text-white text-[11px] font-mono text-center"
+                          title="Custom Exclusive Fund %"
+                        />
+                        <span className="text-[10px] text-slate-400 font-bold">%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profit Target % Selector */}
+                  <div className="p-3 rounded-xl bg-slate-950/90 border border-white/10">
+                    <div className="flex items-center justify-between text-[11px] mb-2">
+                      <span className="text-slate-300 font-bold">2. Auto-Sale Profit Goal %</span>
+                      <span className="font-mono font-extrabold text-amber-300">
+                        +{pod.profitTargetPct}% Target
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {[1, 2, 3, 5].map((profitPreset) => (
+                        <button
+                          key={profitPreset}
+                          type="button"
+                          onClick={() => {
+                            setCustomProfitInputs(prev => ({ ...prev, [mktKey]: String(profitPreset) }));
+                            updateTopPickAgentConfig(mktKey, { profitTargetPct: profitPreset });
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                            Number(pod.profitTargetPct) === profitPreset
+                              ? 'bg-amber-400 text-slate-950 font-black'
+                              : 'bg-slate-800 text-slate-300 hover:text-white border border-white/5'
+                          }`}
+                        >
+                          +{profitPreset}%
+                        </button>
+                      ))}
+                      <div className="flex items-center gap-1 ml-auto">
+                        <input
+                          type="number"
+                          min="0.1"
+                          max="100"
+                          step="0.25"
+                          value={customProfitInputs[mktKey] ?? pod.profitTargetPct}
+                          onChange={(e) => setCustomProfitInputs(prev => ({ ...prev, [mktKey]: e.target.value }))}
+                          onBlur={() => {
+                            const val = parseFloat(customProfitInputs[mktKey]);
+                            if (!isNaN(val) && val >= 0.1 && val <= 100) {
+                              updateTopPickAgentConfig(mktKey, { profitTargetPct: val });
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const val = parseFloat(customProfitInputs[mktKey]);
+                              if (!isNaN(val) && val >= 0.1 && val <= 100) {
+                                updateTopPickAgentConfig(mktKey, { profitTargetPct: val });
+                              }
+                            }
+                          }}
+                          className="w-14 px-2 py-1 rounded-lg bg-slate-900 border border-white/15 text-white text-[11px] font-mono text-center"
+                          title="Custom Profit Target %"
+                        />
+                        <span className="text-[10px] text-slate-400 font-bold">%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Active #1 Top Conviction Stock Position Card OR Staged GTT Approval Card */}
+                {pos ? (
+                  <div className="p-3.5 rounded-xl bg-gradient-to-r from-slate-950 via-emerald-950/20 to-slate-950 border border-emerald-500/30 mb-3">
+                    <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-black uppercase">
+                          🏆 #1 Top Conviction
+                        </span>
+                        <span
+                          onClick={() => navigate(`/stock/${pos.ticker}`)}
+                          className="text-base font-black text-white hover:text-emerald-400 cursor-pointer underline decoration-dotted"
+                        >
+                          {pos.ticker}
+                        </span>
+                        <span className="text-xs text-slate-300 truncate max-w-[140px]">{pos.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                          🛡️ {pos.gttOrderId || (mktKey === 'INDIA' ? 'GTT-NSE-ARMED' : 'OCO-NYSE-ARMED')}
+                        </span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                          Conviction: {pos.convictionScore}/100
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Position Metrics Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-3">
+                      <div className="p-2 rounded-lg bg-slate-900/90 border border-white/5">
+                        <div className="text-[10px] text-slate-400">Entry Buy Price</div>
+                        <div className="font-mono font-bold text-white">
+                          {mktSym}{Number(pos.entryPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">{pos.shares} sh</div>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-slate-900/90 border border-white/5">
+                        <div className="text-[10px] text-slate-400">Live Market Price</div>
+                        <div className="font-mono font-bold text-blue-300">
+                          {mktSym}{Number(pos.currentPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className={`text-[10px] font-mono font-bold ${pnlPct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%
+                        </div>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                        <div className="text-[10px] text-amber-300 font-bold">GTT Auto-Sale (+{pod.profitTargetPct}%)</div>
+                        <div className="font-mono font-extrabold text-amber-300">
+                          {mktSym}{Number(pos.targetPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-amber-200/80">100% Auto-Trigger</div>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                        <div className="text-[10px] text-emerald-300 font-bold">Compounded Fund</div>
+                        <div className="font-mono font-extrabold text-emerald-300">
+                          {mktSym}{Number(pos.currentValue || pod.allocatedCapital || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-emerald-400 font-mono">
+                          Realized: +{mktSym}{Number(pod.totalRealizedProfit || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Progress bar toward Profit Limit */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-slate-300">
+                          Progress to +{pod.profitTargetPct}% GTT Auto-Sale Trigger
+                        </span>
+                        <span className="text-emerald-400 font-bold">
+                          Completed Cycles: {pod.completedCycles || 0}
+                        </span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-white/10">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-500 to-amber-400 transition-all duration-500"
+                          style={{ width: `${progressTowardGoal}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : staged ? (
+                  <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-950/35 via-slate-900 to-emerald-950/35 border-2 border-amber-400/50 mb-3 shadow-lg">
+                    <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black uppercase">
+                          🛡️ Staged #1 GTT Order • Awaiting 1-Click Approval
+                        </span>
+                        <span
+                          onClick={() => navigate(`/stock/${staged.ticker}`)}
+                          className="text-base font-black text-white hover:text-emerald-400 cursor-pointer underline decoration-dotted"
+                        >
+                          {staged.ticker}
+                        </span>
+                        <span className="text-xs text-slate-300 truncate max-w-[140px]">{staged.name}</span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        {staged.orderType || (mktKey === 'INDIA' ? 'NSE Delivery + GTT OCO' : 'NYSE Market + OCO Bracket')}
+                      </span>
+                    </div>
+
+                    {staged.previousSoldTicker && (
+                      <div className="mb-2.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-[11px] text-emerald-200 font-medium">
+                        🎯 Previous #1 (<strong className="text-white">{staged.previousSoldTicker}</strong>) Auto-Sold via GTT{staged.previousRealizedProfit !== undefined ? ` — Locked +${mktSym}${Number(staged.previousRealizedProfit).toFixed(2)} Profit!` : '!'} Compounded capital staged below:
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-2">
+                      <div className="p-2 rounded-lg bg-slate-950/90 border border-white/10">
+                        <div className="text-[10px] text-slate-400">Staged Buy Price</div>
+                        <div className="font-mono font-bold text-white">
+                          {mktSym}{Number(staged.entryPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">{staged.shares} sh</div>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-amber-500/15 border border-amber-500/30">
+                        <div className="text-[10px] text-amber-300 font-bold">Pre-Attached GTT (+{staged.profitTargetPct}%)</div>
+                        <div className="font-mono font-extrabold text-amber-300">
+                          {mktSym}{Number(staged.targetPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-amber-200/80">Auto-Sell on Hit</div>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30">
+                        <div className="text-[10px] text-emerald-300 font-bold">Compounded Capital</div>
+                        <div className="font-mono font-extrabold text-emerald-300">
+                          {mktSym}{Number(staged.investedCapital || pod.allocatedCapital || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-emerald-400 font-mono">100% Re-Invested</div>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-slate-950/90 border border-white/10">
+                        <div className="text-[10px] text-slate-400">AI Conviction</div>
+                        <div className="font-mono font-extrabold text-blue-300">{staged.convictionScore}/100</div>
+                        <div className="text-[10px] text-slate-400 truncate">{staged.sector}</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-slate-950 border border-white/10 text-center text-xs text-slate-400 mb-3">
+                    Scanning {mktKey} universe for #1 Top Conviction stock...
+                  </div>
+                )}
+
+                {/* Action / Verification Row */}
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  {staged ? (
+                    <button
+                      type="button"
+                      onClick={() => handleApproveStagedTopPick(mktKey)}
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-400 hover:from-amber-300 hover:to-emerald-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer"
+                    >
+                      <ShieldCheck size={15} />
+                      <span>
+                        🛡️ 1-Click Approve Buy #1 ({staged.ticker}) + Arm +{staged.profitTargetPct}% Auto-Sale GTT
+                      </span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={simulatingTopPickMkt === mktKey}
+                      onClick={() => handleSimulateTopPickCycle(mktKey)}
+                      className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+                    >
+                      <Zap size={14} />
+                      <span>
+                        {simulatingTopPickMkt === mktKey
+                          ? `Executing GTT Auto-Sale...`
+                          : topPickComplianceMode === 'compliant_1click_gtt'
+                            ? `⚡ Simulate +${pod.profitTargetPct}% GTT Target Hit → Auto-Sell & Stage Newest #1 (${mktKey})`
+                            : `⚡ Simulate +${pod.profitTargetPct}% Profit Hit → Auto-Sell & Buy Newest #1 (${mktKey})`}
+                      </span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={rotatingTopPickMkt === mktKey}
+                    onClick={() => handleRotateTopPick(mktKey)}
+                    className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    title="Rotate to next highest-conviction #1 candidate"
+                  >
+                    <RefreshCw size={13} className={rotatingTopPickMkt === mktKey ? 'animate-spin text-emerald-400' : ''} />
+                    <span>{rotatingTopPickMkt === mktKey ? 'Rotating...' : staged ? 'Rotate Candidate' : 'Rotate #1'}</span>
+                  </button>
+                </div>
+
+                {/* Live Inline Execution Receipt Banner */}
+                {podExecutionReceipt[mktKey] && (
+                  <div className="mt-3 p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/50 text-xs flex items-start justify-between gap-2 shadow-lg">
+                    <div className="space-y-0.5">
+                      <div className="font-black text-emerald-300 flex items-center gap-1.5">
+                        <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                        <span>
+                          {podExecutionReceipt[mktKey].actionType === 'GTT_1CLICK_APPROVED'
+                            ? `🛡️ 1-Click GTT Order Approved & Armed (${new Date(podExecutionReceipt[mktKey].timestamp).toLocaleTimeString()})`
+                            : podExecutionReceipt[mktKey].actionType === 'GTT_AUTO_SOLD_STAGED_NEXT'
+                              ? `🎯 GTT Profit Target Hit — Auto-Sold & Staged Next #1 (${new Date(podExecutionReceipt[mktKey].timestamp).toLocaleTimeString()})`
+                              : podExecutionReceipt[mktKey].actionType === 'MANUAL_ROTATE_TOP1'
+                                ? `✅ Rotate #1 Executed (${new Date(podExecutionReceipt[mktKey].timestamp).toLocaleTimeString()})`
+                                : `🎯 Profit Target Hit & Auto-Rotated (${new Date(podExecutionReceipt[mktKey].timestamp).toLocaleTimeString()})`}
+                        </span>
+                      </div>
+                      <div className="text-slate-100 leading-relaxed">
+                        {podExecutionReceipt[mktKey].actionType === 'GTT_1CLICK_APPROVED' ? (
+                          <>
+                            Bought #1 <strong className="text-emerald-300">{podExecutionReceipt[mktKey].boughtTicker}</strong> ({podExecutionReceipt[mktKey].boughtShares} sh @ {mktSym}{Number(podExecutionReceipt[mktKey].buyPrice || 0).toFixed(2)}) • Native GTT (<strong className="text-amber-300">{podExecutionReceipt[mktKey].gttOrderId}</strong>) Armed for 100% Auto-Sale at <strong className="text-amber-300">{mktSym}{Number(podExecutionReceipt[mktKey].nextTargetPrice || 0).toFixed(2)} (+{podExecutionReceipt[mktKey].targetProfitPct}%)</strong>
+                          </>
+                        ) : podExecutionReceipt[mktKey].actionType === 'GTT_AUTO_SOLD_STAGED_NEXT' ? (
+                          <>
+                            GTT Auto-Sold <strong className="text-amber-300">{podExecutionReceipt[mktKey].soldTicker}</strong> @ {mktSym}{Number(podExecutionReceipt[mktKey].exitPrice || 0).toFixed(2)}{' '}
+                            <span className="text-emerald-300 font-bold">
+                              (Locked +{mktSym}{Number(podExecutionReceipt[mktKey].realizedProfit || 0).toFixed(2)} / +{Number(podExecutionReceipt[mktKey].achievedProfitPct || 0).toFixed(2)}%)
+                            </span>{' '}
+                            → Staged Newest #1 <strong className="text-emerald-300">{podExecutionReceipt[mktKey].boughtTicker}</strong> ({podExecutionReceipt[mktKey].boughtShares} sh @ {mktSym}{Number(podExecutionReceipt[mktKey].buyPrice || 0).toFixed(2)}) — Click <strong className="text-amber-300">1-Click Approve</strong> above to arm next GTT!
+                          </>
+                        ) : (
+                          <>
+                            Sold <strong className="text-amber-300">{podExecutionReceipt[mktKey].soldTicker}</strong> @ {mktSym}{Number(podExecutionReceipt[mktKey].exitPrice || 0).toFixed(2)}
+                            {podExecutionReceipt[mktKey].actionType === 'PROFIT_HIT_AUTO_ROTATE' && (
+                              <span className="text-emerald-300 font-bold">
+                                {' '}(Locked +{mktSym}{Number(podExecutionReceipt[mktKey].realizedProfit || 0).toFixed(2)} / +{Number(podExecutionReceipt[mktKey].achievedProfitPct || 0).toFixed(2)}%)
+                              </span>
+                            )}
+                            {' '}→ Newest #1 <strong className="text-emerald-300">{podExecutionReceipt[mktKey].boughtTicker}</strong> ({podExecutionReceipt[mktKey].boughtShares} sh @ {mktSym}{Number(podExecutionReceipt[mktKey].buyPrice || 0).toFixed(2)}) • Next Auto-Sale Target: <strong className="text-amber-300">{mktSym}{Number(podExecutionReceipt[mktKey].nextTargetPrice || 0).toFixed(2)}</strong>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPodExecutionReceipt(prev => ({ ...prev, [mktKey]: null }))}
+                      className="text-slate-400 hover:text-white text-[11px] font-bold px-1.5 py-0.5"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Autonomous #1 Top Conviction Compounding Ledger */}
+        {topPickCycleHistory && topPickCycleHistory.length > 0 && (
+          <div className="mt-5 pt-4 border-t border-white/10">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2">
+                <Terminal size={14} className="text-emerald-400" />
+                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-200">
+                  Live #1 Top Conviction GTT &amp; Compounding Ledger (US &amp; India)
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400 font-mono">
+                Showing latest {Math.min(6, topPickCycleHistory.length)} events
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              {topPickCycleHistory.slice(0, 6).map((evt) => {
+                const evtSym = evt.market === 'US' ? '$' : '₹';
+                const isProfitRotate = evt.actionType === 'PROFIT_HIT_AUTO_ROTATE' || evt.actionType === 'GTT_AUTO_SOLD_STAGED_NEXT';
+                const isGttApproved = evt.actionType === 'GTT_1CLICK_APPROVED';
+                const isManualRotate = evt.actionType === 'MANUAL_ROTATE_TOP1';
+                return (
+                  <div
+                    key={evt.id}
+                    className="p-2.5 rounded-xl bg-slate-950/85 border border-white/10 flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase shrink-0 ${
+                        evt.market === 'US'
+                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                      }`}>
+                        {evt.market === 'US' ? '🇺🇸 US' : '🇮🇳 IN'}
+                      </span>
+                      <div className="truncate">
+                        {evt.actionType === 'GTT_AUTO_SOLD_STAGED_NEXT' ? (
+                          <div className="text-slate-200 font-medium truncate">
+                            GTT Auto-Sold <strong className="text-amber-300">{evt.soldTicker}</strong> (+{Number(evt.achievedProfitPct || evt.targetProfitPct).toFixed(2)}%) → Staged #1 <strong className="text-emerald-400">{evt.boughtTicker}</strong>
+                          </div>
+                        ) : isGttApproved ? (
+                          <div className="text-slate-200 font-medium truncate">
+                            🛡️ 1-Click Approved #1 <strong className="text-emerald-400">{evt.boughtTicker}</strong> ({evt.boughtShares} sh) • Armed {evt.gttOrderId || 'GTT'}
+                          </div>
+                        ) : isProfitRotate ? (
+                          <div className="text-slate-200 font-medium truncate">
+                            Sold <strong className="text-amber-300">{evt.soldTicker}</strong> (+{Number(evt.achievedProfitPct || evt.targetProfitPct).toFixed(2)}%) → Bought New #1 <strong className="text-emerald-400">{evt.boughtTicker}</strong> @ {evtSym}{Number(evt.buyPrice).toFixed(2)}
+                          </div>
+                        ) : isManualRotate ? (
+                          <div className="text-slate-200 font-medium truncate">
+                            Rotated <strong className="text-amber-300">{evt.soldTicker}</strong> → Newest #1 <strong className="text-emerald-400">{evt.boughtTicker}</strong> @ {evtSym}{Number(evt.buyPrice).toFixed(2)}
+                          </div>
+                        ) : (
+                          <div className="text-slate-200 font-medium truncate">
+                            Auto-Bought #1 <strong className="text-emerald-400">{evt.boughtTicker}</strong> ({evt.boughtShares} sh @ {evtSym}{Number(evt.buyPrice).toFixed(2)}) • Target +{evt.targetProfitPct}%
+                          </div>
+                        )}
+                        <div className="text-[10px] text-slate-400 font-mono">
+                          {new Date(evt.timestamp).toLocaleTimeString()} • GTT Auto-Sale Target: {evtSym}{Number(evt.nextTargetPrice).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0 font-mono">
+                      {isProfitRotate ? (
+                        <>
+                          <div className="text-emerald-400 font-extrabold text-xs">
+                            +{evtSym}{Number(evt.realizedProfit || 0).toFixed(2)}
+                          </div>
+                          <div className="text-[10px] text-slate-400">
+                            Fund: {evtSym}{Number(evt.deployedCapital || 0).toLocaleString()}
+                          </div>
+                        </>
+                      ) : isGttApproved ? (
+                        <>
+                          <div className="text-emerald-400 font-extrabold text-xs">
+                            GTT Armed
+                          </div>
+                          <div className="text-[10px] text-slate-400">
+                            {evtSym}{Number(evt.deployedCapital || 0).toLocaleString()}
+                          </div>
+                        </>
+                      ) : isManualRotate ? (
+                        <>
+                          <div className="text-amber-300 font-extrabold text-xs">
+                            Rotated #1
+                          </div>
+                          <div className="text-[10px] text-slate-400">
+                            Fund: {evtSym}{Number(evt.deployedCapital || 0).toLocaleString()}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-blue-300 font-bold text-xs">
+                            {evtSym}{Number(evt.deployedCapital || 0).toLocaleString()}
+                          </div>
+                          <div className="text-[10px] text-emerald-400">Armed</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Global Threat & Macro Gauges */}
@@ -570,19 +1289,24 @@ export default function MacroAgent() {
             </div>
             <span className="text-xs text-muted">Filled: {new Date(shuffleSuccessReceipt.timestamp).toLocaleTimeString()}</span>
           </div>
-          <p className="text-sm text-slate-300 mb-3">
-            Strategy: <strong className="text-blue-300">{shuffleSuccessReceipt.scenarioName}</strong>. 
-            {shuffleSuccessReceipt.scope === 'vault' ? (
-              <span>
-                {' '}Diverted <strong>{shuffleSuccessReceipt.divertPct}%</strong> ({currency}{shuffleSuccessReceipt.deployedCapital?.toLocaleString()}) into the Tactical Vault. 
-                <strong className="text-emerald-300 ml-1">Core Long-Term Holdings ({currency}{shuffleSuccessReceipt.coreCapitalProtected?.toLocaleString()}) Remain 100% Intact 🛡️</strong>.
-              </span>
-            ) : (
-              <span>
-                {' '}Full Portfolio Rebalance ({currency}{shuffleSuccessReceipt.deployedCapital?.toLocaleString()}).
-              </span>
-            )}
-          </p>
+          <div className="flex flex-wrap items-center gap-3 text-xs mb-3 font-mono bg-black/30 p-2.5 rounded-lg border border-white/5">
+            <span>
+              Liquid Cash: <strong className="text-white">{currency}{shuffleSuccessReceipt.remainingCash?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+              {shuffleSuccessReceipt.cashChange !== undefined && shuffleSuccessReceipt.cashChange !== 0 ? (
+                <span className="text-amber-400 ml-1">({shuffleSuccessReceipt.cashChange > 0 ? '+' : ''}{currency}{shuffleSuccessReceipt.cashChange?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+              ) : (
+                <span className="text-emerald-400 ml-1">(Rebalanced)</span>
+              )}
+            </span>
+            <span className="text-slate-600">•</span>
+            <span>
+              Tactical Vault: <strong className="text-blue-300">{currency}{shuffleSuccessReceipt.deployedCapital?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+            </span>
+            <span className="text-slate-600">•</span>
+            <span>
+              Core Long-Term: <strong className="text-emerald-400">{currency}{shuffleSuccessReceipt.coreCapitalProtected?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (100% Protected 🛡️)</strong>
+            </span>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
             {shuffleSuccessReceipt.orders?.map((o, idx) => (
               <div key={idx} className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col">
@@ -801,69 +1525,6 @@ export default function MacroAgent() {
               </div>
             );
           })}
-        </div>
-
-        {/* Agent Telemetry Live Console */}
-        <div 
-          className="mt-6 p-4 rounded-2xl bg-black/90 border border-emerald-500/25 font-mono text-xs text-emerald-400 shadow-2xl"
-          style={{
-            marginTop: '2rem',
-            padding: '1.25rem',
-            borderRadius: '1rem',
-            backgroundColor: 'rgba(0, 0, 0, 0.95)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            fontFamily: 'monospace',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-          <div 
-            className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-emerald-500/15"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '0.75rem',
-              marginBottom: '0.75rem',
-              paddingBottom: '0.5rem',
-              borderBottom: '1px solid rgba(16, 185, 129, 0.2)'
-            }}
-          >
-            <div className="flex items-center gap-2 text-emerald-300 font-bold" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6ee7b7', fontWeight: 700, fontSize: '0.85rem' }}>
-              <Terminal size={15} />
-              <span>Agent Telemetry & Web Scraping Terminal</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 animate-pulse font-semibold" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#34d399', fontSize: '0.75rem' }}>
-              <span className="w-2 h-2 rounded-full bg-emerald-400" style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#34d399', display: 'inline-block' }}></span>
-              <span>LIVE COGNITION WIRE</span>
-            </div>
-          </div>
-          <div 
-            className="space-y-1.5 text-slate-300 max-h-24 overflow-y-auto pr-1"
-            style={{
-              maxHeight: '130px',
-              overflowY: 'auto',
-              paddingRight: '0.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.625rem'
-            }}
-          >
-            {telemetryLogs.map((log, i) => (
-              <p 
-                key={i} 
-                className="text-emerald-400/90 leading-relaxed font-mono text-[11px] hover:text-white transition-colors"
-                style={{
-                  color: 'rgba(52, 211, 153, 0.95)',
-                  lineHeight: '1.6',
-                  fontFamily: 'monospace',
-                  fontSize: '0.78rem',
-                  margin: 0
-                }}
-              >
-                {log}
-              </p>
-            ))}
-          </div>
         </div>
 
       </div>
@@ -1165,10 +1826,10 @@ export default function MacroAgent() {
             </div>
 
             {/* Scope Switcher: Vault vs Full */}
-            <div className="flex items-center gap-2 bg-black/50 p-1.5 rounded-xl border border-white/10">
+            <div className="flex flex-wrap items-center gap-2 bg-black/50 p-1.5 rounded-xl border border-white/10 w-full lg:w-auto">
               <button
                 onClick={() => setRebalanceScope('vault')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                className={`flex-1 sm:flex-initial justify-center px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                   rebalanceScope === 'vault'
                     ? 'bg-emerald-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-white'
@@ -1179,7 +1840,7 @@ export default function MacroAgent() {
               </button>
               <button
                 onClick={() => setRebalanceScope('full')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                className={`flex-1 sm:flex-initial justify-center px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                   rebalanceScope === 'full'
                     ? 'bg-purple-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-white'
@@ -1400,141 +2061,243 @@ export default function MacroAgent() {
               })}
             </div>
 
-            {/* Prompt for Instant Shuffling Action */}
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-900/30 via-purple-900/30 to-slate-900/40 border border-blue-500/30 flex flex-col md:flex-row justify-between items-center gap-4">
-              <div>
-                <h3 className="font-bold text-lg text-white flex items-center gap-2">
-                  <Zap size={20} className="text-amber-400" />
-                  Ready to Execute Auto-Shuffle?
-                </h3>
-                <p className="text-xs text-slate-300 mt-1">
-                  {rebalanceScope === 'vault' ? (
-                    <span>
-                      Diverts <strong>{divertPct}% ({currency}{capitalToDeploy.toLocaleString()})</strong> into the Tactical Vault. 
-                      Your remaining <strong>{currency}{protectedCoreCapital.toLocaleString()}</strong> Long-Term holdings remain completely protected and untouched.
-                    </span>
-                  ) : (
-                    <span>
-                      Reallocates your entire <strong>{currency}{totalPortfolioValue.toLocaleString()}</strong> portfolio.
-                    </span>
-                  )}
+            {/* Unified Single-Action Auto-Shuffle Execution Station */}
+            <div id="auto-shuffle-execution-card" className="p-6 rounded-2xl bg-gradient-to-r from-blue-950/40 via-purple-950/30 to-slate-900/60 border border-blue-500/40 shadow-2xl animate-fade-in space-y-4">
+              
+              {/* Header and Quick Divert Controls */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                    <Zap size={22} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                      Confirm Autonomous Portfolio Shuffle
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      {rebalanceScope === 'vault' ? (
+                        <span>
+                          Diverts <strong>{divertPct}% ({currency}{capitalToDeploy.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</strong> into the Tactical Vault. Remaining <strong>{currency}{protectedCoreCapital.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> Core holdings stay 100% protected 🛡️.
+                        </span>
+                      ) : (
+                        <span>
+                          Reallocates your entire <strong>{currency}{totalPortfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> portfolio according to the active strategy.
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {!isShuffling && (
+                  <button
+                    onClick={handleExecuteShuffle}
+                    className="btn btn-primary px-7 py-3 text-sm font-extrabold flex items-center gap-2 shadow-xl shadow-emerald-500/25 hover:scale-105 transition-all shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
+                  >
+                    <Sparkles size={18} />
+                    Auto-Shuffle {rebalanceScope === 'vault' ? `${divertPct}% Vault` : 'Portfolio'} Now
+                  </button>
+                )}
+              </div>
+
+              {/* Direct Divert Percentage Toggles & Live Capital Ledger */}
+              {rebalanceScope === 'vault' && (
+                <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-black/40 border border-white/5 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-300 font-semibold">Quick Vault Target %:</span>
+                    {[10, 20, 30, 40, 50].map(pct => (
+                      <button
+                        key={pct}
+                        onClick={() => setDivertPct(pct)}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                          divertPct === pct 
+                            ? 'bg-blue-600 text-white ring-2 ring-blue-400 shadow-sm' 
+                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                        }`}
+                      >
+                        {pct}% {pct === 20 ? '(Default)' : ''}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    Target Capital: <strong className="text-blue-300">{currency}{capitalToDeploy.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                  </div>
+                </div>
+              )}
+
+              {/* Live Portfolio Ledger Before/After Breakdown */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+                <div className="p-3 rounded-xl bg-slate-900/80 border border-white/5">
+                  <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold block">Liquid Cash (Buying Power)</span>
+                  <div className="text-base font-bold text-emerald-400 mt-1">
+                    {currency}{balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-sans">Available to fund vault</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-blue-950/40 border border-blue-500/20">
+                  <span className="text-[10px] text-blue-300 uppercase font-sans font-semibold block">Tactical Vault Current</span>
+                  <div className="text-base font-bold text-blue-300 mt-1">
+                    {currency}{vaultValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                  <span className="text-[10px] text-blue-400 font-sans">{vaultHoldings.length} tactical assets ({((vaultValue / Math.max(1, totalPortfolioValue)) * 100).toFixed(1)}%)</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/20">
+                  <span className="text-[10px] text-emerald-300 uppercase font-sans font-semibold block">Protected Core Holdings</span>
+                  <div className="text-base font-bold text-emerald-300 mt-1">
+                    {currency}{coreValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                  <span className="text-[10px] text-emerald-400 font-sans">100% Intact 🛡️ ({coreHoldings.length} stocks)</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-900/80 border border-white/5">
+                  <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold block">Total Net Worth</span>
+                  <div className="text-base font-bold text-white mt-1">
+                    {currency}{totalPortfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-sans">Cash + All Holdings</span>
+                </div>
+              </div>
+
+              {/* Informative Note: Total Net Worth vs Liquid Cash */}
+              <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-200 flex items-start gap-2">
+                <span className="text-sm">💡</span>
+                <p className="leading-relaxed">
+                  <strong>How Auto-Shuffle Affects Balances:</strong> Clicking Auto-Shuffle converts liquid cash into tactical assets (or re-balances existing vault assets). Your <strong>Total Net Worth ({currency}{totalPortfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</strong> remains preserved, while your <strong>Liquid Cash</strong> is safely deployed into high-conviction macro targets. If the vault is already funded to {divertPct}%, re-shuffling optimizes asset weights without taking additional cash.
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowShuffleConfirmModal(true)}
-                  className="btn btn-primary px-6 py-3 text-sm font-bold flex items-center gap-2 shadow-xl shadow-blue-500/30 hover:scale-105 transition-all"
-                  style={{ background: 'linear-gradient(135deg, #10b981, #2563eb)' }}
-                >
-                  <Sparkles size={18} />
-                  Auto-Shuffle {rebalanceScope === 'vault' ? `${divertPct}% Vault` : 'Portfolio'} Now
-                </button>
-              </div>
+              {isShuffling ? (
+                <div className="py-8 text-center bg-black/40 rounded-xl border border-white/5 animate-fade-in">
+                  <div className="inline-block animate-spin w-10 h-10 border-3 border-emerald-400 border-t-transparent rounded-full mb-3"></div>
+                  <h4 className="font-bold text-white text-base mb-1">Executing Real-Time Rebalancing...</h4>
+                  <p className="text-xs text-blue-300 font-mono animate-pulse">{shuffleStep}</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  {/* Allocation Target Split Preview */}
+                  <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
+                    <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider block mb-1">
+                      Target Strategy Split ({recommendation?.title}):
+                    </span>
+                    {recommendation?.allocations.map((group, idx) => (
+                      <div key={idx} className="flex justify-between items-center py-0.5 border-b border-white/5 last:border-0 text-slate-200">
+                        <span>• {group.category} ({group.assets.map(a => a.ticker).join(', ')})</span>
+                        <span className="font-bold text-blue-400 font-mono">
+                          {group.categoryPct}% ({currency}{(capitalToDeploy * (group.categoryPct / 100)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Safety & Execution Policy */}
+                  <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 flex flex-col justify-between">
+                    <div className="flex items-start gap-2">
+                      <ShieldCheck size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                      <p className="text-xs text-slate-200 leading-relaxed">
+                        Instant limit orders will be routed for designated assets at current market prices. {rebalanceScope === 'vault' ? 'Your Long-Term Core portfolio remains isolated.' : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-amber-500/20 text-[11px] text-emerald-300 font-semibold font-mono">
+                      <span>✓ 1-Click Execution</span>
+                      <span>•</span>
+                      <span>Zero Interruption to Core Holdings</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Instant Inline Execution Receipt (Displays right inside this card!) */}
+              {shuffleSuccessReceipt && (
+                <div className="mt-4 p-5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-100 animate-fade-in shadow-xl space-y-3">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-emerald-500/20">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 size={22} className="text-emerald-400" />
+                      <h4 className="font-extrabold text-base text-white">Auto-Shuffle Executed & Synchronized!</h4>
+                    </div>
+                    <span className="text-xs text-emerald-400 font-mono">Filled: {new Date(shuffleSuccessReceipt.timestamp).toLocaleTimeString()}</span>
+                  </div>
+
+                  {/* Transition Ledger Comparison */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+                    <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                      <span className="text-[10px] text-slate-400 uppercase block font-sans">Liquid Cash</span>
+                      <div className="text-white font-bold mt-0.5">
+                        {currency}{shuffleSuccessReceipt.remainingCash?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                      {shuffleSuccessReceipt.cashChange !== undefined && shuffleSuccessReceipt.cashChange !== 0 ? (
+                        <span className="text-[10px] text-amber-400">
+                          {shuffleSuccessReceipt.cashChange > 0 ? '+' : ''}{currency}{shuffleSuccessReceipt.cashChange?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-emerald-400 font-sans">Rebalanced within vault</span>
+                      )}
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                      <span className="text-[10px] text-slate-400 uppercase block font-sans">Tactical Vault</span>
+                      <div className="text-blue-300 font-bold mt-0.5">
+                        {currency}{shuffleSuccessReceipt.deployedCapital?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                      <span className="text-[10px] text-blue-400 font-sans">{shuffleSuccessReceipt.divertPct}% Deployed</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                      <span className="text-[10px] text-slate-400 uppercase block font-sans">Core Long-Term</span>
+                      <div className="text-emerald-300 font-bold mt-0.5">
+                        {currency}{shuffleSuccessReceipt.coreCapitalProtected?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                      <span className="text-[10px] text-emerald-400 font-sans">100% Intact 🛡️</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                      <span className="text-[10px] text-slate-400 uppercase block font-sans">Total Net Worth</span>
+                      <div className="text-white font-bold mt-0.5">
+                        {currency}{totalPortfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-sans">Constant (Preserved)</span>
+                    </div>
+                  </div>
+
+                  {/* Filled Orders List */}
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[11px] text-slate-300 font-bold uppercase tracking-wider block">Real-Time Limit Orders Filled:</span>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                      {shuffleSuccessReceipt.orders?.map((o, idx) => (
+                        <div key={idx} className="p-2 rounded-lg bg-black/50 border border-white/5 text-[11px]">
+                          <div className="flex justify-between items-center font-bold text-white">
+                            <span>{o.ticker}</span>
+                            <span className="text-blue-400">{o.pct}%</span>
+                          </div>
+                          <div className="text-emerald-400 font-mono mt-1 text-[10px]">
+                            {o.units} sh @ {currency}{o.fillPrice?.toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-emerald-500/20 text-xs">
+                    <span className="text-slate-300">
+                      Orders filled in simulation sandbox with zero slippage.
+                    </span>
+                    <button 
+                      onClick={() => navigate('/')}
+                      className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 underline cursor-pointer"
+                    >
+                      View in Dashboard →
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
         )}
 
       </div>
-
-      {/* Confirmation Modal */}
-      {showShuffleConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
-          <div className="glass-panel p-6 max-w-xl w-full border border-blue-500/40 rounded-2xl animate-fade-in shadow-2xl">
-            
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <Zap size={22} className="text-amber-400" />
-                <h3 className="text-lg font-bold text-white">Confirm Autonomous Portfolio Shuffle</h3>
-              </div>
-              {!isShuffling && (
-                <button 
-                  onClick={() => setShowShuffleConfirmModal(false)}
-                  className="text-muted hover:text-white text-sm"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {isShuffling ? (
-              <div className="py-10 text-center">
-                <div className="inline-block animate-spin w-10 h-10 border-3 border-emerald-400 border-t-transparent rounded-full mb-4"></div>
-                <h4 className="font-bold text-white text-base mb-1">Executing Real-Time Rebalancing...</h4>
-                <p className="text-xs text-blue-300 font-mono animate-pulse">{shuffleStep}</p>
-              </div>
-            ) : (
-              <div>
-                <p className="text-sm text-slate-200 mb-4 leading-relaxed">
-                  The Autonomous Agent will execute the <strong>{recommendation?.title}</strong> allocation with the following configuration:
-                </p>
-
-                {/* Scope Summary Badge */}
-                <div className="p-3.5 rounded-xl bg-slate-900 border border-white/10 mb-4 space-y-2 text-xs">
-                  <div className="flex justify-between items-center text-slate-300">
-                    <span>Rebalance Scope:</span>
-                    <strong className="text-white font-semibold">
-                      {rebalanceScope === 'vault' ? `Tactical Vault (${divertPct}%)` : 'Full Portfolio (100%)'}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between items-center text-slate-300">
-                    <span>Capital to Allocate:</span>
-                    <strong className="text-blue-400 font-mono text-sm">{currency}{capitalToDeploy.toLocaleString()}</strong>
-                  </div>
-                  {rebalanceScope === 'vault' && (
-                    <div className="flex justify-between items-center text-emerald-400 pt-1 border-t border-white/5">
-                      <span>Long-Term Core Holdings:</span>
-                      <strong className="font-mono text-sm">Protected ({currency}{protectedCoreCapital.toLocaleString()}) 🛡️</strong>
-                    </div>
-                  )}
-                </div>
-
-                {/* Breakdown of Orders */}
-                <div className="p-3.5 rounded-xl bg-black/60 border border-white/5 space-y-2 mb-4 text-xs">
-                  <span className="text-[11px] text-muted uppercase font-bold tracking-wider block mb-1">Target Asset Split:</span>
-                  {recommendation?.allocations.map((group, idx) => (
-                    <div key={idx} className="flex justify-between items-center py-1 border-b border-white/5 last:border-0">
-                      <span className="font-semibold text-slate-300">
-                        • {group.category} ({group.assets.map(a => a.ticker).join(', ')})
-                      </span>
-                      <span className="font-bold text-blue-400">
-                        {group.categoryPct}% ({currency}{(capitalToDeploy * (group.categoryPct / 100)).toLocaleString()})
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs mb-5 flex items-start gap-2">
-                  <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-                  <span>
-                    When you confirm <strong>"YES"</strong>, the agent will instantly purchase the designated units of Gold, Oil, NVDA, MU, and AMZN at live prices.
-                    {rebalanceScope === 'vault' ? ' Your long-term core holdings will remain untouched.' : ''}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-end gap-3">
-                  <button 
-                    onClick={() => setShowShuffleConfirmModal(false)}
-                    className="btn btn-outline py-2.5 px-4 text-xs"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={handleExecuteShuffle}
-                    className="btn btn-primary py-2.5 px-6 text-sm font-bold flex items-center gap-2"
-                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
-                  >
-                    <CheckCircle2 size={16} />
-                    YES, Auto-Shuffle Now
-                  </button>
-                </div>
-              </div>
-            )}
-
-          </div>
-        </div>
-      )}
 
       {/* Audit History of Past Rebalancings */}
       {rebalanceHistory && rebalanceHistory.length > 0 && (

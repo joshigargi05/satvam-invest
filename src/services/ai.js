@@ -1,4 +1,5 @@
 import { getLiveStockQuote, getMarketNews, getFundamentals } from './api';
+import { apiFetch } from './platform';
 
 // Regex to detect potential stock tickers (1-5 uppercase letters)
 const extractTickers = (text) => {
@@ -88,9 +89,8 @@ Remember your identity: You are an intelligence platform, not just an ordinary t
 
     const prompt = `${systemPrompt}\n\nLive Context Data:\n${contextData || 'No live data available.'}\n\nUser Question: ${userMessage}`;
 
-    const response = await fetch('/api/chat', {
+    const response = await apiFetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         provider,
         prompt,

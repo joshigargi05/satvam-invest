@@ -7,7 +7,14 @@
     "dev": "concurrently \"vite\" \"node server.js\"",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "mobile:build": "vite build && npx cap sync",
+    "android:init": "npm install @capacitor/core @capacitor/cli @capacitor/android && npx cap add android",
+    "android:sync": "vite build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "ios:init": "npm install @capacitor/core @capacitor/cli @capacitor/ios && npx cap add ios",
+    "ios:sync": "vite build && npx cap sync ios",
+    "ios:open": "npx cap open ios"
   },
   "dependencies": {
     "axios": "^1.16.0",
@@ -17,6 +24,8 @@
     "express": "^5.2.1",
     "lucide-react": "^1.14.0",
     "node-fetch": "^2.7.0",
+    "nodemailer": "^10.3.1",
+    "pg": "^8.23.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.6.0",
