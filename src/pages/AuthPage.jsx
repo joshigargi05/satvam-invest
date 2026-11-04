@@ -203,10 +203,10 @@ export default function AuthPage() {
 
   const [mode, setMode] = useState('login'); // 'login' | 'email_otp' | 'register'
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('investor@vestra.ai');
-  const [password, setPassword] = useState('Vestra@2026');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [defaultMarket, setDefaultMarket] = useState('US');
-  const [pin, setPin] = useState('1234');
+  const [pin, setPin] = useState('');
   const [otp, setOtp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -215,8 +215,8 @@ export default function AuthPage() {
   // Google / Workspace Sign-In Modal State
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [googleModalTab, setGoogleModalTab] = useState('instant'); // 'instant' | 'official_redirect'
-  const [googleEmail, setGoogleEmail] = useState('investor.satvam@gmail.com');
-  const [googleName, setGoogleName] = useState('Satvam Gmail Investor');
+  const [googleEmail, setGoogleEmail] = useState('');
+  const [googleName, setGoogleName] = useState('');
   const [googleVerifyWithOtp, setGoogleVerifyWithOtp] = useState(false);
   const [activeGoogleClientId, setActiveGoogleClientId] = useState(import.meta.env.VITE_GOOGLE_CLIENT_ID || '');
   const [clientIdInput, setClientIdInput] = useState(import.meta.env.VITE_GOOGLE_CLIENT_ID || '');
@@ -555,12 +555,12 @@ export default function AuthPage() {
                   ? 'Create Investor Account'
                   : mode === 'email_otp'
                   ? 'Passwordless Email OTP'
-                  : 'Sign In to VestraAI'}
+                  : 'Sign In to Satvam Invest'}
               </h3>
               <p className="text-xs text-slate-400">
                 {pending2FA
                   ? 'Enter the 6-digit verification code to unlock your portfolio.'
-                  : 'Choose Google Sign-In, 1-Click Demo, or your email credentials below.'}
+                  : 'Sign in with Google, email verification code, or your password below.'}
               </p>
             </div>
 
@@ -579,44 +579,19 @@ export default function AuthPage() {
               </div>
             )}
 
-            {/* 1-Click Demo Sandbox Card */}
-            {!pending2FA && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.75rem',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '14px',
-                  background: 'rgba(16, 185, 129, 0.08)',
-                  border: '1px solid rgba(16, 185, 129, 0.28)',
-                  marginBottom: '1.25rem'
-                }}
-              >
-                <div>
-                  <div className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
-                    <Sparkles size={13} /> Instant Demo Portfolio
-                  </div>
-                  <div className="text-[11px] text-slate-400 font-mono">
-                    investor@vestra.ai • No setup required
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleQuickDemo}
-                  disabled={submitting}
-                  className="auth-demo-btn shrink-0"
-                >
-                  <span>1-Click Demo</span>
-                  <ArrowRight size={13} />
-                </button>
-              </div>
-            )}
-
             {/* Segmented Mode Switcher */}
             {!pending2FA && (
               <div className="auth-segmented-tabs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('email_otp');
+                    setError('');
+                  }}
+                  className={`auth-segmented-tab ${mode === 'email_otp' ? 'active' : ''}`}
+                >
+                  ✉️ Email OTP (Gmail)
+                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -630,23 +605,8 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setMode('email_otp');
-                    setError('');
-                    if (email === 'investor@vestra.ai') setEmail('');
-                  }}
-                  className={`auth-segmented-tab ${mode === 'email_otp' ? 'active' : ''}`}
-                >
-                  ✉️ Email OTP
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
                     setMode('register');
                     setError('');
-                    if (email === 'investor@vestra.ai') {
-                      setEmail('');
-                      setPassword('');
-                    }
                   }}
                   className={`auth-segmented-tab ${mode === 'register' ? 'active' : ''}`}
                 >
