@@ -958,43 +958,12 @@ export default function AuthPage() {
             {googleModalTab === 'instant' ? (
               <form onSubmit={handleGoogleModalSubmit} className="space-y-3.5">
                 <div>
-                  <div className="text-[11px] font-bold text-slate-300 mb-2">
-                    Click an account for instant passwordless sign-in:
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 mb-3">
-                    {[
-                      { email: 'investor.satvam@gmail.com', name: 'Satvam Gmail Investor', tag: '1-Click Gmail' },
-                      { email: 'founder@satvaminvest.com', name: 'Satvam Executive', tag: '1-Click Workspace' }
-                    ].map((preset) => (
-                      <button
-                        key={preset.email}
-                        type="button"
-                        disabled={submitting}
-                        onClick={() => handleInstantGmailAccountSelect(preset.email, preset.name)}
-                        className="p-3 rounded-xl border bg-slate-900/90 border-white/15 text-left flex items-center justify-between transition-all"
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
-                            {preset.name[0]}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-white truncate">{preset.name}</div>
-                            <div className="text-[11px] text-slate-400 font-mono truncate">{preset.email}</div>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-                          {preset.tag} →
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-white/10">
                   <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                    Or enter any Gmail / Official Email (No Password Needed):
+                    Enter your Gmail / Google Workspace address:
                   </label>
+                  <p className="text-[11px] text-slate-400 mb-2.5">
+                    Passwordless Google authentication. An instant investor session will be created for your Google identity.
+                  </p>
                   <input
                     type="email"
                     value={googleEmail}
@@ -1008,7 +977,7 @@ export default function AuthPage() {
                     type="text"
                     value={googleName}
                     onChange={(e) => setGoogleName(e.target.value)}
-                    placeholder="Display Name (Optional)"
+                    placeholder="Your Name (Optional)"
                     className="auth-input-modern"
                     style={{ paddingLeft: '0.9rem' }}
                   />
@@ -1020,7 +989,7 @@ export default function AuthPage() {
                     checked={googleVerifyWithOtp}
                     onChange={(e) => setGoogleVerifyWithOtp(e.target.checked)}
                   />
-                  <span>Also send a 6-digit OTP to this email via SMTP/Gmail</span>
+                  <span>Send a 6-digit confirmation OTP to this email</span>
                 </label>
 
                 <div className="flex gap-2 pt-1">
@@ -1037,7 +1006,7 @@ export default function AuthPage() {
                     className="auth-submit-btn flex-1"
                     style={{ padding: '0.65rem 1rem', fontSize: '0.8rem' }}
                   >
-                    {submitting ? 'Signing in...' : 'Continue with Gmail →'}
+                    {submitting ? 'Signing in...' : 'Continue with Google →'}
                   </button>
                 </div>
               </form>
