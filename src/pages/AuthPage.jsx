@@ -221,7 +221,45 @@ export default function AuthPage() {
   const [activeGoogleClientId, setActiveGoogleClientId] = useState(import.meta.env.VITE_GOOGLE_CLIENT_ID || '');
   const [clientIdInput, setClientIdInput] = useState(import.meta.env.VITE_GOOGLE_CLIENT_ID || '');
 
-  // 1. Handle return from Official Google Login Page (https://accounts.google.com/o/oauth2/v2/auth#access_token=...)
+  // 1. Initialize Google Identity Services (One Tap & Google Sign-In button)
+  useEffect(() => {
+    if (activeGoogleClientId && typeof window !== 'undefined' && window.google?.accounts?.id) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: activeGoogleClientId,
+          callback: async (response) => {
+            if (response.credential) {
+              setSubmitting(true);
+              setError('');
+              try {
+                await loginWithGoogle({ idToken: response.credential, defaultMarket });
+              } catch (err) {
+                setError(err.message || 'Google Sign-In failed');
+              } finally {
+                setSubmitting(false);
+              }
+            }
+          }
+        });
+
+        // Auto-render official Google button if target container exists
+        const googleBtnContainer = document.getElementById('google-official-btn');
+        if (googleBtnContainer) {
+          window.google.accounts.id.renderButton(googleBtnContainer, {
+            theme: 'filled_black',
+            size: 'large',
+            width: '100%',
+            shape: 'pill',
+            text: 'continue_with'
+          });
+        }
+      } catch (e) {
+        // Fallback gracefully
+      }
+    }
+  }, [activeGoogleClientId, defaultMarket, loginWithGoogle]);
+
+  // 2. Handle return from Official Google Login Page (https://accounts.google.com/o/oauth2/v2/auth#access_token=...)
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && (hash.includes('access_token=') || hash.includes('id_token='))) {
@@ -564,9 +602,10 @@ export default function AuthPage() {
               </p>
             </div>
 
-            {/* Primary CTA: Sign in with Google (Gmail / Workspace) */}
+            {/* Primary CTA: Official 1-Click Sign in with Google (Gmail / Workspace) */}
             {!pending2FA && (
-              <div className="mb-4">
+              <div className="mb-4 space-y-2">
+                <div id="google-official-btn" className="w-full"></div>
                 <button
                   type="button"
                   onClick={handleContinueWithGoogleClick}
@@ -574,7 +613,7 @@ export default function AuthPage() {
                   className="auth-google-btn"
                 >
                   <GoogleLogoSvg size={20} />
-                  <span>Sign in with Google (Gmail / Workspace)</span>
+                  <span>1-Click Sign in with Google (Gmail)</span>
                 </button>
               </div>
             )}
