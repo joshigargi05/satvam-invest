@@ -929,137 +929,80 @@ export default function AuthPage() {
               </button>
             </div>
 
-            {/* Mode Switcher inside Modal */}
-            <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-950 border border-white/10 mb-4">
-              <button
-                type="button"
-                onClick={() => setGoogleModalTab('instant')}
-                className={`py-2 rounded-lg text-[11px] font-bold transition-all ${
-                  googleModalTab === 'instant'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                1-Click Gmail Account
-              </button>
-              <button
-                type="button"
-                onClick={() => setGoogleModalTab('official_redirect')}
-                className={`py-2 rounded-lg text-[11px] font-bold transition-all ${
-                  googleModalTab === 'official_redirect'
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                accounts.google.com Page
-              </button>
-            </div>
+            {/* Modern Google / Gmail Passwordless Sign-In Modal */}
+            <form onSubmit={handleGoogleModalSubmit} className="space-y-4">
+              <div className="p-4 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs text-blue-200 leading-relaxed">
+                <span className="font-bold text-white block mb-1">
+                  ⚡ 100% Passwordless Google Login
+                </span>
+                Enter your Gmail or Google Workspace email address. An authenticated session and cloud portfolio wallet will be provisioned instantly.
+              </div>
 
-            {googleModalTab === 'instant' ? (
-              <form onSubmit={handleGoogleModalSubmit} className="space-y-3.5">
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                    Enter your Gmail / Google Workspace address:
-                  </label>
-                  <p className="text-[11px] text-slate-400 mb-2.5">
-                    Passwordless Google authentication. An instant investor session will be created for your Google identity.
-                  </p>
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                  Your Gmail / Google Workspace Address
+                </label>
+                <div className="auth-field-wrap">
+                  <span className="auth-field-icon">
+                    <Mail size={16} />
+                  </span>
                   <input
                     type="email"
                     value={googleEmail}
                     onChange={(e) => setGoogleEmail(e.target.value)}
-                    placeholder="your.name@gmail.com or name@company.com"
-                    className="auth-input-modern mb-2.5"
-                    style={{ paddingLeft: '0.9rem' }}
+                    placeholder="name@gmail.com or name@company.com"
+                    className="auth-input-modern"
                     required
+                    autoFocus
                   />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                  Your Name (Optional)
+                </label>
+                <div className="auth-field-wrap">
+                  <span className="auth-field-icon">
+                    <User size={16} />
+                  </span>
                   <input
                     type="text"
                     value={googleName}
                     onChange={(e) => setGoogleName(e.target.value)}
-                    placeholder="Your Name (Optional)"
+                    placeholder="e.g. Gargi Sharma"
                     className="auth-input-modern"
-                    style={{ paddingLeft: '0.9rem' }}
                   />
                 </div>
+              </div>
 
-                <label className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900/90 border border-white/10 text-xs text-slate-300 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={googleVerifyWithOtp}
-                    onChange={(e) => setGoogleVerifyWithOtp(e.target.checked)}
-                  />
-                  <span>Send a 6-digit confirmation OTP to this email</span>
-                </label>
+              <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-900/90 border border-white/10 text-xs text-slate-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={googleVerifyWithOtp}
+                  onChange={(e) => setGoogleVerifyWithOtp(e.target.checked)}
+                />
+                <span>Also send a 6-digit confirmation code to my email</span>
+              </label>
 
-                <div className="flex gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setShowGoogleModal(false)}
-                    className="btn btn-outline flex-1 py-2.5 text-xs"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting || !googleEmail}
-                    className="auth-submit-btn flex-1"
-                    style={{ padding: '0.65rem 1rem', fontSize: '0.8rem' }}
-                  >
-                    {submitting ? 'Signing in...' : 'Continue with Google →'}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              /* Official https://accounts.google.com/o/oauth2/v2/auth Redirect Setup */
-              <form onSubmit={handleSaveClientIdAndRedirect} className="space-y-3.5">
-                <div className="p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs text-slate-300 leading-relaxed">
-                  To redirect to Google&apos;s official <code>accounts.google.com</code> login page, paste your <strong>OAuth 2.0 Web Client ID</strong> from your GCP Console (<code>APIs &amp; Services → Credentials</code>):
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">
-                    GCP Google OAuth Client ID
-                  </label>
-                  <input
-                    type="text"
-                    value={clientIdInput}
-                    onChange={(e) => setClientIdInput(e.target.value)}
-                    placeholder="1234567890-abcxyz.apps.googleusercontent.com"
-                    className="auth-input-modern font-mono"
-                    style={{ paddingLeft: '0.9rem' }}
-                    required
-                  />
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 text-[11px] font-mono text-slate-300">
-                  <div className="text-slate-400 font-sans font-bold mb-1">
-                    Authorized Redirect URI to add in GCP Console:
-                  </div>
-                  <div className="text-emerald-300 break-all">
-                    {typeof window !== 'undefined' ? `${window.location.origin}/login` : 'http://localhost:5173/login'}
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setGoogleModalTab('instant')}
-                    className="btn btn-outline flex-1 py-2.5 text-xs"
-                  >
-                    ← Back
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="auth-submit-btn flex-1"
-                    style={{ padding: '0.65rem 1rem', fontSize: '0.8rem' }}
-                  >
-                    Save &amp; Open Google Page →
-                  </button>
-                </div>
-              </form>
-            )}
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowGoogleModal(false)}
+                  className="btn btn-outline flex-1 py-2.5 text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting || !googleEmail}
+                  className="auth-submit-btn flex-1"
+                >
+                  <GoogleLogoSvg size={18} />
+                  <span>{submitting ? 'Authenticating...' : 'Sign In with Gmail'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
