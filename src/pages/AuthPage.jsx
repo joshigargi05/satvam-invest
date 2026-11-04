@@ -218,8 +218,12 @@ export default function AuthPage() {
   const [googleEmail, setGoogleEmail] = useState('');
   const [googleName, setGoogleName] = useState('');
   const [googleVerifyWithOtp, setGoogleVerifyWithOtp] = useState(false);
-  const [activeGoogleClientId, setActiveGoogleClientId] = useState(import.meta.env.VITE_GOOGLE_CLIENT_ID || '');
-  const [clientIdInput, setClientIdInput] = useState(import.meta.env.VITE_GOOGLE_CLIENT_ID || '');
+  const [activeGoogleClientId, setActiveGoogleClientId] = useState(
+    import.meta.env.VITE_GOOGLE_CLIENT_ID || '364673139154-7109gaj02ilkn7vansekvcnbisk4ugip.apps.googleusercontent.com'
+  );
+  const [clientIdInput, setClientIdInput] = useState(
+    import.meta.env.VITE_GOOGLE_CLIENT_ID || '364673139154-7109gaj02ilkn7vansekvcnbisk4ugip.apps.googleusercontent.com'
+  );
 
   // 1. Initialize Google Identity Services (One Tap & Google Sign-In button)
   useEffect(() => {
