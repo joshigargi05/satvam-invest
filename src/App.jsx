@@ -132,8 +132,8 @@ function Navigation() {
   const navItems = [
     { path: '/', label: 'Top 3 Stocks', icon: <MdStars /> },
     { path: '/portfolio', label: 'My Portfolio', icon: <MdDashboard /> },
-    { path: '/macro-agent', label: 'Global Agent', icon: <MdPublic /> },
     { path: '/markets', label: 'Markets', icon: <MdAutoGraph /> },
+    { path: '/macro-agent', label: 'Global Agent', icon: <MdPublic /> },
     { path: '/deep-analysis', label: 'Quant Agent', icon: <MdAnalytics /> },
     { path: '/copilot', label: 'AI Chat', icon: <MdSmartToy /> },
     { path: '/profile', label: 'Profile', icon: <MdOutlineAccountCircle /> },
@@ -382,8 +382,8 @@ function AppShell() {
             <Route path="/" element={<TopStocks />} />
             <Route path="/top-stocks" element={<TopStocks />} />
             <Route path="/portfolio" element={<Dashboard />} />
-            <Route path="/macro-agent" element={<MacroAgent />} />
             <Route path="/markets" element={<Markets />} />
+            <Route path="/macro-agent" element={<MacroAgent />} />
             <Route path="/algo" element={<AlgoRedirect />} />
             <Route path="/deep-analysis" element={<DeepQuantAgent />} />
             <Route path="/copilot" element={<Copilot />} />
