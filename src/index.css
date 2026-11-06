@@ -1204,16 +1204,16 @@ table th, table td { vertical-align: middle; }
    Modern Institutional Auth Portal (AuthPage.jsx) & Header Logout Styling
    ========================================================================== */
 
-/* Deep blur effect for Home Page background when unauthenticated / locked */
+/* Visible, vibrant blurred background home page when unauthenticated / locked */
 .app-container-blurred {
-  filter: blur(36px) brightness(0.35) saturate(1.15) !important;
-  -webkit-filter: blur(36px) brightness(0.35) saturate(1.15) !important;
-  transform: scale(1.03);
+  filter: blur(8px) brightness(0.9) saturate(1.1) !important;
+  -webkit-filter: blur(8px) brightness(0.9) saturate(1.1) !important;
+  transform: scale(1.02);
   pointer-events: none !important;
   user-select: none !important;
   height: 100vh !important;
   overflow: hidden !important;
-  transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), -webkit-filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), brightness 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: filter 0.6s cubic-bezier(0.4, 0, 0.2, 1), -webkit-filter 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), brightness 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .app-container-clear {
@@ -1222,7 +1222,7 @@ table th, table td { vertical-align: middle; }
   transform: scale(1);
   pointer-events: auto;
   user-select: auto;
-  transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), -webkit-filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), brightness 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: filter 0.6s cubic-bezier(0.4, 0, 0.2, 1), -webkit-filter 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), brightness 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .auth-portal-bg {
@@ -1234,13 +1234,11 @@ table th, table td { vertical-align: middle; }
   padding: 1.25rem;
   position: relative;
   overflow-y: auto;
-  background-color: rgba(3, 7, 18, 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: rgba(3, 7, 18, 0.25);
   background-image:
-    radial-gradient(at 15% 15%, rgba(59, 130, 246, 0.16) 0px, transparent 50%),
-    radial-gradient(at 85% 20%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-    radial-gradient(at 50% 90%, rgba(16, 185, 129, 0.08) 0px, transparent 55%);
+    radial-gradient(at 15% 15%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+    radial-gradient(at 85% 20%, rgba(139, 92, 246, 0.10) 0px, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(16, 185, 129, 0.06) 0px, transparent 55%);
 }
 
 .auth-portal-container {
