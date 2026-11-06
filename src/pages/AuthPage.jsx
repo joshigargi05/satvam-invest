@@ -205,7 +205,7 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [defaultMarket, setDefaultMarket] = useState('US');
+  const [defaultMarket] = useState('US');
   const [pin, setPin] = useState('');
   const [otp, setOtp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -481,11 +481,11 @@ export default function AuthPage() {
                     boxShadow: '0 8px 20px rgba(59, 130, 246, 0.35)'
                   }}
                 >
-                  V
+                  S
                 </div>
                 <div>
-                  <h1 className="text-gradient text-2xl font-black m-0">VestraAI</h1>
-                  <span className="text-xs text-slate-400">Autonomous Quantitative Wealth OS</span>
+                  <h1 className="text-gradient text-2xl font-black m-0">Satvam Invest</h1>
+                  <span className="text-xs text-slate-400">AI-Powered Wealth Generation</span>
                 </div>
               </div>
 
@@ -501,33 +501,29 @@ export default function AuthPage() {
                 fontWeight: 800,
                 lineHeight: 1.25,
                 color: '#f8fafc',
-                marginBottom: '0.75rem'
+                marginBottom: '1.25rem'
               }}
             >
-              Institutional AI Alpha Across{' '}
-              <span className="text-gradient">US &amp; Indian Markets</span>
+              <span className="text-gradient">AI-powered Investment Engine</span> and Wealth Creation Platform
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
-              One unified identity for Web, Android, and iOS. Powered by proprietary AI market intelligence, real-time macro analysis, and automated Take-Profit execution.
-            </p>
 
             {/* Feature Highlights Grid */}
             <div className="space-y-3 mb-6">
               {[
                 {
                   icon: <Sparkles size={17} className="text-blue-400" />,
-                  title: 'Proprietary AI Stock Picks & Global Agent',
-                  desc: 'Session-locked Top 3 stock picks across NASDAQ/NYSE ($) & NSE/BSE (₹).'
+                  title: 'Top-Ranked AI Stock Picks',
+                  desc: 'Curated daily stock picks across US ($) and Indian (₹) markets.'
                 },
                 {
                   icon: <ShieldCheck size={17} className="text-emerald-400" />,
-                  title: 'Zero-Password Google & Email OTP Login',
-                  desc: 'Sign in with Gmail, Google Workspace, or 6-digit SMTP verification codes.'
+                  title: 'Effortless 1-Click Sign-In',
+                  desc: 'Sign in instantly with your Google account or email code.'
                 },
                 {
                   icon: <Smartphone size={17} className="text-purple-400" />,
-                  title: 'Cloud SQL Multi-Device Portfolio Sync',
-                  desc: 'Instant synchronization of holdings, cash balances, and Auto-Exit rules.'
+                  title: 'Automated Multi-Device Portfolio Sync',
+                  desc: 'Your holdings, balance, and smart rules stay updated everywhere.'
                 }
               ].map((feat, idx) => (
                 <div
@@ -580,8 +576,8 @@ export default function AuthPage() {
               color: '#94a3b8'
             }}
           >
-            <span>🔒 TLS 1.3 • scrypt 64-byte • HS256 JWT</span>
-            <span className="text-emerald-400 font-semibold">☁️ GCP Cloud SQL Ready</span>
+            <span>🔒 Bank-Grade Security &amp; Encryption</span>
+            <span className="text-emerald-400 font-semibold">☁️ Secure Cloud Protected</span>
           </div>
         </div>
 
@@ -766,37 +762,21 @@ export default function AuthPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                        Your Name (Optional)
-                      </label>
-                      <div className="auth-field-wrap">
-                        <span className="auth-field-icon">
-                          <User size={16} />
-                        </span>
-                        <input
-                          type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Gargi Sharma"
-                          className="auth-input-modern"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                        Default Market
-                      </label>
-                      <select
-                        value={defaultMarket}
-                        onChange={(e) => setDefaultMarket(e.target.value)}
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                      Your Name (Optional)
+                    </label>
+                    <div className="auth-field-wrap">
+                      <span className="auth-field-icon">
+                        <User size={16} />
+                      </span>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g. Gargi Sharma"
                         className="auth-input-modern"
-                        style={{ paddingLeft: '0.9rem' }}
-                      >
-                        <option value="US" style={{ color: '#000' }}>🇺🇸 US Stocks ($)</option>
-                        <option value="INDIA" style={{ color: '#000' }}>🇮🇳 India NSE (₹)</option>
-                      </select>
+                      />
                     </div>
                   </div>
 
@@ -895,38 +875,22 @@ export default function AuthPage() {
                   </div>
 
                   {mode === 'register' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                          Primary Market
-                        </label>
-                        <select
-                          value={defaultMarket}
-                          onChange={(e) => setDefaultMarket(e.target.value)}
-                          className="auth-input-modern"
-                          style={{ paddingLeft: '0.9rem' }}
-                        >
-                          <option value="US" style={{ color: '#000' }}>🇺🇸 US Stocks ($)</option>
-                          <option value="INDIA" style={{ color: '#000' }}>🇮🇳 India NSE (₹)</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                          4-Digit App PIN
-                        </label>
-                        <div className="auth-field-wrap">
-                          <span className="auth-field-icon">
-                            <Lock size={15} />
-                          </span>
-                          <input
-                            type="password"
-                            maxLength={4}
-                            value={pin}
-                            onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                            placeholder="1234"
-                            className="auth-input-modern font-mono tracking-widest"
-                          />
-                        </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                        4-Digit App PIN (Optional)
+                      </label>
+                      <div className="auth-field-wrap">
+                        <span className="auth-field-icon">
+                          <Lock size={15} />
+                        </span>
+                        <input
+                          type="password"
+                          maxLength={4}
+                          value={pin}
+                          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                          placeholder="1234"
+                          className="auth-input-modern font-mono tracking-widest"
+                        />
                       </div>
                     </div>
                   )}

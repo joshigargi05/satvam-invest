@@ -85,7 +85,7 @@ function TopHeader() {
               type="button"
               onClick={logout}
               className="logout-header-btn"
-              title="Sign Out of VestraAI"
+              title="Sign Out of Satvam Invest"
             >
               <MdLogout />
               <span>Sign Out</span>
@@ -146,9 +146,9 @@ function Navigation() {
       {/* Mobile Header */}
       <div className="md-hidden flex justify-between items-center p-3.5 bg-black/50 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div style={{ background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', width: '26px', height: '26px', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'white', fontSize: '13px', flexShrink: 0 }}>V</div>
+          <div style={{ background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', width: '26px', height: '26px', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'white', fontSize: '13px', flexShrink: 0 }}>S</div>
           <div>
-            <h1 className="text-gradient font-bold" style={{ fontSize: '1.1rem', margin: 0, lineHeight: 1.1 }}>VestraAI</h1>
+            <h1 className="text-gradient font-bold" style={{ fontSize: '1.1rem', margin: 0, lineHeight: 1.1 }}>Satvam Invest</h1>
             <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>AI-Powered Wealth Generation</span>
           </div>
         </div>
@@ -206,8 +206,8 @@ function Navigation() {
               fontWeight: 'bold',
               color: 'white',
               flexShrink: 0
-            }}>V</div>
-            <h1 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>VestraAI</h1>
+            }}>S</div>
+            <h1 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>Satvam Invest</h1>
           </div>
           <span className="brand-subtitle" style={{ fontSize: '0.68rem', color: 'var(--text-muted)', letterSpacing: '0.03em', fontWeight: '500' }}>
             AI-Powered Wealth Generation
@@ -322,7 +322,7 @@ function SimulatorBanner() {
           Simulator Platform
         </span>
         <p className="text-xs sm:text-sm md:text-[15px] text-slate-200 font-normal leading-relaxed m-0">
-          VestraAI is currently operating as a <strong className="text-amber-300 font-semibold">simulation &amp; paper-trading platform</strong>. Real-time market data and quantitative AI models are live; all balances, trades, and portfolio assets are simulated with <strong className="text-white font-semibold">virtual currency</strong>.
+          Satvam Invest is currently operating as a <strong className="text-amber-300 font-semibold">simulation &amp; paper-trading platform</strong>. Real-time market data and quantitative AI models are live; all balances, trades, and portfolio assets are simulated with <strong className="text-white font-semibold">virtual currency</strong>.
         </p>
       </div>
       <span 
@@ -340,38 +340,56 @@ function AppShell() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-[#030712]">
         <div className="inline-block animate-spin w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full mb-3" />
-        <p className="text-xs text-slate-400 font-mono">Initializing VestraAI Security Enclave...</p>
+        <p className="text-xs text-slate-400 font-mono">Initializing Satvam Invest Security Enclave...</p>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return <AuthPage />;
-  }
-
-  if (isLocked) {
-    return <PinLockScreen />;
-  }
+  const isBlurred = !isAuthenticated || isLocked;
 
   return (
-    <div className="app-container">
-      <Navigation />
-      <main className="main-content md:pt-6">
-        <SimulatorBanner />
-        <TopHeader />
-        <AutonomousExecutionToast />
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/macro-agent" element={<MacroAgent />} />
-          <Route path="/markets" element={<Markets />} />
-          <Route path="/algo" element={<AlgoTrading />} />
-          <Route path="/deep-analysis" element={<EarningsAgent />} />
-          <Route path="/copilot" element={<Copilot />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </main>
+    <div className="relative min-h-screen w-full bg-[#030712] overflow-x-hidden">
+      {/* Background Home Page / Portfolio Dashboard (Blurred when unauthenticated, smoothly sharp upon login) */}
+      <div
+        className={`app-container transition-all duration-700 ease-in-out ${
+          isBlurred
+            ? 'filter blur-[16px] brightness-[0.4] pointer-events-none select-none h-screen overflow-hidden'
+            : 'filter-none brightness-100'
+        }`}
+        aria-hidden={isBlurred}
+      >
+        <Navigation />
+        <main className="main-content md:pt-6">
+          <SimulatorBanner />
+          <TopHeader />
+          <AutonomousExecutionToast />
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/macro-agent" element={<MacroAgent />} />
+            <Route path="/markets" element={<Markets />} />
+            <Route path="/algo" element={<AlgoTrading />} />
+            <Route path="/deep-analysis" element={<EarningsAgent />} />
+            <Route path="/copilot" element={<Copilot />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+        </main>
+      </div>
+
+      {/* Auth Page Modal Overlay (Displays over the blurred background) */}
+      {!isAuthenticated && (
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fade-in">
+          <AuthPage />
+        </div>
+      )}
+
+      {/* PIN Lock Screen Overlay */}
+      {isAuthenticated && isLocked && (
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fade-in">
+          <PinLockScreen />
+        </div>
+      )}
     </div>
   );
 }
