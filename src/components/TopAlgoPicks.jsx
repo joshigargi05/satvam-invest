@@ -189,17 +189,6 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
           {/* Quick US / IND Toggle synced with global MarketContext */}
           <div className="flex items-center bg-slate-950/90 p-1 rounded-xl border border-white/10 text-xs">
             <button
-              onClick={() => setMarket('US')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                market === 'US'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span>$</span>
-              <span>US Top 3</span>
-            </button>
-            <button
               onClick={() => setMarket('INDIA')}
               className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
                 market === 'INDIA'
@@ -209,6 +198,17 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
             >
               <span>₹</span>
               <span>IND Top 3</span>
+            </button>
+            <button
+              onClick={() => setMarket('US')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                market === 'US'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>$</span>
+              <span>US Top 3</span>
             </button>
           </div>
 

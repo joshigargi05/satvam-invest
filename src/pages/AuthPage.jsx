@@ -205,7 +205,7 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [defaultMarket] = useState('US');
+  const [defaultMarket] = useState('INDIA');
   const [pin, setPin] = useState('');
   const [otp, setOtp] = useState('');
   const [showPassword, setShowPassword] = useState(false);

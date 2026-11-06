@@ -28,9 +28,9 @@ export function MarketProvider({ children }) {
   const [market, setMarket] = useState(() => {
     try {
       const saved = localStorage.getItem('vestra_market');
-      return (saved === 'INDIA' || saved === 'US') ? saved : 'US';
+      return (saved === 'INDIA' || saved === 'US') ? saved : 'INDIA';
     } catch (e) {
-      return 'US';
+      return 'INDIA';
     }
   });
 

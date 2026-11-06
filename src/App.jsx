@@ -96,18 +96,18 @@ function TopHeader() {
       
       <div className="market-tabs-container">
         <button 
-          onClick={() => setMarket('US')} 
-          className={`market-tab-btn ${market === 'US' ? 'active-us' : ''}`}
-        >
-          <span className="currency-label">$</span>
-          <span className="name">US Stocks</span>
-        </button>
-        <button 
           onClick={() => setMarket('INDIA')} 
           className={`market-tab-btn ${market === 'INDIA' ? 'active-in' : ''}`}
         >
           <span className="currency-label">₹</span>
           <span className="name">IND Stocks</span>
+        </button>
+        <button 
+          onClick={() => setMarket('US')} 
+          className={`market-tab-btn ${market === 'US' ? 'active-us' : ''}`}
+        >
+          <span className="currency-label">$</span>
+          <span className="name">US Stocks</span>
         </button>
       </div>
     </header>

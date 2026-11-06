@@ -769,8 +769,8 @@ export default function Profile() {
                   onChange={(e) => setEditMarket(e.target.value)}
                   className="chat-input w-full py-2.5 px-3.5 text-sm"
                 >
-                  <option value="US" style={{ color: '#000' }}>🇺🇸 US Equities ($ USD)</option>
                   <option value="INDIA" style={{ color: '#000' }}>🇮🇳 India NSE/BSE (₹ INR)</option>
+                  <option value="US" style={{ color: '#000' }}>🇺🇸 US Equities ($ USD)</option>
                 </select>
               </div>
             </div>
