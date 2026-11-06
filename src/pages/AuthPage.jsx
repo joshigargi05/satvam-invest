@@ -615,8 +615,8 @@ export default function AuthPage() {
         <div className="auth-form-pane">
           <div style={{ maxWidth: '420px', width: '100%', margin: '0 auto' }}>
             {/* Form Header */}
-            <div className="mb-5">
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>
+            <div style={{ marginBottom: '1.75rem' }}>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.45rem' }}>
                 {pending2FA
                   ? 'Verify Your Identity'
                   : mode === 'register'
@@ -625,7 +625,7 @@ export default function AuthPage() {
                   ? 'Passwordless Email OTP'
                   : 'Sign In to Satvam Invest'}
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400" style={{ lineHeight: '1.5', margin: 0 }}>
                 {pending2FA
                   ? 'Enter the 6-digit verification code to unlock your portfolio.'
                   : 'Sign in with Google, email verification code, or your password below.'}
@@ -634,7 +634,7 @@ export default function AuthPage() {
 
             {/* Primary CTA: Single "Continue with Google" Button */}
             {!pending2FA && (
-              <div className="mb-4">
+              <div style={{ marginBottom: '1.25rem' }}>
                 <div 
                   id="google-official-btn" 
                   className={`w-full flex justify-center ${googleOfficialRendered ? '' : 'hidden'}`}
