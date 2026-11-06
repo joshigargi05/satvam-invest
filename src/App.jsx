@@ -351,13 +351,9 @@ function AppShell() {
 
   return (
     <div className="relative min-h-screen w-full bg-[#030712] overflow-x-hidden">
-      {/* Background Home Page / Portfolio Dashboard (Blurred when unauthenticated, smoothly sharp upon login) */}
+      {/* Background Home Page / Portfolio Dashboard (Deeply blurred when unauthenticated, smoothly sharp upon login) */}
       <div
-        className={`app-container transition-all duration-700 ease-in-out ${
-          isBlurred
-            ? 'filter blur-[16px] brightness-[0.4] pointer-events-none select-none h-screen overflow-hidden'
-            : 'filter-none brightness-100'
-        }`}
+        className={`app-container ${isBlurred ? 'app-container-blurred' : 'app-container-clear'}`}
         aria-hidden={isBlurred}
       >
         <Navigation />

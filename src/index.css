@@ -1204,6 +1204,27 @@ table th, table td { vertical-align: middle; }
    Modern Institutional Auth Portal (AuthPage.jsx) & Header Logout Styling
    ========================================================================== */
 
+/* Deep blur effect for Home Page background when unauthenticated / locked */
+.app-container-blurred {
+  filter: blur(36px) brightness(0.35) saturate(1.15) !important;
+  -webkit-filter: blur(36px) brightness(0.35) saturate(1.15) !important;
+  transform: scale(1.03);
+  pointer-events: none !important;
+  user-select: none !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), -webkit-filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), brightness 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-container-clear {
+  filter: blur(0px) brightness(1) saturate(1);
+  -webkit-filter: blur(0px) brightness(1) saturate(1);
+  transform: scale(1);
+  pointer-events: auto;
+  user-select: auto;
+  transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), -webkit-filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), brightness 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .auth-portal-bg {
   min-height: 100vh;
   width: 100%;
@@ -1213,9 +1234,9 @@ table th, table td { vertical-align: middle; }
   padding: 1.25rem;
   position: relative;
   overflow-y: auto;
-  background-color: rgba(3, 7, 18, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(3, 7, 18, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   background-image:
     radial-gradient(at 15% 15%, rgba(59, 130, 246, 0.16) 0px, transparent 50%),
     radial-gradient(at 85% 20%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
