@@ -623,11 +623,11 @@ export default function DeepQuantAgent() {
         <div className="flex items-center gap-2">
           <button 
             type="button"
-            onClick={() => navigate('/')} 
+            onClick={() => navigate('/portfolio')} 
             className="btn btn-outline"
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
-            📊 Portfolio
+            📊 My Portfolio
           </button>
           <button 
             type="button"

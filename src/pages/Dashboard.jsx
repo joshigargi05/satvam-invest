@@ -19,7 +19,6 @@ const X = Lucide.X || (() => '✕');
 import { usePortfolio } from '../context/PortfolioContext';
 import { getPortfolioNews, getMarketNews, getUpcomingEarnings, getPortfolioHistory } from '../services/api';
 import { useMarket } from '../context/MarketContext';
-import TopAlgoPicks from '../components/TopAlgoPicks';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -200,10 +199,17 @@ export default function Dashboard() {
     <div className="animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-gradient">Portfolio Overview</h1>
+          <h1 className="text-gradient">My Portfolio</h1>
           <p className="text-muted">Welcome back! Here's how your {market === 'US' ? 'US' : 'Indian'} investments are doing.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <button 
+            onClick={() => navigate('/')}
+            className="btn btn-outline flex items-center gap-1.5 text-sm"
+            style={{ borderColor: 'rgba(245, 158, 11, 0.4)', background: 'rgba(245, 158, 11, 0.1)', color: '#fcd34d' }}
+          >
+            <span>⭐ Top 3 Stocks</span>
+          </button>
           <button 
             onClick={() => navigate('/macro-agent')}
             className="btn btn-outline flex items-center gap-2 text-sm"
@@ -1141,11 +1147,6 @@ export default function Dashboard() {
           </div>
         );
       })()}
-
-      {/* Top 3 Algorithmic Stock Picks (US & India Markets) */}
-      <div style={{ marginTop: '2.5rem' }}>
-        <TopAlgoPicks pageContext="portfolio" />
-      </div>
 
       {/* Live Financial News Section */}
       <div style={{ marginTop: '2rem' }}></div>

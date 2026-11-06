@@ -2284,10 +2284,10 @@ export default function MacroAgent() {
                       Orders filled in simulation sandbox with zero slippage.
                     </span>
                     <button 
-                      onClick={() => navigate('/')}
+                      onClick={() => navigate('/portfolio')}
                       className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 underline cursor-pointer"
                     >
-                      View in Dashboard →
+                      View in My Portfolio →
                     </button>
                   </div>
                 </div>

@@ -11,6 +11,7 @@ const MdAnalytics = Md.MdAnalytics || (() => '📊');
 const IoNotificationsOutline = Io5.IoNotificationsOutline || (() => '🔔');
 const MdPublic = Md.MdPublic || (() => '🌐');
 const MdLogout = Md.MdLogout || (() => '🚪');
+const MdStars = Md.MdStars || Md.MdWorkspacePremium || (() => '⭐');
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -18,6 +19,7 @@ import { MarketProvider, useMarket } from './context/MarketContext'
 import { PortfolioProvider } from './context/PortfolioContext'
 
 // Pages
+import TopStocks from './pages/TopStocks'
 import Dashboard from './pages/Dashboard'
 import Copilot from './pages/Copilot'
 import Markets from './pages/Markets'
@@ -128,13 +130,21 @@ function Navigation() {
   const { logout } = useAuth();
   
   const navItems = [
-    { path: '/', label: 'Portfolio', icon: <MdDashboard /> },
+    { path: '/', label: 'Top 3 Stocks', icon: <MdStars /> },
+    { path: '/portfolio', label: 'My Portfolio', icon: <MdDashboard /> },
     { path: '/macro-agent', label: 'Global Agent', icon: <MdPublic /> },
     { path: '/markets', label: 'Markets', icon: <MdAutoGraph /> },
     { path: '/deep-analysis', label: 'Quant Agent', icon: <MdAnalytics /> },
     { path: '/copilot', label: 'AI Chat', icon: <MdSmartToy /> },
     { path: '/profile', label: 'Profile', icon: <MdOutlineAccountCircle /> },
   ];
+
+  const isItemActive = (path) => {
+    if (path === '/') return location.pathname === '/' || location.pathname === '/top-stocks';
+    if (path === '/portfolio') return location.pathname === '/portfolio';
+    if (path === '/deep-analysis') return location.pathname === '/deep-analysis' || location.pathname === '/algo';
+    return location.pathname === path;
+  };
 
   const handleResetAppData = () => {
     if (window.confirm("This will reset your local portfolio holdings, balance, AI chat history, and service workers to clear any browser cache. Proceed?")) {
@@ -189,7 +199,7 @@ function Navigation() {
               e.preventDefault();
               navigate(item.path);
             }}
-            className={({ isActive }) => `nav-item ${isActive || location.pathname === item.path || (item.path === '/deep-analysis' && location.pathname === '/algo') ? 'active' : ''}`}
+            className={() => `nav-item ${isItemActive(item.path) ? 'active' : ''}`}
             style={{ cursor: 'pointer' }}
           >
             {item.icon}
@@ -231,7 +241,7 @@ function Navigation() {
                e.preventDefault();
                navigate(item.path);
              }}
-             className={({ isActive }) => `nav-item ${isActive || location.pathname === item.path || (item.path === '/deep-analysis' && location.pathname === '/algo') ? 'active' : ''}`}
+             className={() => `nav-item ${isItemActive(item.path) ? 'active' : ''}`}
              style={{ cursor: 'pointer' }}
            >
              {item.icon}
@@ -369,7 +379,9 @@ function AppShell() {
           <TopHeader />
           <AutonomousExecutionToast />
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<TopStocks />} />
+            <Route path="/top-stocks" element={<TopStocks />} />
+            <Route path="/portfolio" element={<Dashboard />} />
             <Route path="/macro-agent" element={<MacroAgent />} />
             <Route path="/markets" element={<Markets />} />
             <Route path="/algo" element={<AlgoRedirect />} />
