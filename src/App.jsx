@@ -131,7 +131,7 @@ function Navigation() {
     { path: '/', label: 'Portfolio', icon: <MdDashboard /> },
     { path: '/macro-agent', label: 'Global Agent', icon: <MdPublic /> },
     { path: '/markets', label: 'Markets', icon: <MdAutoGraph /> },
-    { path: '/deep-analysis', label: 'Deep Quant Agent', icon: <MdAnalytics /> },
+    { path: '/deep-analysis', label: 'Quant Agent', icon: <MdAnalytics /> },
     { path: '/copilot', label: 'AI Chat', icon: <MdSmartToy /> },
     { path: '/profile', label: 'Profile', icon: <MdOutlineAccountCircle /> },
   ];

@@ -197,7 +197,7 @@ export default function DeepQuantAgent() {
           }
         }
 
-        // Replicate active market's Top 3 Recommended Stocks into Deep Quant Agent
+        // Replicate active market's Top 3 Recommended Stocks into Quant Agent
         const topList = market === 'INDIA'
           ? (picks?.indiaTopPicks || picks?.topPicks || [])
           : (picks?.usTopPicks || picks?.topPicks || []);
@@ -208,7 +208,7 @@ export default function DeepQuantAgent() {
           handleAnalyze(top3Tickers, picks);
         }
       } catch (e) {
-        console.error('Error syncing Top 3 picks in Deep Quant Agent:', e);
+        console.error('Error syncing Top 3 picks in Quant Agent:', e);
       }
     };
 
@@ -391,8 +391,8 @@ export default function DeepQuantAgent() {
             const synthesis = evalItem?.explanation
               ? `${evalItem.explanation} Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
               : (isBullish
-                ? `Autonomous Deep Quant Agent rates ${cleanTicker} with a high outperformance vector. Institutional demand across product verticals is accelerating with expanding operating margins. Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
-                : `Deep Quant Agent flags elevated operational headwind for ${cleanTicker}. Recent management remarks highlight margin compression and delayed enterprise pipeline conversion. Algorithmic target of ${assetCurrency}${targetPrice} reflects downside risk.`);
+                ? `Autonomous Quant Agent rates ${cleanTicker} with a high outperformance vector. Institutional demand across product verticals is accelerating with expanding operating margins. Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
+                : `Quant Agent flags elevated operational headwind for ${cleanTicker}. Recent management remarks highlight margin compression and delayed enterprise pipeline conversion. Algorithmic target of ${assetCurrency}${targetPrice} reflects downside risk.`);
 
             return {
               ticker: cleanTicker,
@@ -608,7 +608,7 @@ export default function DeepQuantAgent() {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-gradient" style={{ fontSize: '1.75rem' }}>
-                Deep Quant Agent
+                Quant Agent
               </h1>
               <span className="text-[10px] uppercase tracking-widest font-extrabold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">
                 Institutional Quant &amp; Fundamental Intelligence
@@ -1344,7 +1344,7 @@ export default function DeepQuantAgent() {
                   <Bot className="text-emerald-400" /> Autopilot Trading Engine
                 </h2>
                 <p className="text-muted text-xs md:text-sm max-w-2xl leading-relaxed">
-                  When enabled, Deep Quant Agent monitors live streaming market ticks, matches institutional catalyst criteria, and stages automated Take-Profit orders with zero manual intervention.
+                  When enabled, Quant Agent monitors live streaming market ticks, matches institutional catalyst criteria, and stages automated Take-Profit orders with zero manual intervention.
                 </p>
               </div>
               <div className="flex items-center justify-between md:justify-end flex-wrap gap-4 w-full md:w-auto bg-black/40 p-4 rounded-xl border border-white/10">
