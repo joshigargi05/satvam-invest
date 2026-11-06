@@ -1316,6 +1316,47 @@ app.get('/api/algo-top-picks', async (req, res) => {
   }
 });
 
+// Single Unified Stock Algorithmic Evaluation Endpoint (Guarantees target price & metrics consistency across all agents)
+app.get('/api/evaluate-stocks', async (req, res) => {
+  const rawTickers = String(req.query.tickers || '').trim().toUpperCase();
+  if (!rawTickers) {
+    return res.status(400).json({ error: 'Tickers parameter is required' });
+  }
+  const symbols = rawTickers.split(/[,;\s]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+
+  try {
+    let liveQuoteMap = {};
+    try {
+      liveQuoteMap = await getBatchQuotes(symbols, 20);
+    } catch (e) {
+      console.warn('Batch quote fetch warning in evaluate-stocks:', e.message);
+    }
+
+    const results = symbols.map(sym => {
+      let company = algoStockCatalog.find(c => c.t === sym);
+      if (!company) {
+        const isIndia = sym.endsWith('.NS') || sym.endsWith('.BO') || indianTickers.has(sym);
+        company = {
+          t: sym,
+          n: `${sym} Corp.`,
+          s: isIndia ? 'Indian Enterprise' : 'US Technology / Growth',
+          market: isIndia ? 'INDIA' : 'US',
+          alphaBoost: 10,
+          keywords: [sym]
+        };
+      }
+      const formattedSym = formatSymbol(sym);
+      const quote = liveQuoteMap[sym] || liveQuoteMap[formattedSym] || {};
+      return computeStockAlgoEvaluation(company, quote, 0);
+    });
+
+    res.json({ results });
+  } catch (err) {
+    console.error('Error evaluating stocks:', err);
+    res.status(500).json({ error: 'Failed to evaluate requested stocks' });
+  }
+});
+
 app.post('/api/algo-trading', async (req, res) => {
   const { query } = req.body;
   if (!query) return res.status(400).json({ error: 'Missing query' });

@@ -96,6 +96,18 @@ export const getTopAlgoPicks = async (market = 'US', forceRefresh = false, rotat
   }
 };
 
+export const evaluateStocks = async (tickers) => {
+  try {
+    const symbols = Array.isArray(tickers) ? tickers.join(',') : tickers;
+    const response = await apiFetch(`/api/evaluate-stocks?tickers=${encodeURIComponent(symbols)}`);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error('Error evaluating stocks:', error);
+    return null;
+  }
+};
+
 export const getFundamentals = async (symbol) => {
   try {
     const response = await apiFetch(`/api/fundamentals?symbol=${symbol}`);

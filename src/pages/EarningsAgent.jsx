@@ -13,7 +13,7 @@ import {
   CartesianGrid,
   Legend
 } from 'recharts';
-import { getQuotes } from '../services/api';
+import { getQuotes, getTopAlgoPicks, evaluateStocks } from '../services/api';
 import { useMarket } from '../context/MarketContext';
 
 const Search = Lucide.Search || (() => '🔍');
@@ -118,6 +118,7 @@ export default function EarningsAgent() {
   const [selectedTickers, setSelectedTickers] = useState([]);
   const [inputTicker, setInputTicker] = useState('');
   const [inputError, setInputError] = useState('');
+  const [topPicksData, setTopPicksData] = useState(null);
 
   // Processing state
   const [analyzing, setAnalyzing] = useState(false);
@@ -131,20 +132,47 @@ export default function EarningsAgent() {
   const [activeTranscriptStock, setActiveTranscriptStock] = useState(null);
   const [showTranscriptModal, setShowTranscriptModal] = useState(false);
 
-  // Initialize from search params if present
+  // Replicate Top 3 Recommended Stocks on mount or when market toggle changes
   useEffect(() => {
-    const rawParam = searchParams.get('tickers') || searchParams.get('ticker');
-    if (rawParam) {
-      const parts = rawParam
-        .split(/[,;\s]+/)
-        .map((s) => s.trim().toUpperCase())
-        .filter(Boolean)
-        .slice(0, 3);
-      if (parts.length > 0) {
-        setSelectedTickers(parts);
+    let isMounted = true;
+    const syncStocks = async () => {
+      try {
+        const picks = await getTopAlgoPicks(market, false);
+        if (!isMounted) return;
+        if (picks) setTopPicksData(picks);
+
+        const rawParam = searchParams.get('tickers') || searchParams.get('ticker');
+        if (rawParam) {
+          const parts = rawParam
+            .split(/[,;\s]+/)
+            .map((s) => s.trim().toUpperCase())
+            .filter(Boolean)
+            .slice(0, 3);
+          if (parts.length > 0) {
+            setSelectedTickers(parts);
+            handleAnalyze(parts, picks);
+            return;
+          }
+        }
+
+        // Replicate active market's Top 3 Recommended Stocks into Deep Agent
+        const topList = market === 'INDIA'
+          ? (picks?.indiaTopPicks || picks?.topPicks || [])
+          : (picks?.usTopPicks || picks?.topPicks || []);
+
+        const top3Tickers = topList.slice(0, 3).map((p) => p.ticker);
+        if (top3Tickers.length > 0) {
+          setSelectedTickers(top3Tickers);
+          handleAnalyze(top3Tickers, picks);
+        }
+      } catch (e) {
+        console.error('Error syncing Top 3 picks in Deep Agent:', e);
       }
-    }
-  }, [searchParams]);
+    };
+
+    syncStocks();
+    return () => { isMounted = false; };
+  }, [market, searchParams]);
 
   // Handle adding ticker(s)
   const handleAddTicker = (tickerToAdd) => {
@@ -181,20 +209,22 @@ export default function EarningsAgent() {
     setInputError('');
   };
 
-  // Quick preset selector
+  // Quick preset selector: automatically triggers analysis for instant side-by-side comparison
   const loadPreset = (presetList) => {
-    setSelectedTickers(presetList.slice(0, 3));
+    const list = presetList.slice(0, 3);
+    setSelectedTickers(list);
     setInputTicker('');
     setInputError('');
+    handleAnalyze(list, topPicksData);
   };
 
-  // Execute multi-stock analysis
-  const handleAnalyze = async () => {
+  // Execute multi-stock analysis with unified quantitative engine
+  const handleAnalyze = async (overrideTickers = null, cachedPicks = null) => {
     // Gather all tickers (including anything currently in the input box if space remains)
-    let tickersToAnalyze = [...selectedTickers];
+    let tickersToAnalyze = overrideTickers && overrideTickers.length > 0 ? [...overrideTickers] : [...selectedTickers];
     const pendingText = inputTicker.trim().toUpperCase();
 
-    if (pendingText) {
+    if (!overrideTickers && pendingText) {
       const tokens = pendingText.split(/[,;\s]+/).map((t) => t.trim().toUpperCase()).filter(Boolean);
       for (const t of tokens) {
         if (!tickersToAnalyze.includes(t) && tickersToAnalyze.length < 3) {
@@ -215,14 +245,37 @@ export default function EarningsAgent() {
     setResults(null);
     setProgress(0);
 
-    // Fetch quotes for all tickers in parallel
-    const symbolsQuery = tickersToAnalyze.join(',');
+    // Parallel fetch: Live quotes + Unified Algorithmic Evaluations
     let quotesMap = {};
+    let evalMap = {};
+
     try {
-      quotesMap = await getQuotes(symbolsQuery);
+      const [quotesRes, evalRes] = await Promise.all([
+        getQuotes(tickersToAnalyze.join(',')),
+        evaluateStocks(tickersToAnalyze)
+      ]);
+      quotesMap = quotesRes || {};
+      if (evalRes?.results && Array.isArray(evalRes.results)) {
+        evalRes.results.forEach((item) => {
+          if (item?.ticker) evalMap[item.ticker] = item;
+        });
+      }
     } catch (e) {
-      console.error('Error fetching live quotes for comparison:', e);
+      console.error('Error fetching live quotes and algo evaluations for comparison:', e);
     }
+
+    // Also merge session-stabilized Top 3 picks if available
+    const activeTopPicks = cachedPicks || topPicksData;
+    const allKnownTopPicks = [
+      ...(activeTopPicks?.indiaTopPicks || []),
+      ...(activeTopPicks?.usTopPicks || []),
+      ...(activeTopPicks?.topPicks || [])
+    ];
+    allKnownTopPicks.forEach((p) => {
+      if (p?.ticker && !evalMap[p.ticker]) {
+        evalMap[p.ticker] = p;
+      }
+    });
 
     // Dynamic Multi-stage Progress Workflow
     const label = tickersToAnalyze.join(', ');
@@ -230,7 +283,7 @@ export default function EarningsAgent() {
       { p: 15, text: `Fetching SEC 10-Q & Financial Statements for [${label}]...` },
       { p: 40, text: `Processing Audio Transcripts & Voice Sentiment for [${label}]...` },
       { p: 65, text: `Correlating Macro Geopolitical Catalysts & News Vectors...` },
-      { p: 85, text: `Calculating Proprietary AI Price Target Projections...` },
+      { p: 85, text: `Calculating Unified Algorithmic Price Target Projections...` },
       { p: 100, text: `Synthesizing Side-by-Side Institutional Comparison...` }
     ];
 
@@ -245,31 +298,40 @@ export default function EarningsAgent() {
         setTimeout(() => {
           setAnalyzing(false);
 
-          // Build analyzed result for each stock
+          // Build analyzed result for each stock using unified algorithm
           const computedResults = tickersToAnalyze.map((cleanTicker, idx) => {
             const assetCurrency = getCurrency(cleanTicker);
             const quote = quotesMap[cleanTicker] || {};
+            const evalItem = evalMap[cleanTicker];
 
             let currentPrice = typeof quote.price === 'number'
               ? quote.price
-              : (assetCurrency === '₹' ? 1200.00 : 180.00);
+              : (evalItem?.currentPrice || (assetCurrency === '₹' ? 1200.00 : 180.00));
 
-            const liveChange = typeof quote.change === 'number' ? quote.change : 0;
-            const liveChangePct = typeof quote.changePct === 'number' ? quote.changePct : 0;
-
-            // Generate deterministic yet responsive metrics per ticker
-            const hash = cleanTicker.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-            const isBullish = (hash + idx) % 2 === 0;
-
-            // Target price projection
-            const targetMultiplier = isBullish
-              ? (1.12 + ((hash % 16) / 100))
-              : (0.92 - ((hash % 10) / 100));
+            const liveChange = typeof quote.change === 'number' ? quote.change : (evalItem?.change || 0);
+            const liveChangePct = typeof quote.changePct === 'number' ? quote.changePct : (evalItem?.changePct || 0);
 
             const safePrice = Number(currentPrice) || (assetCurrency === '₹' ? 1200.00 : 180.00);
-            const targetPrice = Number((safePrice * targetMultiplier).toFixed(2));
-            const upsidePct = Number((((targetPrice - safePrice) / safePrice) * 100).toFixed(1));
 
+            // UNIFIED TARGET PRICE & UPSIDE: Consistent across Deep Agent, Global Agent, and Portfolio
+            let targetPrice;
+            let upsidePct;
+
+            if (evalItem && typeof evalItem.targetPrice === 'number' && evalItem.targetPrice > 0) {
+              targetPrice = Number(evalItem.targetPrice);
+              upsidePct = Number(
+                evalItem.upsidePct !== undefined
+                  ? evalItem.upsidePct
+                  : (((targetPrice - safePrice) / safePrice) * 100).toFixed(1)
+              );
+            } else {
+              const finalScore = evalItem?.finalScore || 82;
+              upsidePct = Number(Math.max(8.5, (finalScore - 68) * 1.15).toFixed(1));
+              targetPrice = Number((safePrice * (1 + upsidePct / 100)).toFixed(2));
+            }
+
+            const isBullish = upsidePct > 0;
+            const hash = cleanTicker.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
             const revGrowthNum = isBullish ? (12 + (hash % 22)) : -(3 + (hash % 7));
             const revGrowth = `${revGrowthNum > 0 ? '+' : ''}${revGrowthNum}% YoY`;
             const epsBeatAmount = (0.12 + (hash % 30) / 100).toFixed(2);
@@ -278,28 +340,31 @@ export default function EarningsAgent() {
               : `Missed by ${assetCurrency}${(0.05 + (hash % 15) / 100).toFixed(2)}`;
 
             const margins = isBullish ? 'Expanding (+180 bps)' : 'Contracting (-95 bps)';
-            const winProbability = Math.min(96, Math.max(68, 75 + (isBullish ? 14 : -5) + (hash % 10)));
+            const winProbability = evalItem?.probability
+              ? Math.round(Number(evalItem.probability))
+              : Math.min(96, Math.max(68, 75 + (isBullish ? 14 : -5) + (hash % 10)));
 
-            // 5-Point Price Trajectory Chart
+            // 5-Point Price Trajectory Chart connecting to exact currentPrice and targetPrice
             const chartData = [
-              { month: 'Q-3', price: Number((safePrice * (isBullish ? 0.82 : 1.15)).toFixed(2)), predicted: null },
-              { month: 'Q-2', price: Number((safePrice * (isBullish ? 0.89 : 1.10)).toFixed(2)), predicted: null },
-              { month: 'Q-1', price: Number((safePrice * (isBullish ? 0.96 : 1.05)).toFixed(2)), predicted: null },
+              { month: 'Q-3', price: Number((safePrice * 0.88).toFixed(2)), predicted: null },
+              { month: 'Q-2', price: Number((safePrice * 0.93).toFixed(2)), predicted: null },
+              { month: 'Q-1', price: Number((safePrice * 0.97).toFixed(2)), predicted: null },
               { month: 'Today', price: safePrice, predicted: safePrice },
               { month: 'Target', price: null, predicted: targetPrice }
             ];
 
-            // Specific realistic transcript highlights
             const transcriptPoints = getCustomTranscriptPoints(cleanTicker, isBullish, assetCurrency);
             const globalImpact = getCustomGlobalImpact(cleanTicker, isBullish);
 
-            const synthesis = isBullish
-              ? `Autonomous Deep Agent rates ${cleanTicker} with a high outperformance vector. Institutional demand across product verticals is accelerating with expanding operating margins. Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
-              : `Deep Agent flags elevated operational headwind for ${cleanTicker}. Recent management remarks highlight margin compression and delayed enterprise pipeline conversion. Algorithmic target of ${assetCurrency}${targetPrice} reflects downside risk.`;
+            const synthesis = evalItem?.explanation
+              ? `${evalItem.explanation} Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
+              : (isBullish
+                ? `Autonomous Deep Agent rates ${cleanTicker} with a high outperformance vector. Institutional demand across product verticals is accelerating with expanding operating margins. Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
+                : `Deep Agent flags elevated operational headwind for ${cleanTicker}. Recent management remarks highlight margin compression and delayed enterprise pipeline conversion. Algorithmic target of ${assetCurrency}${targetPrice} reflects downside risk.`);
 
             return {
               ticker: cleanTicker,
-              companyName: getCompanyName(cleanTicker),
+              companyName: evalItem?.companyName || getCompanyName(cleanTicker),
               currency: assetCurrency,
               currentPrice: safePrice,
               change: liveChange,
@@ -308,7 +373,9 @@ export default function EarningsAgent() {
               upsidePct,
               chartData,
               winProbability,
-              algorithmConviction: isBullish ? (upsidePct > 15 ? 'Strong Buy' : 'High') : 'Moderate',
+              algorithmConviction: evalItem?.layers?.agentSignal || (upsidePct > 15 ? 'Strong Buy' : 'High Conviction'),
+              finalScore: evalItem?.finalScore || 85,
+              layers: evalItem?.layers,
               financials: {
                 revenue: revGrowth,
                 eps: epsChange,
@@ -362,14 +429,26 @@ export default function EarningsAgent() {
     });
   }, [results]);
 
-  // Quick Preset Options based on current market
+  // Quick Preset Options with replicated Top 3 Recommended Stocks
+  const topList = market === 'INDIA'
+    ? (topPicksData?.indiaTopPicks || topPicksData?.topPicks || [])
+    : (topPicksData?.usTopPicks || topPicksData?.topPicks || []);
+  const top3PicksTickers = topList.slice(0, 3).map((p) => p.ticker);
+  const top3PicksLabel = top3PicksTickers.length > 0 ? top3PicksTickers.join(' vs ') : 'Top 3 Picks';
+
   const presetsUS = [
-    { label: 'NVDA vs MSFT vs AAPL', tickers: ['NVDA', 'MSFT', 'AAPL'] },
+    ...(top3PicksTickers.length > 0
+      ? [{ label: `🏆 Top 3 Recommended (${top3PicksLabel})`, tickers: top3PicksTickers, isTop3: true }]
+      : []),
     { label: 'GOOGL vs META vs AMZN', tickers: ['GOOGL', 'META', 'AMZN'] },
+    { label: 'NVDA vs MSFT vs AAPL', tickers: ['NVDA', 'MSFT', 'AAPL'] },
     { label: 'AMD vs INTC vs NVDA', tickers: ['AMD', 'INTC', 'NVDA'] }
   ];
 
   const presetsIndia = [
+    ...(top3PicksTickers.length > 0
+      ? [{ label: `🏆 Top 3 Recommended (${top3PicksLabel})`, tickers: top3PicksTickers, isTop3: true }]
+      : []),
     { label: 'RELIANCE vs TCS vs INFY', tickers: ['RELIANCE', 'TCS', 'INFY'] },
     { label: 'HDFCBANK vs ICICIBANK vs SBIN', tickers: ['HDFCBANK', 'ICICIBANK', 'SBIN'] },
     { label: 'TATAMOTORS vs MARUTI', tickers: ['TATAMOTORS', 'MARUTI'] }
@@ -586,7 +665,11 @@ export default function EarningsAgent() {
               key={preset.label}
               onClick={() => loadPreset(preset.tickers)}
               disabled={analyzing}
-              className="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-purple-950/40 text-slate-300 hover:text-purple-200 border border-white/10 hover:border-purple-500/40 transition-all font-mono text-[11px]"
+              className={`px-3 py-1 rounded-lg transition-all font-mono text-[11px] flex items-center gap-1.5 ${
+                preset.isTop3
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 font-bold shadow-sm shadow-amber-500/20'
+                  : 'bg-slate-900/90 hover:bg-purple-950/40 text-slate-300 hover:text-purple-200 border border-white/10 hover:border-purple-500/40'
+              }`}
             >
               {preset.label}
             </button>
