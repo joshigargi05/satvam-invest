@@ -223,11 +223,11 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
           </button>
 
           <button
-            onClick={() => navigate('/algo')}
+            onClick={() => navigate('/deep-analysis?tab=quant')}
             className="btn btn-outline py-2 px-3 text-xs flex items-center gap-1.5 border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
           >
             <Cpu size={14} />
-            <span>Full Algo Engine</span>
+            <span>Deep Quant Agent</span>
           </button>
         </div>
       </div>
@@ -380,11 +380,11 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
                   </button>
 
                   <button
-                    onClick={() => navigate(`/algo?ticker=${stock.ticker}`)}
+                    onClick={() => navigate(`/deep-analysis?ticker=${stock.ticker}&tab=quant`)}
                     className="btn btn-outline py-2.5 px-3 text-xs font-bold flex items-center gap-1 hover:border-blue-400 text-slate-200"
-                    title={`Inspect ${stock.ticker} analysis in Algo Engine`}
+                    title={`Inspect ${stock.ticker} analysis in Deep Quant Agent`}
                   >
-                    <span>Algo Scan</span>
+                    <span>Quant Scan</span>
                     <ArrowRight size={13} />
                   </button>
                 </div>

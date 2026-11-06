@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, useNavigate, Navigate } from 'react-router-dom'
 import * as Md from 'react-icons/md'
 import * as Io5 from 'react-icons/io5'
 
@@ -21,11 +21,19 @@ import { PortfolioProvider } from './context/PortfolioContext'
 import Dashboard from './pages/Dashboard'
 import Copilot from './pages/Copilot'
 import Markets from './pages/Markets'
-import AlgoTrading from './pages/AlgoTrading'
-import EarningsAgent from './pages/EarningsAgent'
+import DeepQuantAgent from './pages/DeepQuantAgent'
 import MacroAgent from './pages/MacroAgent'
 import Profile from './pages/Profile'
 import AuthPage, { PinLockScreen } from './pages/AuthPage'
+
+function AlgoRedirect() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  if (!searchParams.has('tab')) {
+    searchParams.set('tab', 'quant');
+  }
+  return <Navigate to={`/deep-analysis?${searchParams.toString()}`} replace />;
+}
 
 import './index.css'
 
@@ -123,8 +131,7 @@ function Navigation() {
     { path: '/', label: 'Portfolio', icon: <MdDashboard /> },
     { path: '/macro-agent', label: 'Global Agent', icon: <MdPublic /> },
     { path: '/markets', label: 'Markets', icon: <MdAutoGraph /> },
-    { path: '/algo', label: 'Algo Engine', icon: <MdCode /> },
-    { path: '/deep-analysis', label: 'Deep Agent', icon: <MdAnalytics /> },
+    { path: '/deep-analysis', label: 'Deep Quant Agent', icon: <MdAnalytics /> },
     { path: '/copilot', label: 'AI Chat', icon: <MdSmartToy /> },
     { path: '/profile', label: 'Profile', icon: <MdOutlineAccountCircle /> },
   ];
@@ -182,7 +189,7 @@ function Navigation() {
               e.preventDefault();
               navigate(item.path);
             }}
-            className={({ isActive }) => `nav-item ${isActive || location.pathname === item.path ? 'active' : ''}`}
+            className={({ isActive }) => `nav-item ${isActive || location.pathname === item.path || (item.path === '/deep-analysis' && location.pathname === '/algo') ? 'active' : ''}`}
             style={{ cursor: 'pointer' }}
           >
             {item.icon}
@@ -224,7 +231,7 @@ function Navigation() {
                e.preventDefault();
                navigate(item.path);
              }}
-             className={({ isActive }) => `nav-item ${isActive || location.pathname === item.path ? 'active' : ''}`}
+             className={({ isActive }) => `nav-item ${isActive || location.pathname === item.path || (item.path === '/deep-analysis' && location.pathname === '/algo') ? 'active' : ''}`}
              style={{ cursor: 'pointer' }}
            >
              {item.icon}
@@ -365,8 +372,8 @@ function AppShell() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/macro-agent" element={<MacroAgent />} />
             <Route path="/markets" element={<Markets />} />
-            <Route path="/algo" element={<AlgoTrading />} />
-            <Route path="/deep-analysis" element={<EarningsAgent />} />
+            <Route path="/algo" element={<AlgoRedirect />} />
+            <Route path="/deep-analysis" element={<DeepQuantAgent />} />
             <Route path="/copilot" element={<Copilot />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
