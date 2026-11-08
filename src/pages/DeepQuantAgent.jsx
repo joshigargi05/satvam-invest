@@ -158,6 +158,26 @@ export default function DeepQuantAgent() {
     }
   }, [searchParams]);
 
+  // Dynamic Dropdown for Algo Stock Target: 'quarterly' | 'sixMonths' | 'twelveMonths'
+  const [targetTimeframe, setTargetTimeframe] = useState('twelveMonths');
+
+  const getStockTarget = (stock, tf = targetTimeframe) => {
+    if (stock?.targets && stock.targets[tf]) {
+      return stock.targets[tf];
+    }
+    const baseUpside = Number(stock?.upsidePct || 15);
+    const curP = Number(stock?.currentPrice || 100);
+    if (tf === 'quarterly') {
+      const u = Number((baseUpside * 0.32).toFixed(1));
+      return { label: 'Quarterly', targetPrice: Number((curP * (1 + u / 100)).toFixed(2)), upsidePct: u };
+    }
+    if (tf === 'sixMonths') {
+      const u = Number((baseUpside * 0.58).toFixed(1));
+      return { label: '6 Months', targetPrice: Number((curP * (1 + u / 100)).toFixed(2)), upsidePct: u };
+    }
+    return { label: '12 Months', targetPrice: Number(stock?.targetPrice || (curP * (1 + baseUpside / 100)).toFixed(2)), upsidePct: baseUpside };
+  };
+
   // ==========================================
   // TAB 1: Multi-Stock Comparison State
   // ==========================================
@@ -685,6 +705,24 @@ export default function DeepQuantAgent() {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           )}
         </button>
+
+        {/* Dynamic Dropdown for Algo Stock Target: Quarterly, 6 Months, 12 Months */}
+        <div className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs">
+          <span className="text-[11px] text-slate-400 font-semibold whitespace-nowrap flex items-center gap-1">
+            <Target size={12} className="text-purple-400" />
+            <span>Target Horizon:</span>
+          </span>
+          <select
+            value={targetTimeframe}
+            onChange={(e) => setTargetTimeframe(e.target.value)}
+            className="bg-transparent text-purple-300 font-bold focus:outline-none cursor-pointer text-xs"
+            title="Select dynamic target price timeframe (Quarterly, 6 Months, or 12 Months)"
+          >
+            <option value="quarterly" className="bg-slate-900 text-white">Quarterly (3M)</option>
+            <option value="sixMonths" className="bg-slate-900 text-white">6 Months</option>
+            <option value="twelveMonths" className="bg-slate-900 text-white">12 Months</option>
+          </select>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -1015,25 +1053,28 @@ export default function DeepQuantAgent() {
                         </tr>
                         <tr>
                           <td className="p-3 text-slate-300 font-semibold">Unified Target &amp; Upside</td>
-                          {results.map((r) => (
-                            <td key={r.ticker} className="p-3 font-mono font-bold">
-                              <div className="flex items-center gap-1.5">
-                                <Target size={14} className="text-purple-400" />
-                                <span className="text-white">
-                                  {r.currency}{r.targetPrice.toFixed(2)}
-                                </span>
-                                <span
-                                  className={`text-xs px-2 py-0.5 rounded-full ${
-                                    r.upsidePct > 0
-                                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                      : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                                  }`}
-                                >
-                                  {r.upsidePct > 0 ? `+${r.upsidePct}%` : `${r.upsidePct}%`}
-                                </span>
-                              </div>
-                            </td>
-                          ))}
+                          {results.map((r) => {
+                            const tg = getStockTarget(r);
+                            return (
+                              <td key={r.ticker} className="p-3 font-mono font-bold">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <Target size={14} className="text-purple-400" />
+                                  <span className="text-white">
+                                    {r.currency}{tg.targetPrice.toFixed(2)}
+                                  </span>
+                                  <span
+                                    className={`text-xs px-2 py-0.5 rounded-full ${
+                                      tg.upsidePct > 0
+                                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                        : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                    }`}
+                                  >
+                                    {tg.upsidePct > 0 ? `+${tg.upsidePct}%` : `${tg.upsidePct}%`} ({tg.label})
+                                  </span>
+                                </div>
+                              </td>
+                            );
+                          })}
                         </tr>
                         <tr>
                           <td className="p-3 text-slate-300 font-semibold">Outperform Probability</td>
@@ -1099,12 +1140,19 @@ export default function DeepQuantAgent() {
                             {stock.currency}{stock.currentPrice.toFixed(2)}
                           </span>
                         </div>
-                        <div className="text-right p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40">
-                          <span className="text-xs text-emerald-300 block font-bold">Target (+{stock.upsidePct}%)</span>
-                          <span className="text-xl font-bold font-mono text-emerald-300">
-                            {stock.currency}{stock.targetPrice.toFixed(2)}
-                          </span>
-                        </div>
+                        {(() => {
+                          const tg = getStockTarget(stock);
+                          return (
+                            <div className="text-right p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40">
+                              <span className="text-xs text-emerald-300 block font-bold">
+                                Target ({tg.label}: +{tg.upsidePct}%)
+                              </span>
+                              <span className="text-xl font-bold font-mono text-emerald-300">
+                                {stock.currency}{tg.targetPrice.toFixed(2)}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 

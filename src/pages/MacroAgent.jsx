@@ -1043,6 +1043,22 @@ export default function MacroAgent() {
                   </button>
                 </div>
 
+                {/* View in My Portfolio Navigation Link under Rotate Candidate */}
+                <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-xs flex-wrap gap-2">
+                  <span className="text-slate-400 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Holdings &amp; quantities synced to your portfolio ledger</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/portfolio')}
+                    className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 underline cursor-pointer hover:scale-105 transition-all"
+                    title="View updated holdings and quantities in My Portfolio"
+                  >
+                    <span>View in My Portfolio →</span>
+                  </button>
+                </div>
+
                 {/* Live Inline Execution Receipt Banner */}
                 {podExecutionReceipt[mktKey] && (
                   <div className="mt-3 p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/50 text-xs flex items-start justify-between gap-2 shadow-lg">

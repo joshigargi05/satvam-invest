@@ -564,23 +564,43 @@ export function PortfolioProvider({ children }) {
     };
 
     setHoldingsMap(prev => {
-      const filtered = (prev[mkt] || []).filter(h => h.bucket !== 'top1_agent');
+      const currentList = prev[mkt] || [];
+      let updated = currentList.filter(h => h.bucket !== 'top1_agent');
+
+      // Deduct or remove the previously sold stock quantity from other buckets (e.g. core/vault)
+      if (staged.previousSoldTicker) {
+        const matchIdx = updated.findIndex(h => h.ticker === staged.previousSoldTicker);
+        if (matchIdx !== -1) {
+          const existing = updated[matchIdx];
+          const soldSh = Number(staged.previousSoldShares || pod.activePosition?.shares || existing.shares);
+          const remainingShares = Number(Math.max(0, existing.shares - soldSh).toFixed(4));
+          if (remainingShares > 0.0001) {
+            updated[matchIdx] = {
+              ...existing,
+              shares: remainingShares,
+              totalValue: Number((remainingShares * (existing.currentPrice || existing.avgPrice)).toFixed(2))
+            };
+          } else {
+            updated.splice(matchIdx, 1);
+          }
+        }
+      }
+
+      updated.push({
+        ticker: approvedPosition.ticker,
+        name: approvedPosition.name,
+        shares: approvedPosition.shares,
+        avgPrice: approvedPosition.entryPrice,
+        currentPrice: approvedPosition.currentPrice,
+        totalValue: approvedPosition.currentValue,
+        category: approvedPosition.sector,
+        assetType: 'stock',
+        bucket: 'top1_agent'
+      });
+
       return {
         ...prev,
-        [mkt]: [
-          ...filtered,
-          {
-            ticker: approvedPosition.ticker,
-            name: approvedPosition.name,
-            shares: approvedPosition.shares,
-            avgPrice: approvedPosition.entryPrice,
-            currentPrice: approvedPosition.currentPrice,
-            totalValue: approvedPosition.currentValue,
-            category: approvedPosition.sector,
-            assetType: 'stock',
-            bucket: 'top1_agent'
-          }
-        ]
+        [mkt]: updated
       };
     });
 
@@ -800,10 +820,28 @@ export function PortfolioProvider({ children }) {
           };
 
           // Remove sold position from holdingsMap until user clicks 1-Click Approve on staged #1 stock
-          setHoldingsMap(prev => ({
-            ...prev,
-            [mkt]: (prev[mkt] || []).filter(h => h.bucket !== 'top1_agent')
-          }));
+          setHoldingsMap(prev => {
+            const currentList = prev[mkt] || [];
+            let updated = currentList.filter(h => h.bucket !== 'top1_agent');
+            const matchIdx = updated.findIndex(h => h.ticker === prevPos.ticker);
+            if (matchIdx !== -1) {
+              const existing = updated[matchIdx];
+              const remainingShares = Number(Math.max(0, existing.shares - prevPos.shares).toFixed(4));
+              if (remainingShares > 0.0001) {
+                updated[matchIdx] = {
+                  ...existing,
+                  shares: remainingShares,
+                  totalValue: Number((remainingShares * (existing.currentPrice || existing.avgPrice)).toFixed(2))
+                };
+              } else {
+                updated.splice(matchIdx, 1);
+              }
+            }
+            return {
+              ...prev,
+              [mkt]: updated
+            };
+          });
 
           setTopPickAgentSync(prev => ({
             ...prev,
@@ -887,23 +925,40 @@ export function PortfolioProvider({ children }) {
 
         // Update holdingsMap[mkt] so bucket 'top1_agent' reflects the newly bought #1 Top Conviction stock
         setHoldingsMap(prev => {
-          const filtered = (prev[mkt] || []).filter(h => h.bucket !== 'top1_agent');
+          const currentList = prev[mkt] || [];
+          let updated = currentList.filter(h => h.bucket !== 'top1_agent');
+
+          // If prevPos.ticker also existed in core or vault, deduct the sold shares:
+          const matchIdx = updated.findIndex(h => h.ticker === prevPos.ticker);
+          if (matchIdx !== -1) {
+            const existing = updated[matchIdx];
+            const remainingShares = Number(Math.max(0, existing.shares - prevPos.shares).toFixed(4));
+            if (remainingShares > 0.0001) {
+              updated[matchIdx] = {
+                ...existing,
+                shares: remainingShares,
+                totalValue: Number((remainingShares * (existing.currentPrice || existing.avgPrice)).toFixed(2))
+              };
+            } else {
+              updated.splice(matchIdx, 1);
+            }
+          }
+
+          updated.push({
+            ticker: nextActivePosition.ticker,
+            name: nextActivePosition.name,
+            shares: nextActivePosition.shares,
+            avgPrice: nextActivePosition.entryPrice,
+            currentPrice: nextActivePosition.currentPrice,
+            totalValue: nextActivePosition.currentValue,
+            category: nextActivePosition.sector,
+            assetType: 'stock',
+            bucket: 'top1_agent'
+          });
+
           return {
             ...prev,
-            [mkt]: [
-              ...filtered,
-              {
-                ticker: nextActivePosition.ticker,
-                name: nextActivePosition.name,
-                shares: nextActivePosition.shares,
-                avgPrice: nextActivePosition.entryPrice,
-                currentPrice: nextActivePosition.currentPrice,
-                totalValue: nextActivePosition.currentValue,
-                category: nextActivePosition.sector,
-                assetType: 'stock',
-                bucket: 'top1_agent'
-              }
-            ]
+            [mkt]: updated
           };
         });
 

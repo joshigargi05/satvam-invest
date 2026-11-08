@@ -667,8 +667,8 @@ export default function Dashboard() {
             ) : (
               holdings
                 .filter(asset => {
-                  if (holdingsFilter === 'CORE') return (asset.bucket || 'core') !== 'agent_vault';
-                  if (holdingsFilter === 'VAULT') return asset.bucket === 'agent_vault';
+                  if (holdingsFilter === 'CORE') return (asset.bucket || 'core') !== 'agent_vault' && asset.bucket !== 'top1_agent';
+                  if (holdingsFilter === 'VAULT') return asset.bucket === 'agent_vault' || asset.bucket === 'top1_agent';
                   return true;
                 })
                 .map((asset, index) => {
@@ -703,11 +703,13 @@ export default function Dashboard() {
                       </td>
                       <td className="p-4 whitespace-nowrap">
                         <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                          isVaultHolding 
-                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 
-                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          asset.bucket === 'top1_agent'
+                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                            : isVaultHolding 
+                              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 
+                              : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                         }`}>
-                          {isVaultHolding ? '⚡ Tactical Vault' : '🛡️ Long-Term Core'}
+                          {asset.bucket === 'top1_agent' ? '🏆 #1 Top Pick' : isVaultHolding ? '⚡ Tactical Vault' : '🛡️ Long-Term Core'}
                         </span>
                       </td>
                       <td className="p-4 whitespace-nowrap">

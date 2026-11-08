@@ -18,6 +18,7 @@ dist-ssr
 
 # Local runtime state, Python cache & scratch files
 data/*.json
+!data/algo_targets_store.json
 scratch/
 ml/__pycache__/
 *.pyc

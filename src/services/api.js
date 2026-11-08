@@ -203,3 +203,58 @@ export const getMobileReleaseManifest = async () => {
     return null;
   }
 };
+
+// ---------------------------------------------------------------------------
+// Algo Target Milestones & Celebration APIs
+// ---------------------------------------------------------------------------
+
+export const getTargetMilestonesHistory = async (market = null) => {
+  try {
+    const url = market ? `/api/algo-targets/history?market=${market}` : '/api/algo-targets/history';
+    const response = await apiFetch(url);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching target milestones history:', error);
+    return null;
+  }
+};
+
+export const getUnreadCelebration = async (market = null) => {
+  try {
+    const url = market ? `/api/algo-targets/celebration?market=${market}` : '/api/algo-targets/celebration';
+    const response = await apiFetch(url);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching unread celebration:', error);
+    return null;
+  }
+};
+
+export const ackCelebration = async (id) => {
+  try {
+    const response = await apiFetch(`/api/algo-targets/celebration/${id}/ack`, {
+      method: 'POST'
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    return Boolean(data.success);
+  } catch (error) {
+    console.error('Error acknowledging celebration:', error);
+    return false;
+  }
+};
+
+export const simulateTargetHit = async (ticker, timeframe = 'Quarterly') => {
+  try {
+    const response = await apiFetch('/api/algo-targets/simulate-hit', {
+      method: 'POST',
+      body: JSON.stringify({ ticker, timeframe })
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    return null;
+  }
+};

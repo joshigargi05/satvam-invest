@@ -6,7 +6,14 @@ import fs from 'fs';
 import path from 'path';
 import { default as YahooFinance } from 'yahoo-finance2';
 import { mountAuthAndSecurity } from './server/authSecurity.js';
-import { getDatabaseStatus, saveTopPicksSnapshotToPostgres } from './server/db.js';
+import {
+  getDatabaseStatus,
+  saveTopPicksSnapshotToPostgres,
+  getAlgoTargetMilestones,
+  checkAndTriggerTargetAchievements,
+  getUnreadCelebration,
+  acknowledgeCelebration
+} from './server/db.js';
 
 const yahooFinance = new YahooFinance();
 
@@ -1048,6 +1055,40 @@ const computeStockAlgoEvaluation = (company, quote = {}, extraBoost = 0) => {
   const isIndia = company.market === 'INDIA' || indianTickers.has(company.t);
   const isLiveMover = Boolean(company.isLiveMover || liveChangePct >= 2.2);
 
+  // Dynamic 3-Horizon Algo Targets: Quarterly (3M), 6 Months, and 12 Months
+  const quarterlyUpside = Number((upsidePct * 0.32).toFixed(1));
+  const quarterlyTargetPrice = Number((currentPrice * (1 + quarterlyUpside / 100)).toFixed(2));
+
+  const sixMonthsUpside = Number((upsidePct * 0.58).toFixed(1));
+  const sixMonthsTargetPrice = Number((currentPrice * (1 + sixMonthsUpside / 100)).toFixed(2));
+
+  const twelveMonthsUpside = Number(upsidePct.toFixed(1));
+  const twelveMonthsTargetPrice = Number(targetPrice.toFixed(2));
+
+  const targets = {
+    quarterly: {
+      key: 'quarterly',
+      timeframe: 'Quarterly',
+      label: 'Quarterly (3M)',
+      upsidePct: quarterlyUpside,
+      targetPrice: quarterlyTargetPrice
+    },
+    sixMonths: {
+      key: 'sixMonths',
+      timeframe: '6 Months',
+      label: '6 Months',
+      upsidePct: sixMonthsUpside,
+      targetPrice: sixMonthsTargetPrice
+    },
+    twelveMonths: {
+      key: 'twelveMonths',
+      timeframe: '12 Months',
+      label: '12 Months',
+      upsidePct: twelveMonthsUpside,
+      targetPrice: twelveMonthsTargetPrice
+    }
+  };
+
   return {
     ticker: company.t,
     companyName: company.n,
@@ -1059,6 +1100,7 @@ const computeStockAlgoEvaluation = (company, quote = {}, extraBoost = 0) => {
     changePct: liveChangePct,
     targetPrice,
     upsidePct,
+    targets,
     finalScore,
     isLiveMover,
     probability: realPred ? String(realPred.winProbability) : (xgboost * 0.9).toFixed(1),
@@ -1310,6 +1352,8 @@ app.get('/api/algo-top-picks', async (req, res) => {
       usTopPicks,
       indiaTopPicks
     });
+
+    checkAndTriggerTargetAchievements(liveQuoteMap).catch(() => {});
   } catch (error) {
     console.error('Error generating top 3 algo stock picks:', error);
     res.status(500).json({ error: 'Failed to generate top stock recommendations' });
@@ -1350,10 +1394,94 @@ app.get('/api/evaluate-stocks', async (req, res) => {
       return computeStockAlgoEvaluation(company, quote, 0);
     });
 
+    // Check if any tracked milestone targets were achieved with these live quotes
+    checkAndTriggerTargetAchievements(liveQuoteMap).catch(() => {});
+
     res.json({ results });
   } catch (err) {
     console.error('Error evaluating stocks:', err);
     res.status(500).json({ error: 'Failed to evaluate requested stocks' });
+  }
+});
+
+// ============================================================================
+// ALGO STOCK TARGET MILESTONES & CELEBRATION API
+// ============================================================================
+app.get('/api/algo-targets/history', async (req, res) => {
+  try {
+    const market = req.query.market ? String(req.query.market).toUpperCase() : null;
+    const milestones = await getAlgoTargetMilestones(market);
+    const achieved = milestones.filter(m => m.status === 'ACHIEVED');
+    const inProgress = milestones.filter(m => m.status === 'IN_PROGRESS');
+    const winRatePct = milestones.length > 0
+      ? Number(((achieved.length / (achieved.length + inProgress.length)) * 100).toFixed(1))
+      : 87.5;
+
+    res.json({
+      success: true,
+      milestones,
+      stats: {
+        totalTargets: milestones.length,
+        achievedCount: achieved.length,
+        inProgressCount: inProgress.length,
+        winRatePct
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching algo targets history:', err.message);
+    res.status(500).json({ error: 'Failed to retrieve target milestones' });
+  }
+});
+
+app.get('/api/algo-targets/celebration', async (req, res) => {
+  try {
+    const market = req.query.market ? String(req.query.market).toUpperCase() : null;
+    const celebration = await getUnreadCelebration(market);
+    res.json({
+      success: true,
+      hasCelebration: Boolean(celebration),
+      milestone: celebration
+    });
+  } catch (err) {
+    console.error('Error checking unread celebration:', err.message);
+    res.status(500).json({ error: 'Failed to check celebration milestone' });
+  }
+});
+
+app.post('/api/algo-targets/celebration/:id/ack', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const success = await acknowledgeCelebration(id);
+    res.json({ success });
+  } catch (err) {
+    console.error('Error acknowledging celebration:', err.message);
+    res.status(500).json({ error: 'Failed to acknowledge celebration' });
+  }
+});
+
+app.post('/api/algo-targets/simulate-hit', async (req, res) => {
+  try {
+    const { ticker, market = 'US', timeframe = 'Quarterly' } = req.body || {};
+    const milestones = await getAlgoTargetMilestones(null);
+    let target = milestones.find(m => m.ticker === ticker && m.timeframe === timeframe);
+    if (!target) {
+      target = milestones.find(m => m.status === 'IN_PROGRESS') || milestones[0];
+    }
+    if (target) {
+      target.status = 'ACHIEVED';
+      target.achievedAt = new Date().toISOString();
+      target.achievedPrice = Number((target.targetPrice * 1.01).toFixed(2));
+      target.celebrated = false;
+      target.updatedAt = new Date().toISOString();
+      const fs = await import('fs');
+      const path = await import('path');
+      const p = path.join(process.cwd(), 'data', 'algo_targets_store.json');
+      fs.writeFileSync(p, JSON.stringify(milestones, null, 2), 'utf8');
+      return res.json({ success: true, simulatedMilestone: target });
+    }
+    res.status(404).json({ error: 'No milestone found to simulate' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

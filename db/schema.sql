@@ -244,4 +244,29 @@ CREATE TABLE IF NOT EXISTS copilot_messages (
 
 CREATE INDEX IF NOT EXISTS idx_copilot_user_time ON copilot_messages (user_id, created_at ASC);
 
+-- ============================================================================
+-- 11. ALGO STOCK TARGET MILESTONES & CELEBRATION AUDIT LEDGER
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS algo_target_milestones (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticker                  VARCHAR(32) NOT NULL,
+    company_name            VARCHAR(150) NOT NULL,
+    market                  VARCHAR(10) NOT NULL CHECK (market IN ('US', 'INDIA')),
+    timeframe               VARCHAR(20) NOT NULL CHECK (timeframe IN ('Quarterly', '6 Months', '12 Months')),
+    recommended_price       NUMERIC(18, 4) NOT NULL,
+    target_price            NUMERIC(18, 4) NOT NULL,
+    target_pct              NUMERIC(10, 2) NOT NULL,
+    current_price           NUMERIC(18, 4) NOT NULL,
+    status                  VARCHAR(20) NOT NULL DEFAULT 'IN_PROGRESS' CHECK (status IN ('IN_PROGRESS', 'ACHIEVED', 'EXPIRED')),
+    achieved_at             TIMESTAMPTZ,
+    achieved_price          NUMERIC(18, 4),
+    celebrated              BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (ticker, market, timeframe)
+);
+
+CREATE INDEX IF NOT EXISTS idx_algo_milestones_status ON algo_target_milestones (market, status);
+CREATE INDEX IF NOT EXISTS idx_algo_milestones_celebrated ON algo_target_milestones (celebrated) WHERE status = 'ACHIEVED';
+
 COMMIT;

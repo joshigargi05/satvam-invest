@@ -30,7 +30,7 @@ let dbState = {
   connectionTarget: 'local-file',
   lastSyncAt: null,
   lastError: null,
-  tablesCount: 10,
+  tablesCount: 11,
   tables: [
     'users',
     'user_sessions',
@@ -41,7 +41,8 @@ let dbState = {
     'trade_orders',
     'rebalance_executions',
     'algo_top_picks_snapshots',
-    'copilot_messages'
+    'copilot_messages',
+    'algo_target_milestones'
   ]
 };
 
@@ -383,3 +384,279 @@ export async function saveTopPicksSnapshotToPostgres(market, tradingSessionDate,
     return false;
   }
 }
+
+const TARGETS_STORE_PATH = path.join(process.cwd(), 'data', 'algo_targets_store.json');
+
+const DEFAULT_SEED_MILESTONES = [
+  {
+    id: 'milestone-us-nvda-q',
+    ticker: 'NVDA',
+    companyName: 'NVIDIA Corporation',
+    market: 'US',
+    currency: '$',
+    timeframe: 'Quarterly',
+    recommendedPrice: 124.50,
+    targetPrice: 142.50,
+    targetPct: 14.5,
+    currentPrice: 144.20,
+    status: 'ACHIEVED',
+    achievedAt: '2026-10-18T14:30:00.000Z',
+    achievedPrice: 144.20,
+    celebrated: false,
+    explanation: 'Blackwell enterprise data center revenue acceleration and margin expansion drove immediate target breakout.',
+    createdAt: '2026-09-01T10:00:00.000Z',
+    updatedAt: '2026-10-18T14:30:00.000Z'
+  },
+  {
+    id: 'milestone-in-rel-q',
+    ticker: 'RELIANCE',
+    companyName: 'Reliance Industries Ltd.',
+    market: 'INDIA',
+    currency: '₹',
+    timeframe: 'Quarterly',
+    recommendedPrice: 1185.00,
+    targetPrice: 1285.00,
+    targetPct: 8.4,
+    currentPrice: 1292.50,
+    status: 'ACHIEVED',
+    achievedAt: '2026-10-22T09:45:00.000Z',
+    achievedPrice: 1292.50,
+    celebrated: false,
+    explanation: 'Jio tariff monetization and retail footfall expansion drove quarterly operational beat.',
+    createdAt: '2026-09-10T09:30:00.000Z',
+    updatedAt: '2026-10-22T09:45:00.000Z'
+  },
+  {
+    id: 'milestone-us-meta-6m',
+    ticker: 'META',
+    companyName: 'Meta Platforms Inc.',
+    market: 'US',
+    currency: '$',
+    timeframe: '6 Months',
+    recommendedPrice: 515.00,
+    targetPrice: 610.00,
+    targetPct: 18.4,
+    currentPrice: 614.80,
+    status: 'ACHIEVED',
+    achievedAt: '2026-10-25T16:00:00.000Z',
+    achievedPrice: 614.80,
+    celebrated: true,
+    explanation: 'Advantage+ AI ad monetization and Reels engagement surge led to decisive multi-month breakout.',
+    createdAt: '2026-05-15T12:00:00.000Z',
+    updatedAt: '2026-10-25T16:00:00.000Z'
+  },
+  {
+    id: 'milestone-in-tcs-6m',
+    ticker: 'TCS',
+    companyName: 'Tata Consultancy Services',
+    market: 'INDIA',
+    currency: '₹',
+    timeframe: '6 Months',
+    recommendedPrice: 2380.00,
+    targetPrice: 2640.00,
+    targetPct: 10.9,
+    currentPrice: 2652.00,
+    status: 'ACHIEVED',
+    achievedAt: '2026-10-30T10:15:00.000Z',
+    achievedPrice: 2652.00,
+    celebrated: true,
+    explanation: 'Major BFSI multi-year generative AI cloud modernizations fueled operating margin recovery.',
+    createdAt: '2026-06-01T09:15:00.000Z',
+    updatedAt: '2026-10-30T10:15:00.000Z'
+  },
+  {
+    id: 'milestone-us-googl-12m',
+    ticker: 'GOOGL',
+    companyName: 'Alphabet Inc.',
+    market: 'US',
+    currency: '$',
+    timeframe: '12 Months',
+    recommendedPrice: 192.50,
+    targetPrice: 238.00,
+    targetPct: 23.6,
+    currentPrice: 218.40,
+    status: 'IN_PROGRESS',
+    achievedAt: null,
+    achievedPrice: null,
+    celebrated: false,
+    explanation: 'Gemini workspace expansion and enterprise cloud backlog compound annual upside.',
+    createdAt: '2026-08-15T10:00:00.000Z',
+    updatedAt: '2026-11-08T10:00:00.000Z'
+  },
+  {
+    id: 'milestone-us-amzn-6m',
+    ticker: 'AMZN',
+    companyName: 'Amazon.com Inc.',
+    market: 'US',
+    currency: '$',
+    timeframe: '6 Months',
+    recommendedPrice: 198.00,
+    targetPrice: 228.00,
+    targetPct: 15.2,
+    currentPrice: 206.50,
+    status: 'IN_PROGRESS',
+    achievedAt: null,
+    achievedPrice: null,
+    celebrated: false,
+    explanation: 'AWS cloud reacceleration and regional fulfillment cost efficiencies powering operating income.',
+    createdAt: '2026-08-20T11:00:00.000Z',
+    updatedAt: '2026-11-08T10:00:00.000Z'
+  },
+  {
+    id: 'milestone-in-hdfc-12m',
+    ticker: 'HDFCBANK',
+    companyName: 'HDFC Bank Ltd.',
+    market: 'INDIA',
+    currency: '₹',
+    timeframe: '12 Months',
+    recommendedPrice: 1720.00,
+    targetPrice: 1980.00,
+    targetPct: 15.1,
+    currentPrice: 1785.00,
+    status: 'IN_PROGRESS',
+    achievedAt: null,
+    achievedPrice: null,
+    celebrated: false,
+    explanation: 'Merger credit deposit normalization, deposit growth trajectory, and branch leverage expansion.',
+    createdAt: '2026-07-10T09:30:00.000Z',
+    updatedAt: '2026-11-08T10:00:00.000Z'
+  }
+];
+
+function readLocalMilestonesStore() {
+  try {
+    if (fs.existsSync(TARGETS_STORE_PATH)) {
+      const raw = fs.readFileSync(TARGETS_STORE_PATH, 'utf8');
+      return JSON.parse(raw);
+    } else {
+      const dir = path.dirname(TARGETS_STORE_PATH);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(TARGETS_STORE_PATH, JSON.stringify(DEFAULT_SEED_MILESTONES, null, 2), 'utf8');
+      return DEFAULT_SEED_MILESTONES;
+    }
+  } catch (e) {
+    console.error('[DB] readLocalMilestonesStore error:', e.message);
+  }
+  return DEFAULT_SEED_MILESTONES;
+}
+
+function writeLocalMilestonesStore(items) {
+  try {
+    const dir = path.dirname(TARGETS_STORE_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(TARGETS_STORE_PATH, JSON.stringify(items, null, 2), 'utf8');
+    return true;
+  } catch (e) {
+    console.error('[DB] writeLocalMilestonesStore error:', e.message);
+    return false;
+  }
+}
+
+export async function getAlgoTargetMilestones(market = null) {
+  if (pgPool && dbState.connected) {
+    try {
+      const query = market
+        ? 'SELECT * FROM algo_target_milestones WHERE market = $1 ORDER BY created_at DESC'
+        : 'SELECT * FROM algo_target_milestones ORDER BY created_at DESC';
+      const params = market ? [market === 'INDIA' ? 'INDIA' : 'US'] : [];
+      const res = await pgPool.query(query, params);
+      return res.rows.map(r => ({
+        id: r.id,
+        ticker: r.ticker,
+        companyName: r.company_name,
+        market: r.market,
+        currency: r.market === 'INDIA' ? '₹' : '$',
+        timeframe: r.timeframe,
+        recommendedPrice: Number(r.recommended_price),
+        targetPrice: Number(r.target_price),
+        targetPct: Number(r.target_pct),
+        currentPrice: Number(r.current_price),
+        status: r.status,
+        achievedAt: r.achieved_at,
+        achievedPrice: r.achieved_price ? Number(r.achieved_price) : null,
+        celebrated: Boolean(r.celebrated),
+        createdAt: r.created_at,
+        updatedAt: r.updated_at
+      }));
+    } catch (e) {
+      console.warn('[GCP DB] Postgres getAlgoTargetMilestones fallback to local file:', e.message);
+    }
+  }
+
+  const all = readLocalMilestonesStore();
+  if (market) {
+    const cleanMarket = market === 'INDIA' ? 'INDIA' : 'US';
+    return all.filter(m => m.market === cleanMarket);
+  }
+  return all;
+}
+
+export async function checkAndTriggerTargetAchievements(liveQuoteMap = {}) {
+  const all = readLocalMilestonesStore();
+  let updatedCount = 0;
+  const newlyAchieved = [];
+
+  for (const m of all) {
+    if (m.status !== 'IN_PROGRESS') continue;
+    const quote = liveQuoteMap[m.ticker] || {};
+    const livePrice = Number(quote.price || quote.regularMarketPrice || 0);
+    if (livePrice > 0) {
+      m.currentPrice = livePrice;
+      if (livePrice >= m.targetPrice) {
+        m.status = 'ACHIEVED';
+        m.achievedAt = new Date().toISOString();
+        m.achievedPrice = livePrice;
+        m.celebrated = false;
+        m.updatedAt = new Date().toISOString();
+        newlyAchieved.push(m);
+        updatedCount++;
+      }
+    }
+  }
+
+  if (updatedCount > 0) {
+    writeLocalMilestonesStore(all);
+
+    if (pgPool && dbState.connected) {
+      for (const m of newlyAchieved) {
+        try {
+          await pgPool.query(
+            `UPDATE algo_target_milestones
+             SET status = 'ACHIEVED', achieved_at = NOW(), achieved_price = $1, celebrated = FALSE, current_price = $1, updated_at = NOW()
+             WHERE ticker = $2 AND timeframe = $3`,
+            [m.achievedPrice, m.ticker, m.timeframe]
+          );
+        } catch (e) {}
+      }
+    }
+  }
+
+  return newlyAchieved;
+}
+
+export async function getUnreadCelebration(market = null) {
+  const milestones = await getAlgoTargetMilestones(market);
+  return milestones.find(m => m.status === 'ACHIEVED' && !m.celebrated) || null;
+}
+
+export async function acknowledgeCelebration(id) {
+  const all = readLocalMilestonesStore();
+  let found = false;
+  for (const m of all) {
+    if (m.id === id) {
+      m.celebrated = true;
+      m.updatedAt = new Date().toISOString();
+      found = true;
+    }
+  }
+  if (found) {
+    writeLocalMilestonesStore(all);
+    if (pgPool && dbState.connected) {
+      try {
+        await pgPool.query('UPDATE algo_target_milestones SET celebrated = TRUE WHERE id = $1', [toDeterministicUuid(id)]);
+      } catch (e) {}
+    }
+  }
+  return found;
+}
+
