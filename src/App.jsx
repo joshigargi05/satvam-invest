@@ -163,31 +163,54 @@ function Navigation() {
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="md-hidden flex justify-between items-center p-3.5 bg-black/50 border-b border-white/5">
-        <div className="flex items-center gap-2.5">
-          <GaloraLogo size={30} />
-          <div>
-            <h1 className="text-gradient font-bold" style={{ fontSize: '1.1rem', margin: 0, lineHeight: 1.1 }}>Galora AI</h1>
-            <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>AI-Powered Wealth Generation</span>
+      {/* Sticky Mobile Top Header + High-Visibility Top Navigation Bar */}
+      <div className="md-hidden mobile-top-sticky-shell">
+        <div className="flex justify-between items-center px-3.5 py-2.5">
+          <div className="flex items-center gap-2.5">
+            <GaloraLogo size={28} />
+            <div>
+              <h1 className="text-gradient font-bold" style={{ fontSize: '1.05rem', margin: 0, lineHeight: 1.1 }}>Galora AI</h1>
+              <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block' }}>AI-Powered Wealth Generation</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={logout}
+              className="logout-header-btn"
+            >
+              <MdLogout />
+              <span>Sign Out</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleResetAppData}
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-white/15 text-slate-300 bg-slate-800/80"
+            >
+              Reset
+            </button>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={logout}
-            className="logout-header-btn"
-          >
-            <MdLogout />
-            <span>Sign Out</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleResetAppData}
-            className="text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-white/15 text-slate-300 bg-slate-800/80"
-          >
-            Reset
-          </button>
+
+        {/* High-Visibility Top Navigation Icons & Labels (Always visible at top of mobile screen) */}
+        <div className="mobile-top-nav-grid">
+          {navItems.map((item) => (
+            <NavLink
+              key={`top-${item.path}`}
+              to={item.path}
+              end={item.path === '/'}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(item.path);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={() => `mobile-top-nav-pill ${isItemActive(item.path) ? 'active' : ''}`}
+              style={{ cursor: 'pointer' }}
+            >
+              {item.icon}
+              <span>{item.mobileLabel || item.label}</span>
+            </NavLink>
+          ))}
         </div>
       </div>
 
@@ -201,6 +224,7 @@ function Navigation() {
             onClick={(e) => {
               e.preventDefault();
               navigate(item.path);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className={() => `nav-item ${isItemActive(item.path) ? 'active' : ''}`}
             style={{ cursor: 'pointer' }}
