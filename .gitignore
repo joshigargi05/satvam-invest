@@ -26,9 +26,11 @@ ml/__pycache__/
 # Mobile Native Build Artifacts (Android & iOS)
 android/.gradle/
 android/app/build/
+android/app/src/main/assets/public/
 android/local.properties
 ios/App/Pods/
 ios/App/build/
+ios/App/App/public/
 
 
 # Editor directories and files

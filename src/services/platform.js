@@ -75,10 +75,8 @@ export function getApiBaseUrl() {
 
   const info = detectPlatformInfo();
   if (info.isNative) {
-    // Default loopback for Android Emulator (10.0.2.2) vs iOS Simulator (localhost)
-    return info.platform === 'android'
-      ? 'http://10.0.2.2:3000'
-      : 'http://localhost:3000';
+    // Connect native Android (.apk/.aab) and iOS (.ipa) apps directly to live production Cloud Run backend
+    return 'https://galora.ai';
   }
   return '';
 }

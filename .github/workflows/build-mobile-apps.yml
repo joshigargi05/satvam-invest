@@ -1,0 +1,103 @@
+name: Build Galora AI Android & iOS Mobile Apps
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'android/**'
+      - 'ios/**'
+      - 'capacitor.config.json'
+      - '.github/workflows/build-mobile-apps.yml'
+
+jobs:
+  build-android:
+    name: Build Android APK & Play Store AAB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Java 21 for Android Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Dependencies & Build Web Assets
+        run: |
+          npm install --legacy-peer-deps
+          npm run build
+          npx cap sync android
+
+      - name: Build Android Debug APK & Release Bundle (AAB)
+        working-directory: ./android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug bundleRelease
+
+      - name: Upload Ready-to-Install Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Galora-AI-Android-Debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      - name: Upload Google Play Store Release AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: Galora-AI-Android-PlayStore-AAB
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+  build-ios:
+    name: Build iOS Xcode App Bundle (macOS Runner)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies & Sync Capacitor iOS
+        run: |
+          npm install --legacy-peer-deps
+          npm run build
+          npx cap sync ios
+
+      - name: Build Unsigned iOS App Bundle via xcodebuild
+        working-directory: ./ios/App
+        run: |
+          xcodebuild -project App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package Unsigned IPA for Sideloading / TestFlight Signing
+        run: |
+          mkdir -p Payload
+          cp -r ios/App/build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -r Galora-AI-iOS-Unsigned.ipa Payload
+
+      - name: Upload iOS App Artifact (.ipa & Xcode Build)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Galora-AI-iOS-App-IPA
+          path: Galora-AI-iOS-Unsigned.ipa
+          retention-days: 30

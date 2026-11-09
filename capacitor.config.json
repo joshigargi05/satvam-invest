@@ -2,7 +2,6 @@
   "appId": "com.galora.ai",
   "appName": "Galora AI",
   "webDir": "dist",
-  "bundledWebRuntime": false,
   "server": {
     "androidScheme": "https",
     "iosScheme": "capacitor",
