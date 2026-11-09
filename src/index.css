@@ -1265,68 +1265,27 @@ table th, table td { vertical-align: middle; }
   user-select: auto;
 }
 
-/* Sticky Top Mobile Header + Quick Navigation Bar (< 768px) */
-.mobile-top-sticky-shell {
-  position: sticky;
-  top: 0;
-  z-index: 60;
-  width: 100%;
-  background: rgba(3, 7, 18, 0.96);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.28);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-}
-
-.mobile-top-nav-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.2rem;
-  padding: 0.35rem 0.3rem 0.45rem 0.3rem;
-  background: rgba(15, 23, 42, 0.92);
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.mobile-top-nav-pill {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.16rem;
-  padding: 0.35rem 0.1rem;
-  border-radius: 10px;
+/* High-Visibility Mobile Bottom Navigation Items */
+.mobile-nav .nav-item {
   background: rgba(30, 41, 59, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #e2e8f0;
-  text-decoration: none;
-  min-width: 0;
-  transition: all 0.2s ease;
+  padding: 0.35rem 0.1rem;
+  border-radius: 10px;
 }
 
-.mobile-top-nav-pill svg {
-  font-size: 1.05rem;
+.mobile-nav .nav-item svg {
   color: #93c5fd;
-  flex-shrink: 0;
 }
 
-.mobile-top-nav-pill span {
-  font-size: 0.58rem;
-  font-weight: 700;
-  line-height: 1.05;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.mobile-top-nav-pill.active {
+.mobile-nav .nav-item.active {
   background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
   border-color: rgba(16, 185, 129, 0.65);
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
-.mobile-top-nav-pill.active svg {
+.mobile-nav .nav-item.active svg {
   color: #ffffff;
 }
 
