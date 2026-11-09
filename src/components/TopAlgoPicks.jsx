@@ -42,7 +42,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
   const [tradeCustomExitPrice, setTradeCustomExitPrice] = useState('');
   const [purchaseToast, setPurchaseToast] = useState('');
 
-  // 1) Dynamic Dropdown for Algo Stock Target: 'quarterly' | 'sixMonths' | 'twelveMonths'
+  // 1) Dynamic Dropdown for Algo Stock Target: 'sixMonths' | 'twelveMonths'
   const [targetTimeframe, setTargetTimeframe] = useState('twelveMonths');
 
   // 2) Target Milestones History & Celebration Modal State
@@ -52,22 +52,13 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
   const [simulatingCelebration, setSimulatingCelebration] = useState(false);
 
   const getStockTargetInfo = (stock, timeframe = targetTimeframe) => {
-    if (stock?.targets && stock.targets[timeframe]) {
-      return stock.targets[timeframe];
+    const cleanTimeframe = timeframe === 'sixMonths' ? 'sixMonths' : 'twelveMonths';
+    if (stock?.targets && stock.targets[cleanTimeframe]) {
+      return stock.targets[cleanTimeframe];
     }
     const baseUpside = Number(stock?.upsidePct || 15);
     const currentPrice = Number(stock?.currentPrice || 100);
-    if (timeframe === 'quarterly') {
-      const uPct = Number((baseUpside * 0.32).toFixed(1));
-      return {
-        key: 'quarterly',
-        timeframe: 'Quarterly',
-        label: 'Quarterly',
-        upsidePct: uPct,
-        targetPrice: Number((currentPrice * (1 + uPct / 100)).toFixed(2))
-      };
-    }
-    if (timeframe === 'sixMonths') {
+    if (cleanTimeframe === 'sixMonths') {
       const uPct = Number((baseUpside * 0.58).toFixed(1));
       return {
         key: 'sixMonths',
@@ -268,68 +259,73 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
         </div>
 
         {/* Market Switcher & Controls */}
-        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end">
-          {/* Quick US / IND Toggle synced with global MarketContext */}
-          <div className="flex items-center bg-slate-950/90 p-1 rounded-xl border border-white/10 text-xs">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end">
+          {/* High-Visibility IND Top 3 / US Top 3 Market Switcher */}
+          <div className="grid grid-cols-2 sm:flex items-center bg-slate-950 p-1.5 rounded-2xl border-2 border-blue-500/40 shadow-lg shadow-blue-500/10 gap-1.5 w-full sm:w-auto">
             <button
+              type="button"
               onClick={() => setMarket('INDIA')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 market === 'INDIA'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border border-blue-400/50'
+                  : 'bg-slate-800/90 text-slate-200 border border-white/15 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              <span>₹</span>
-              <span>IND Top 3</span>
+              {market === 'INDIA' && <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse"></span>}
+              <span>🇮🇳 ₹ IND Top 3</span>
             </button>
             <button
+              type="button"
               onClick={() => setMarket('US')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 market === 'US'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/35 border border-emerald-400/50'
+                  : 'bg-slate-800/90 text-slate-200 border border-white/15 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              <span>$</span>
-              <span>US Top 3</span>
+              {market === 'US' && <span className="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span>}
+              <span>🇺🇸 $ US Top 3</span>
             </button>
           </div>
 
-          {/* Dynamic Dropdown for Algo Stock Target: Quarterly, 6 Months, 12 Months */}
-          <div className="flex items-center gap-1.5 bg-slate-950/90 px-3 py-1.5 rounded-xl border border-white/10 text-xs shadow-inner">
-            <span className="text-[11px] text-slate-400 font-semibold whitespace-nowrap flex items-center gap-1">
-              <Target size={12} className="text-emerald-400" />
-              <span>Target:</span>
-            </span>
-            <select
-              value={targetTimeframe}
-              onChange={(e) => setTargetTimeframe(e.target.value)}
-              className="bg-transparent text-emerald-300 font-bold focus:outline-none cursor-pointer text-xs"
-              title="Select dynamic target price timeframe (Quarterly, 6 Months, or 12 Months)"
+          {/* Secondary Controls Row: Target (6M / 12M), Recalculate, Quant Agent */}
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            {/* Dynamic Dropdown for Algo Stock Target: 6 Months or 12 Months */}
+            <div className="flex items-center gap-1.5 bg-slate-950/90 px-2.5 py-1.5 rounded-xl border border-white/15 text-[11px] sm:text-xs shadow-inner">
+              <span className="text-[11px] text-slate-300 font-semibold whitespace-nowrap flex items-center gap-1">
+                <Target size={12} className="text-emerald-400 shrink-0" />
+                <span>Target:</span>
+              </span>
+              <select
+                value={targetTimeframe}
+                onChange={(e) => setTargetTimeframe(e.target.value)}
+                className="bg-transparent text-emerald-300 font-bold focus:outline-none cursor-pointer text-[11px] sm:text-xs"
+                style={{ fontSize: '0.75rem', lineHeight: 1.2 }}
+                title="Select dynamic target price timeframe (6 Months or 12 Months)"
+              >
+                <option value="sixMonths" className="bg-slate-900 text-white" style={{ fontSize: '0.75rem' }}>6 Months</option>
+                <option value="twelveMonths" className="bg-slate-900 text-white" style={{ fontSize: '0.75rem' }}>12 Months</option>
+              </select>
+            </div>
+
+            <button
+              onClick={() => fetchPicks(true)}
+              disabled={refreshing}
+              className="btn btn-outline py-1.5 px-2.5 text-[11px] sm:text-xs flex items-center gap-1.5 hover:border-blue-400"
+              title="Refresh live quotes and recalculate top stock recommendations"
             >
-              <option value="quarterly" className="bg-slate-900 text-white">Quarterly (3M)</option>
-              <option value="sixMonths" className="bg-slate-900 text-white">6 Months</option>
-              <option value="twelveMonths" className="bg-slate-900 text-white">12 Months</option>
-            </select>
+              <RefreshCw size={13} className={refreshing ? 'animate-spin text-blue-400' : ''} />
+              <span>{refreshing ? 'Recalculating...' : 'Recalculate'}</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/deep-analysis?tab=quant')}
+              className="btn btn-outline py-1.5 px-2.5 text-[11px] sm:text-xs flex items-center gap-1.5 border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
+            >
+              <Cpu size={13} />
+              <span>Quant Agent</span>
+            </button>
           </div>
-
-          <button
-            onClick={() => fetchPicks(true)}
-            disabled={refreshing}
-            className="btn btn-outline py-2 px-3 text-xs flex items-center gap-1.5 hover:border-blue-400"
-            title="Refresh live quotes and recalculate top stock recommendations"
-          >
-            <RefreshCw size={14} className={refreshing ? 'animate-spin text-blue-400' : ''} />
-            <span>{refreshing ? 'Recalculating...' : 'Recalculate Picks'}</span>
-          </button>
-
-          <button
-            onClick={() => navigate('/deep-analysis?tab=quant')}
-            className="btn btn-outline py-2 px-3 text-xs flex items-center gap-1.5 border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
-          >
-            <Cpu size={14} />
-            <span>Quant Agent</span>
-          </button>
         </div>
       </div>
 

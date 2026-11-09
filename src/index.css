@@ -1162,8 +1162,7 @@ table th, table td { vertical-align: middle; }
   }
   /* Prevent iOS Safari automatic zoom when tapping text inputs */
   .auth-input-modern,
-  .chat-input,
-  select {
+  .chat-input {
     font-size: 16px !important;
   }
   .top-header {
