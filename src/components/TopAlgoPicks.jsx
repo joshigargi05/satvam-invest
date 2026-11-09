@@ -818,7 +818,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
             </div>
 
             {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-4 gap-2 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
               <div className="p-3 rounded-xl bg-slate-950/70 border border-white/5">
                 <span className="text-[10px] text-slate-400 block uppercase font-bold">Accuracy Win Rate</span>
                 <span className="text-base font-black text-emerald-400 font-mono">

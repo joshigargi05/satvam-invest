@@ -253,6 +253,8 @@ export default function AuthPage() {
 
           const googleBtnContainer = document.getElementById('google-official-btn');
           if (googleBtnContainer) {
+            const containerWidth = googleBtnContainer.parentElement?.clientWidth || (window.innerWidth - 64);
+            const responsiveBtnWidth = Math.min(360, Math.max(240, Math.floor(containerWidth - 4)));
             googleBtnContainer.innerHTML = '';
             window.google.accounts.id.renderButton(googleBtnContainer, {
               theme: 'outline',
@@ -260,7 +262,7 @@ export default function AuthPage() {
               type: 'standard',
               text: 'continue_with',
               shape: 'pill',
-              width: 380,
+              width: responsiveBtnWidth,
               logo_alignment: 'left'
             });
             if (googleBtnContainer.children.length > 0 && mounted) {
@@ -494,8 +496,8 @@ export default function AuthPage() {
         {/* Left Pane: Modern Institutional Brand & Ecosystem Overview */}
         <div className="auth-hero-pane">
           <div>
-            {/* Brand Emblem */}
-            <div className="flex items-center justify-between gap-3 mb-6">
+            {/* Brand Emblem (Desktop / Landscape Tablet) */}
+            <div className="auth-desktop-brand flex items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
                 <GaloraLogo size={46} />
                 <div>
@@ -512,11 +514,11 @@ export default function AuthPage() {
             {/* Hero Headline */}
             <h2
               style={{
-                fontSize: '1.75rem',
+                fontSize: 'clamp(1.2rem, 3.5vw, 1.75rem)',
                 fontWeight: 800,
                 lineHeight: 1.25,
                 color: '#f8fafc',
-                marginBottom: '1.25rem'
+                marginBottom: '1.1rem'
               }}
             >
               <span className="text-gradient">AI-powered Investment Engine</span> and Wealth Creation Platform
@@ -599,9 +601,23 @@ export default function AuthPage() {
         {/* Right Pane: Sleek Modern Authentication Card */}
         <div className="auth-form-pane">
           <div style={{ maxWidth: '420px', width: '100%', margin: '0 auto' }}>
+            {/* Mobile & Tablet Top Brand Bar (< 960px) */}
+            <div className="auth-mobile-brand">
+              <div className="flex items-center gap-2.5">
+                <GaloraLogo size={36} />
+                <div>
+                  <h1 className="text-gradient text-lg font-black m-0" style={{ lineHeight: 1.15 }}>Galora AI</h1>
+                  <span className="text-[11px] text-slate-400 block">AI-Powered Wealth Generation</span>
+                </div>
+              </div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                ● {platformInfo.label}
+              </span>
+            </div>
+
             {/* Form Header */}
-            <div style={{ marginBottom: '1.75rem' }}>
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.45rem' }}>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.35rem' }}>
                 {pending2FA
                   ? 'Verify Your Identity'
                   : mode === 'register'
@@ -619,7 +635,7 @@ export default function AuthPage() {
 
             {/* Primary CTA: Single "Continue with Google" Button */}
             {!pending2FA && (
-              <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ marginBottom: '1.1rem' }}>
                 <div 
                   id="google-official-btn" 
                   className={`w-full flex justify-center ${googleOfficialRendered ? '' : 'hidden'}`}
@@ -651,7 +667,7 @@ export default function AuthPage() {
                   }}
                   className={`auth-segmented-tab ${mode === 'email_otp' ? 'active' : ''}`}
                 >
-                  ✉️ Email OTP (Gmail)
+                  ✉️ Email OTP
                 </button>
                 <button
                   type="button"

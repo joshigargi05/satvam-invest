@@ -97,7 +97,7 @@ function TopHeader() {
             <button
               type="button"
               onClick={logout}
-              className="logout-header-btn"
+              className="logout-header-btn hidden md:inline-flex"
               title="Sign Out of Galora AI"
             >
               <MdLogout />
@@ -133,13 +133,13 @@ function Navigation() {
   const { logout } = useAuth();
   
   const navItems = [
-    { path: '/', label: 'Top 3 Stocks', icon: <MdStars /> },
-    { path: '/portfolio', label: 'My Portfolio', icon: <MdDashboard /> },
-    { path: '/markets', label: 'Markets', icon: <MdAutoGraph /> },
-    { path: '/macro-agent', label: 'Global Agent', icon: <MdPublic /> },
-    { path: '/deep-analysis', label: 'Quant Agent', icon: <MdAnalytics /> },
-    { path: '/copilot', label: 'AI Chat', icon: <MdSmartToy /> },
-    { path: '/profile', label: 'Profile', icon: <MdOutlineAccountCircle /> },
+    { path: '/', label: 'Top 3 Stocks', mobileLabel: 'Top 3', icon: <MdStars /> },
+    { path: '/portfolio', label: 'My Portfolio', mobileLabel: 'Portfolio', icon: <MdDashboard /> },
+    { path: '/markets', label: 'Markets', mobileLabel: 'Markets', icon: <MdAutoGraph /> },
+    { path: '/macro-agent', label: 'Global Agent', mobileLabel: 'Global', icon: <MdPublic /> },
+    { path: '/deep-analysis', label: 'Quant Agent', mobileLabel: 'Quant', icon: <MdAnalytics /> },
+    { path: '/copilot', label: 'AI Chat', mobileLabel: 'AI Chat', icon: <MdSmartToy /> },
+    { path: '/profile', label: 'Profile', mobileLabel: 'Profile', icon: <MdOutlineAccountCircle /> },
   ];
 
   const isItemActive = (path) => {
@@ -206,7 +206,7 @@ function Navigation() {
             style={{ cursor: 'pointer' }}
           >
             {item.icon}
-            <span>{item.label}</span>
+            <span>{item.mobileLabel || item.label}</span>
           </NavLink>
         ))}
       </nav>
@@ -316,26 +316,33 @@ function AutonomousExecutionToast() {
 function SimulatorBanner() {
   return (
     <div 
-      className="mb-4 md:mb-8 px-4 py-3 md:px-6 md:py-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-950/20 to-slate-900/70 border border-amber-500/35 text-amber-200 flex items-center justify-between gap-4 shadow-lg animate-fade-in"
+      className="mb-3 md:mb-6 px-3.5 py-2.5 md:px-6 md:py-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-950/20 to-slate-900/70 border border-amber-500/35 text-amber-200 flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 md:gap-4 shadow-lg animate-fade-in"
       style={{
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)'
       }}
     >
-      <div className="flex items-center gap-3 flex-wrap">
-        <span 
-          className="flex items-center gap-2 font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] sm:text-xs shrink-0 shadow-sm"
-          style={{ letterSpacing: '0.06em' }}
-        >
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          Simulator Platform
-        </span>
-        <p className="text-xs sm:text-sm md:text-[15px] text-slate-200 font-normal leading-relaxed m-0">
-          Galora AI is currently operating as a <strong className="text-amber-300 font-semibold">simulation &amp; paper-trading platform</strong>. Real-time market data and quantitative AI models are live; all balances, trades, and portfolio assets are simulated with <strong className="text-white font-semibold">virtual currency</strong>.
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
+        <div className="flex items-center justify-between sm:justify-start gap-2 shrink-0">
+          <span 
+            className="inline-flex items-center gap-1.5 font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] sm:text-xs shrink-0 shadow-sm"
+            style={{ letterSpacing: '0.06em' }}
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            Simulator Platform
+          </span>
+          <span 
+            className="inline-flex lg:hidden items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-full shrink-0"
+          >
+            Paper Trading Sandbox
+          </span>
+        </div>
+        <p className="text-[11px] sm:text-xs md:text-sm text-slate-200 font-normal leading-relaxed m-0">
+          Galora AI operates as a <strong className="text-amber-300 font-semibold">simulation &amp; paper-trading platform</strong>. Real-time market data and quantitative AI models are live; all balances, trades, and portfolio assets use <strong className="text-white font-semibold">virtual currency</strong>.
         </p>
       </div>
       <span 
-        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-300 bg-amber-500/15 border border-amber-500/30 px-3.5 py-1.5 rounded-full shrink-0 hidden lg:inline-flex shadow-sm"
+        className="hidden lg:inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-300 bg-amber-500/15 border border-amber-500/30 px-3.5 py-1.5 rounded-full shrink-0 shadow-sm"
         style={{ letterSpacing: '0.06em' }}
       >
         Paper Trading Sandbox

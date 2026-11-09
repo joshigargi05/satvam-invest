@@ -379,7 +379,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-2.5 flex-wrap shrink-0 w-full sm:w-auto sm:justify-end">
           <button 
             onClick={() => setAgentModeEnabled(!agentModeEnabled)}
             className={`btn text-xs font-bold py-2 px-3.5 flex items-center gap-1.5 transition-all ${
@@ -889,8 +889,8 @@ export default function Dashboard() {
         const willExecuteImmediately = exitMode !== 'manual' && previewTargetPrice > 0 && live >= previewTargetPrice;
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="glass-panel p-6 rounded-2xl max-w-md w-full border border-emerald-500/40 shadow-2xl bg-slate-900/95">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto animate-fade-in">
+            <div className="glass-panel p-4 sm:p-6 rounded-2xl max-w-md w-full border border-emerald-500/40 shadow-2xl bg-slate-900/95 my-auto max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-start mb-4 pb-3 border-b border-white/10">
                 <div>
                   <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/10">

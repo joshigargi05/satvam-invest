@@ -634,32 +634,32 @@ export default function MacroAgent() {
           </div>
 
           {/* Regulatory Compliance Execution Mode Switcher */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
-            <div className="p-1 rounded-xl bg-slate-950/90 border border-white/10 flex items-center gap-1">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full xl:w-auto">
+            <div className="p-1 rounded-xl bg-slate-950/90 border border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-1">
               <button
                 type="button"
                 onClick={() => setTopPickComplianceMode && setTopPickComplianceMode('compliant_1click_gtt')}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-3 py-2 sm:py-1.5 rounded-lg text-[11px] font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   topPickComplianceMode === 'compliant_1click_gtt'
                     ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
                     : 'text-slate-300 hover:text-white'
                 }`}
                 title="SEBI (India) & SEC/FINRA (US) Retail Compliant: 1-Click Entry + 100% Automatic GTT Target Sale"
               >
-                <ShieldCheck size={13} />
-                <span>🛡️ 1-Click GTT (Compliant Default)</span>
+                <ShieldCheck size={13} className="shrink-0" />
+                <span>🛡️ 1-Click GTT (Compliant)</span>
               </button>
               <button
                 type="button"
                 onClick={() => setTopPickComplianceMode && setTopPickComplianceMode('sandbox_full_auto')}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-3 py-2 sm:py-1.5 rounded-lg text-[11px] font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   topPickComplianceMode === 'sandbox_full_auto'
                     ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20'
                     : 'text-slate-300 hover:text-white'
                 }`}
                 title="100% Zero-Click Paper Sandbox / Personal API Mode"
               >
-                <Zap size={13} />
+                <Zap size={13} className="shrink-0" />
                 <span>🧪 Zero-Touch Sandbox</span>
               </button>
             </div>
@@ -1001,14 +1001,14 @@ export default function MacroAgent() {
                 )}
 
                 {/* Action / Verification Row */}
-                <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                   {staged ? (
                     <button
                       type="button"
                       onClick={() => handleApproveStagedTopPick(mktKey)}
-                      className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-400 hover:from-amber-300 hover:to-emerald-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer"
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-400 hover:from-amber-300 hover:to-emerald-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer text-center"
                     >
-                      <ShieldCheck size={15} />
+                      <ShieldCheck size={15} className="shrink-0" />
                       <span>
                         🛡️ 1-Click Approve Buy #1 ({staged.ticker}) + Arm +{staged.profitTargetPct}% Auto-Sale GTT
                       </span>
@@ -1018,15 +1018,15 @@ export default function MacroAgent() {
                       type="button"
                       disabled={simulatingTopPickMkt === mktKey}
                       onClick={() => handleSimulateTopPickCycle(mktKey)}
-                      className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer text-center"
                     >
-                      <Zap size={14} />
+                      <Zap size={14} className="shrink-0" />
                       <span>
                         {simulatingTopPickMkt === mktKey
                           ? `Executing GTT Auto-Sale...`
                           : topPickComplianceMode === 'compliant_1click_gtt'
-                            ? `⚡ Simulate +${pod.profitTargetPct}% GTT Target Hit → Auto-Sell & Stage Newest #1 (${mktKey})`
-                            : `⚡ Simulate +${pod.profitTargetPct}% Profit Hit → Auto-Sell & Buy Newest #1 (${mktKey})`}
+                            ? `⚡ Simulate +${pod.profitTargetPct}% GTT Hit → Auto-Sell & Stage #1 (${mktKey})`
+                            : `⚡ Simulate +${pod.profitTargetPct}% Profit Hit → Auto-Sell & Buy #1 (${mktKey})`}
                       </span>
                     </button>
                   )}
@@ -1035,7 +1035,7 @@ export default function MacroAgent() {
                     type="button"
                     disabled={rotatingTopPickMkt === mktKey}
                     onClick={() => handleRotateTopPick(mktKey)}
-                    className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="py-2.5 sm:py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
                     title="Rotate to next highest-conviction #1 candidate"
                   >
                     <RefreshCw size={13} className={rotatingTopPickMkt === mktKey ? 'animate-spin text-emerald-400' : ''} />
