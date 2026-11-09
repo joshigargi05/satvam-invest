@@ -54,7 +54,7 @@ function getSmtpConfig() {
   const smtpSecure = process.env.SMTP_SECURE !== undefined
     ? process.env.SMTP_SECURE === 'true'
     : smtpPort === 465;
-  const smtpFrom = (process.env.SMTP_FROM || (smtpUser ? `"VestraAI Security" <${smtpUser}>` : '')).trim();
+  const smtpFrom = (process.env.SMTP_FROM || (smtpUser ? `"Galora AI Security" <${smtpUser}>` : '')).trim();
   const resendApiKey = (process.env.RESEND_API_KEY || '').trim();
 
   const isSmtpConfigured = Boolean(
@@ -117,7 +117,7 @@ function buildOtpEmailHtml({ userName, otp, purpose, platform }) {
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; background: #0b0f19; color: #f8fafc; border-radius: 16px; border: 1px solid #1e293b; overflow: hidden;">
     <div style="background: linear-gradient(135deg, #2563eb, #7c3aed); padding: 24px 28px;">
-      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #e0e7ff;">VestraAI Institutional Security</div>
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #e0e7ff;">Galora AI Institutional Security</div>
       <h1 style="margin: 6px 0 0; font-size: 20px; color: #ffffff;">${title}</h1>
     </div>
     <div style="padding: 28px;">
@@ -125,7 +125,7 @@ function buildOtpEmailHtml({ userName, otp, purpose, platform }) {
         Hello <strong>${userName || 'Investor'}</strong>,
       </p>
       <p style="margin: 0 0 20px; font-size: 14px; color: #cbd5e1; line-height: 1.6;">
-        Use the 6-digit verification code below to complete your sign-in on <strong>VestraAI (${String(platform || 'Web').toUpperCase()})</strong>:
+        Use the 6-digit verification code below to complete your sign-in on <strong>Galora AI (${String(platform || 'Web').toUpperCase()})</strong>:
       </p>
       <div style="background: #111827; border: 1px solid #3b82f6; border-radius: 12px; padding: 18px; text-align: center; margin: 20px 0;">
         <div style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #60a5fa;">
@@ -148,9 +148,9 @@ function buildOtpEmailHtml({ userName, otp, purpose, platform }) {
  */
 export async function sendOtpEmail({ toEmail, userName = 'Investor', otp, purpose = '2FA', platform = 'web' }) {
   const cfg = getSmtpConfig();
-  const subject = `${otp} is your VestraAI verification code`;
+  const subject = `${otp} is your Galora AI verification code`;
   const html = buildOtpEmailHtml({ userName, otp, purpose, platform });
-  const text = `Your VestraAI verification code is: ${otp} (Valid for 5 minutes).`;
+  const text = `Your Galora AI verification code is: ${otp} (Valid for 5 minutes).`;
 
   // 1. Try SMTP (Gmail App Password or Custom Corporate SMTP)
   if (cfg.isSmtpConfigured) {
@@ -197,7 +197,7 @@ export async function sendOtpEmail({ toEmail, userName = 'Investor', otp, purpos
   // 2. Try Resend HTTP API if configured
   if (cfg.isResendConfigured) {
     try {
-      const fromAddress = process.env.RESEND_FROM || 'VestraAI Security <onboarding@resend.dev>';
+      const fromAddress = process.env.RESEND_FROM || 'Galora AI Security <onboarding@resend.dev>';
       const response = await axios.post(
         'https://api.resend.com/emails',
         {

@@ -1039,7 +1039,7 @@ export default function MacroAgent() {
                     title="Rotate to next highest-conviction #1 candidate"
                   >
                     <RefreshCw size={13} className={rotatingTopPickMkt === mktKey ? 'animate-spin text-emerald-400' : ''} />
-                    <span>{rotatingTopPickMkt === mktKey ? 'Rotating...' : staged ? 'Rotate Candidate' : 'Rotate #1'}</span>
+                    <span>{rotatingTopPickMkt === mktKey ? 'Rotating...' : 'Rotate Candidate'}</span>
                   </button>
                 </div>
 

@@ -385,7 +385,7 @@ const yahooFinanceChartWithTimeout = async (sym, options) => {
 };
 
 const mockNews = [
-  { id: 1, headline: "VestraAI releases institutional quantum analysis engine", source: "Bloomberg", url: "https://bloomberg.com", datetime: Date.now() / 1000 },
+  { id: 1, headline: "Galora AI releases institutional quantum analysis engine", source: "Bloomberg", url: "https://bloomberg.com", datetime: Date.now() / 1000 },
   { id: 2, headline: "Global markets show strong recovery amid easing inflation indicators", source: "Reuters", url: "https://reuters.com", datetime: Date.now() / 1000 - 3600 },
   { id: 3, headline: "Tech sector leads index breakout to all-time highs", source: "CNBC", url: "https://cnbc.com", datetime: Date.now() / 1000 - 7200 },
   { id: 4, headline: "Federal Reserve hints at adaptive rate cuts in upcoming session", source: "Wall Street Journal", url: "https://wsj.com", datetime: Date.now() / 1000 - 10800 },
@@ -1039,7 +1039,7 @@ const computeStockAlgoEvaluation = (company, quote = {}, extraBoost = 0) => {
   if (finalScore > 85) {
     alloc = '10-15%';
     risk = 'Low-Medium';
-    explanation = stockThesisMap[company.t] || `Vestra AI's proprietary intelligence engine detects strong upside potential for ${company.n}. Fundamental revenue growth is accelerating alongside strong institutional accumulation and a durable competitive moat.`;
+    explanation = stockThesisMap[company.t] || `Galora AI's proprietary intelligence engine detects strong upside potential for ${company.n}. Fundamental revenue growth is accelerating alongside strong institutional accumulation and a durable competitive moat.`;
   } else if (finalScore > 75) {
     alloc = '5-10%';
     risk = 'Medium';
@@ -1339,7 +1339,7 @@ app.get('/api/algo-top-picks', async (req, res) => {
       lastRefreshedAt: new Date().toISOString(),
       isStabilizedCache: requestedMarket === 'INDIA' ? indiaResult.isStabilizedCache : usResult.isStabilizedCache,
       stabilityWindowMinutes: 15,
-      algorithmName: 'VestraAI Proprietary Intelligence Engine',
+      algorithmName: 'Galora AI Proprietary Intelligence Engine',
       universeStats: {
         usScannedCount: baseUsCandidates.length,
         indiaScannedCount: indiaCandidates.length,
@@ -1596,7 +1596,7 @@ app.post('/api/algo-trading', async (req, res) => {
 app.get('/api/ml-model-status', (req, res) => {
   res.json({
     status: 'ONLINE',
-    engine: 'VestraAI Proprietary Intelligence Engine',
+    engine: 'Galora AI Proprietary Intelligence Engine',
     cachedPredictionsCount: Object.keys(realXgbPredictions).length
   });
 });

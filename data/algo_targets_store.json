@@ -12,11 +12,11 @@
     "currentPrice": 144.2,
     "status": "ACHIEVED",
     "achievedAt": "2026-10-18T14:30:00.000Z",
-    "achievedPrice": 144.20,
-    "celebrated": false,
+    "achievedPrice": 144.2,
+    "celebrated": true,
     "explanation": "Blackwell enterprise data center revenue acceleration and margin expansion drove immediate target breakout.",
     "createdAt": "2026-09-01T10:00:00.000Z",
-    "updatedAt": "2026-10-18T14:30:00.000Z"
+    "updatedAt": "2026-11-08T12:37:15.324Z"
   },
   {
     "id": "milestone-in-rel-q",
@@ -32,10 +32,10 @@
     "status": "ACHIEVED",
     "achievedAt": "2026-10-22T09:45:00.000Z",
     "achievedPrice": 1292.5,
-    "celebrated": false,
+    "celebrated": true,
     "explanation": "Jio tariff monetization and retail footfall expansion drove quarterly operational beat.",
     "createdAt": "2026-09-10T09:30:00.000Z",
-    "updatedAt": "2026-10-22T09:45:00.000Z"
+    "updatedAt": "2026-11-08T12:37:31.776Z"
   },
   {
     "id": "milestone-us-meta-6m",
@@ -85,14 +85,14 @@
     "recommendedPrice": 192.5,
     "targetPrice": 238,
     "targetPct": 23.6,
-    "currentPrice": 218.4,
-    "status": "IN_PROGRESS",
-    "achievedAt": null,
-    "achievedPrice": null,
-    "celebrated": false,
+    "currentPrice": 284.78,
+    "status": "ACHIEVED",
+    "achievedAt": "2026-11-08T12:36:28.473Z",
+    "achievedPrice": 284.78,
+    "celebrated": true,
     "explanation": "Gemini workspace expansion and enterprise cloud backlog compound annual upside.",
     "createdAt": "2026-08-15T10:00:00.000Z",
-    "updatedAt": "2026-11-08T10:00:00.000Z"
+    "updatedAt": "2026-11-08T12:37:17.446Z"
   },
   {
     "id": "milestone-us-amzn-6m",
@@ -104,14 +104,14 @@
     "recommendedPrice": 204,
     "targetPrice": 236,
     "targetPct": 15.7,
-    "currentPrice": 222.8,
-    "status": "IN_PROGRESS",
-    "achievedAt": null,
-    "achievedPrice": null,
-    "celebrated": false,
+    "currentPrice": 259.3,
+    "status": "ACHIEVED",
+    "achievedAt": "2026-11-08T12:36:28.473Z",
+    "achievedPrice": 259.3,
+    "celebrated": true,
     "explanation": "AWS cloud optimization cycle conclusion and international logistics margin expansion.",
     "createdAt": "2026-09-01T10:00:00.000Z",
-    "updatedAt": "2026-11-08T10:00:00.000Z"
+    "updatedAt": "2026-11-08T12:37:18.364Z"
   },
   {
     "id": "milestone-in-hdfc-q",
@@ -123,7 +123,7 @@
     "recommendedPrice": 1710,
     "targetPrice": 1860,
     "targetPct": 8.8,
-    "currentPrice": 1785.4,
+    "currentPrice": 784.1,
     "status": "IN_PROGRESS",
     "achievedAt": null,
     "achievedPrice": null,

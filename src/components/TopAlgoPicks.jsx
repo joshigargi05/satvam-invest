@@ -246,7 +246,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
               <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                ● Vestra Alpha Engine
+                ● Galora Alpha Engine
               </span>
               <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-mono">
                 ⚡ Proprietary AI Intelligence
@@ -271,7 +271,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
               Top 3 Recommended Stocks to Buy ({market === 'US' ? 'US Stocks' : 'IND Stocks'})
             </h2>
             <p className="text-xs text-slate-300 mt-0.5 max-w-3xl">
-              High-conviction recommendations powered by <strong>Vestra AI&apos;s Proprietary Intelligence Engine</strong>. Kept stable across an investment horizon to prevent rapid churn, with continuous real-time price synchronization.
+              High-conviction recommendations powered by <strong>Galora AI&apos;s Proprietary Intelligence Engine</strong>. Kept stable across an investment horizon to prevent rapid churn, with continuous real-time price synchronization.
             </p>
           </div>
         </div>
@@ -740,7 +740,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
                 {unreadCelebration.ticker} Hit {unreadCelebration.timeframe} Target!
               </h2>
               <p className="text-xs text-slate-300 max-w-md mx-auto mb-5">
-                {unreadCelebration.companyName} achieved the proprietary algorithmic price target. This milestone has been verified and permanently logged to your Cloud SQL / Database ledger.
+                {unreadCelebration.companyName} achieved the proprietary algorithmic price target.
               </p>
 
               {/* Achievement Summary Card */}

@@ -675,7 +675,7 @@ export default function Dashboard() {
                   const performance = ((asset.currentPrice - asset.avgPrice) / asset.avgPrice) * 100;
                   const isPositive = performance >= 0;
                   const formattedShares = typeof asset.shares === 'number' 
-                    ? (asset.shares % 1 === 0 ? asset.shares : asset.shares.toFixed(3)) 
+                    ? (asset.shares % 1 === 0 ? asset.shares : Number(asset.shares.toFixed(4))) 
                     : asset.shares;
                   const isCommodity = asset.assetType === 'commodity' || asset.ticker.includes('=');
                   const isVaultHolding = asset.bucket === 'agent_vault';

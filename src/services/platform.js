@@ -233,7 +233,7 @@ export async function triggerBiometricVerification(userEmail = 'investor@vestra.
         const cred = await navigator.credentials.create({
           publicKey: {
             challenge,
-            rp: { name: 'VestraAI Institutional Wealth' },
+            rp: { name: 'Galora AI Institutional Wealth' },
             user: {
               id: userId,
               name: userEmail,

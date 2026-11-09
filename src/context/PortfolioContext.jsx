@@ -525,9 +525,74 @@ export function PortfolioProvider({ children }) {
     const mktCash = Number(balancesRef.current?.[mkt] || 0);
     const mktHoldings = (holdingsMapRef.current?.[mkt] || []).filter(h => h.bucket !== 'top1_agent');
     const mktHoldingsVal = mktHoldings.reduce((s, h) => s + Number(h.totalValue || 0), 0);
-    const activeTop1Val = Number(topPickAgentRef.current?.[mkt]?.activePosition?.currentValue || 0);
+    const activeTop1Val = Number(
+      topPickAgentRef.current?.[mkt]?.activePosition?.currentValue ||
+      topPickAgentRef.current?.[mkt]?.stagedOrder?.investedCapital ||
+      0
+    );
     return Number((mktCash + mktHoldingsVal + activeTop1Val).toFixed(2));
   };
+
+  // Synchronize #1 Top Conviction stock & quantity into holdingsMap[mkt] and remove sold stock
+  const syncTopPickToHoldingsMap = (mkt, newPick, soldTicker = null) => {
+    if (!newPick || !newPick.ticker) return;
+    setHoldingsMap(prev => {
+      const currentList = prev[mkt] || [];
+      const updated = currentList.filter(h => {
+        if (h.bucket === 'top1_agent') return false;
+        if (soldTicker && h.ticker === soldTicker) return false;
+        if (h.ticker === newPick.ticker) return false;
+        return true;
+      });
+
+      const entryPrice = Number(newPick.entryPrice || newPick.avgPrice || newPick.price || 0);
+      const currentPrice = Number(newPick.currentPrice || entryPrice);
+      const shares = Number(newPick.shares || 0);
+      const totalValue = Number(
+        newPick.currentValue ||
+        newPick.investedCapital ||
+        Number((shares * currentPrice).toFixed(2))
+      );
+
+      const topPickHolding = {
+        ticker: newPick.ticker,
+        name: newPick.name || newPick.ticker,
+        shares,
+        avgPrice: entryPrice,
+        currentPrice,
+        totalValue,
+        category: newPick.sector || newPick.category || 'High Conviction Equity',
+        assetType: 'stock',
+        bucket: 'top1_agent'
+      };
+
+      return {
+        ...prev,
+        [mkt]: [topPickHolding, ...updated]
+      };
+    });
+  };
+
+  // Keep holdingsMap in sync with the active or staged #1 Top Pick for both US and INDIA
+  useEffect(() => {
+    for (const mkt of ['US', 'INDIA']) {
+      const pod = topPickAgent?.[mkt];
+      const currentPick = pod?.activePosition || pod?.stagedOrder;
+      const soldTicker = pod?.stagedOrder?.previousSoldTicker || null;
+      if (currentPick && currentPick.ticker && Number(currentPick.shares) > 0) {
+        syncTopPickToHoldingsMap(mkt, currentPick, soldTicker);
+      }
+    }
+  }, [
+    topPickAgent?.US?.activePosition?.ticker,
+    topPickAgent?.US?.activePosition?.shares,
+    topPickAgent?.US?.stagedOrder?.ticker,
+    topPickAgent?.US?.stagedOrder?.shares,
+    topPickAgent?.INDIA?.activePosition?.ticker,
+    topPickAgent?.INDIA?.activePosition?.shares,
+    topPickAgent?.INDIA?.stagedOrder?.ticker,
+    topPickAgent?.INDIA?.stagedOrder?.shares
+  ]);
 
   // 1-Click SEBI / SEC Compliant Approval: Executes Staged #1 Buy + Arms Native GTT / Bracket Auto-Sale Order
   const approveStagedTopPickOrder = (targetMarket = market) => {
@@ -563,46 +628,7 @@ export function PortfolioProvider({ children }) {
       cycleNumber: nextCycleNumber
     };
 
-    setHoldingsMap(prev => {
-      const currentList = prev[mkt] || [];
-      let updated = currentList.filter(h => h.bucket !== 'top1_agent');
-
-      // Deduct or remove the previously sold stock quantity from other buckets (e.g. core/vault)
-      if (staged.previousSoldTicker) {
-        const matchIdx = updated.findIndex(h => h.ticker === staged.previousSoldTicker);
-        if (matchIdx !== -1) {
-          const existing = updated[matchIdx];
-          const soldSh = Number(staged.previousSoldShares || pod.activePosition?.shares || existing.shares);
-          const remainingShares = Number(Math.max(0, existing.shares - soldSh).toFixed(4));
-          if (remainingShares > 0.0001) {
-            updated[matchIdx] = {
-              ...existing,
-              shares: remainingShares,
-              totalValue: Number((remainingShares * (existing.currentPrice || existing.avgPrice)).toFixed(2))
-            };
-          } else {
-            updated.splice(matchIdx, 1);
-          }
-        }
-      }
-
-      updated.push({
-        ticker: approvedPosition.ticker,
-        name: approvedPosition.name,
-        shares: approvedPosition.shares,
-        avgPrice: approvedPosition.entryPrice,
-        currentPrice: approvedPosition.currentPrice,
-        totalValue: approvedPosition.currentValue,
-        category: approvedPosition.sector,
-        assetType: 'stock',
-        bucket: 'top1_agent'
-      });
-
-      return {
-        ...prev,
-        [mkt]: updated
-      };
-    });
+    syncTopPickToHoldingsMap(mkt, approvedPosition, staged.previousSoldTicker);
 
     setTopPickAgentSync(prev => ({
       ...prev,
@@ -720,10 +746,13 @@ export function PortfolioProvider({ children }) {
           finalScore: newestTop1.finalScore || 90,
           sector: newestTop1.sector || 'High Conviction Equity',
           orderType: mkt === 'INDIA' ? 'NSE/BSE Delivery + GTT Target OCO' : 'NYSE/NASDAQ Market + OCO Take-Profit Bracket',
-          previousSoldTicker: prevStaged.previousSoldTicker || prevStaged.ticker,
+          previousSoldTicker: prevStaged.ticker,
           stagedReason: `Rotated Staged Candidate (${prevStaged.ticker} → ${newestTop1.ticker})`,
           stagedAt: new Date().toISOString()
         };
+
+        // Immediately sync rotated candidate & shares to My Portfolio (holdingsMap) and remove sold stock
+        syncTopPickToHoldingsMap(mkt, nextStagedOrder, prevStaged.ticker);
 
         setTopPickAgentSync(prev => ({
           ...prev,
@@ -735,19 +764,26 @@ export function PortfolioProvider({ children }) {
           }
         }));
 
-        return {
+        const stageRotateRecord = {
           id: `top1-stage-rot-${Date.now()}-${mkt}`,
           timestamp: new Date().toISOString(),
           market: mkt,
+          cycleNumber: (pod.completedCycles || 0) + 1,
           actionType: 'MANUAL_ROTATE_TOP1',
           soldTicker: prevStaged.ticker,
+          soldShares: prevStaged.shares,
           exitPrice: prevStaged.entryPrice,
           boughtTicker: nextStagedOrder.ticker,
+          boughtName: nextStagedOrder.name,
           boughtShares: nextStagedOrder.shares,
           buyPrice: nextStagedOrder.entryPrice,
           nextTargetPrice: nextStagedOrder.targetPrice,
-          deployedCapital: nextStagedOrder.investedCapital
+          deployedCapital: nextStagedOrder.investedCapital,
+          convictionScore: nextStagedOrder.convictionScore
         };
+
+        setTopPickCycleHistory(prev => [stageRotateRecord, ...prev.slice(0, 39)]);
+        return stageRotateRecord;
       }
 
       // Case A: Active position exists and either hit profit target OR user triggered profit-hit simulation / rotation
@@ -819,29 +855,8 @@ export function PortfolioProvider({ children }) {
             stagedAt: new Date().toISOString()
           };
 
-          // Remove sold position from holdingsMap until user clicks 1-Click Approve on staged #1 stock
-          setHoldingsMap(prev => {
-            const currentList = prev[mkt] || [];
-            let updated = currentList.filter(h => h.bucket !== 'top1_agent');
-            const matchIdx = updated.findIndex(h => h.ticker === prevPos.ticker);
-            if (matchIdx !== -1) {
-              const existing = updated[matchIdx];
-              const remainingShares = Number(Math.max(0, existing.shares - prevPos.shares).toFixed(4));
-              if (remainingShares > 0.0001) {
-                updated[matchIdx] = {
-                  ...existing,
-                  shares: remainingShares,
-                  totalValue: Number((remainingShares * (existing.currentPrice || existing.avgPrice)).toFixed(2))
-                };
-              } else {
-                updated.splice(matchIdx, 1);
-              }
-            }
-            return {
-              ...prev,
-              [mkt]: updated
-            };
-          });
+          // Sync newly staged #1 stock and quantity to My Portfolio (holdingsMap) and remove sold stock
+          syncTopPickToHoldingsMap(mkt, stagedNextOrder, prevPos.ticker);
 
           setTopPickAgentSync(prev => ({
             ...prev,
@@ -923,44 +938,8 @@ export function PortfolioProvider({ children }) {
           cycleNumber: nextCycleNumber + 1
         };
 
-        // Update holdingsMap[mkt] so bucket 'top1_agent' reflects the newly bought #1 Top Conviction stock
-        setHoldingsMap(prev => {
-          const currentList = prev[mkt] || [];
-          let updated = currentList.filter(h => h.bucket !== 'top1_agent');
-
-          // If prevPos.ticker also existed in core or vault, deduct the sold shares:
-          const matchIdx = updated.findIndex(h => h.ticker === prevPos.ticker);
-          if (matchIdx !== -1) {
-            const existing = updated[matchIdx];
-            const remainingShares = Number(Math.max(0, existing.shares - prevPos.shares).toFixed(4));
-            if (remainingShares > 0.0001) {
-              updated[matchIdx] = {
-                ...existing,
-                shares: remainingShares,
-                totalValue: Number((remainingShares * (existing.currentPrice || existing.avgPrice)).toFixed(2))
-              };
-            } else {
-              updated.splice(matchIdx, 1);
-            }
-          }
-
-          updated.push({
-            ticker: nextActivePosition.ticker,
-            name: nextActivePosition.name,
-            shares: nextActivePosition.shares,
-            avgPrice: nextActivePosition.entryPrice,
-            currentPrice: nextActivePosition.currentPrice,
-            totalValue: nextActivePosition.currentValue,
-            category: nextActivePosition.sector,
-            assetType: 'stock',
-            bucket: 'top1_agent'
-          });
-
-          return {
-            ...prev,
-            [mkt]: updated
-          };
-        });
+        // Update holdingsMap[mkt] so bucket 'top1_agent' reflects the newly bought #1 Top Conviction stock and removes sold stock
+        syncTopPickToHoldingsMap(mkt, nextActivePosition, prevPos.ticker);
 
         const statusText = options.forceRotate
           ? `Rotated #1: Sold ${prevPos.ticker} → Bought Newest #1 ${nextActivePosition.ticker} (GTT ${gttOrderId} @ +${profitGoalPct}%)`
@@ -1080,26 +1059,7 @@ export function PortfolioProvider({ children }) {
           }));
         }
 
-        setHoldingsMap(prev => {
-          const filtered = (prev[mkt] || []).filter(h => h.bucket !== 'top1_agent');
-          return {
-            ...prev,
-            [mkt]: [
-              ...filtered,
-              {
-                ticker: initialPosition.ticker,
-                name: initialPosition.name,
-                shares: initialPosition.shares,
-                avgPrice: initialPosition.entryPrice,
-                currentPrice: initialPosition.currentPrice,
-                totalValue: initialPosition.currentValue,
-                category: initialPosition.sector,
-                assetType: 'stock',
-                bucket: 'top1_agent'
-              }
-            ]
-          };
-        });
+        syncTopPickToHoldingsMap(mkt, initialPosition);
 
         setTopPickAgentSync(prev => ({
           ...prev,
@@ -1755,10 +1715,11 @@ export function PortfolioProvider({ children }) {
       const newCashBalance = Math.max(0, Number((balance + currentVaultValue - deployedVaultTotal).toFixed(2)));
 
       // Keep ALL core holdings and #1 Top Conviction exclusive pod holdings 100% untouched, replace only vault holdings!
+      const top1Tickers = new Set(top1Holdings.map(h => h.ticker));
       const mergedHoldings = [
-        ...coreHoldings,
         ...top1Holdings,
-        ...newVaultHoldings
+        ...coreHoldings.filter(h => !top1Tickers.has(h.ticker)),
+        ...newVaultHoldings.filter(h => !top1Tickers.has(h.ticker))
       ];
 
       setBalances(prev => ({
@@ -1851,9 +1812,13 @@ export function PortfolioProvider({ children }) {
         [market]: remainingCash
       }));
 
+      const top1TickersFull = new Set(top1Holdings.map(h => h.ticker));
       setHoldingsMap(prev => ({
         ...prev,
-        [market]: newHoldings
+        [market]: [
+          ...top1Holdings,
+          ...newHoldings.filter(h => !top1TickersFull.has(h.ticker))
+        ]
       }));
 
       const auditRecord = {

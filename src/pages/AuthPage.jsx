@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Lucide from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../services/platform';
+import GaloraLogo from '../components/GaloraLogo';
 
 const ShieldCheck = Lucide.ShieldCheck || (() => '🛡️');
 const Lock = Lucide.Lock || (() => '🔒');
@@ -496,25 +497,9 @@ export default function AuthPage() {
             {/* Brand Emblem */}
             <div className="flex items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
-                <div
-                  style={{
-                    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '13px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 900,
-                    color: '#ffffff',
-                    fontSize: '1.35rem',
-                    boxShadow: '0 8px 20px rgba(59, 130, 246, 0.35)'
-                  }}
-                >
-                  S
-                </div>
+                <GaloraLogo size={46} />
                 <div>
-                  <h1 className="text-gradient text-2xl font-black m-0">Satvam Invest</h1>
+                  <h1 className="text-gradient text-2xl font-black m-0">Galora AI</h1>
                   <span className="text-xs text-slate-400">AI-Powered Wealth Generation</span>
                 </div>
               </div>
@@ -623,7 +608,7 @@ export default function AuthPage() {
                   ? 'Create Investor Account'
                   : mode === 'email_otp'
                   ? 'Passwordless Email OTP'
-                  : 'Sign In to Satvam Invest'}
+                  : 'Sign In to Galora AI'}
               </h3>
               <p className="text-xs text-slate-400" style={{ lineHeight: '1.5', margin: 0 }}>
                 {pending2FA

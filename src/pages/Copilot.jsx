@@ -134,7 +134,7 @@ export default function Copilot() {
   const promptPeriods = `${y1}, ${y2}, ${y3}, ${lastQuarterLabel}`;
 
   const defaultMessages = [
-    { id: 1, type: 'ai', text: 'Hi there! I am your Vestra AI Copilot. As an **AI-powered global investing intelligence platform**, I can analyze your portfolio, evaluate global assets, or research complex market trends. What strategic insights would you like to explore today?' }
+    { id: 1, type: 'ai', text: 'Hi there! I am your Galora AI Copilot. As an **AI-powered global investing intelligence platform**, I can analyze your portfolio, evaluate global assets, or research complex market trends. What strategic insights would you like to explore today?' }
   ];
 
   const [messages, setMessages] = useState(() => {
@@ -142,7 +142,14 @@ export default function Copilot() {
       const saved = localStorage.getItem('chatHistory');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.map(m => ({
+            ...m,
+            text: typeof m.text === 'string'
+              ? m.text.replace(/Vestra\s*AI/gi, 'Galora AI').replace(/Satvam\s*Invest/gi, 'Galora AI')
+              : m.text
+          }));
+        }
       }
     } catch (e) {
       console.error(e);

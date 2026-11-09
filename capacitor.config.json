@@ -1,6 +1,6 @@
 {
-  "appId": "com.satvaminvest.vestraai",
-  "appName": "VestraAI",
+  "appId": "com.galora.ai",
+  "appName": "Galora AI",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
@@ -8,6 +8,8 @@
     "iosScheme": "capacitor",
     "cleartext": true,
     "allowNavigation": [
+      "galora.ai",
+      "*.galora.ai",
       "localhost",
       "10.0.2.2",
       "*.run.app",

@@ -15,10 +15,20 @@ const USER_CACHE_KEY = 'vestra_auth_user_v1';
 const LOCK_STATE_KEY = 'vestra_session_locked_v1';
 
 export function AuthProvider({ children }) {
+  const normalizeUserBrand = (u) => {
+    if (!u || typeof u !== 'object') return u;
+    return {
+      ...u,
+      name: typeof u.name === 'string'
+        ? u.name.replace(/Satvam/gi, 'Galora').replace(/Vestra/gi, 'Galora')
+        : u.name
+    };
+  };
+
   const [user, setUser] = useState(() => {
     try {
       const cached = localStorage.getItem(USER_CACHE_KEY);
-      return cached ? JSON.parse(cached) : null;
+      return cached ? normalizeUserBrand(JSON.parse(cached)) : null;
     } catch {
       return null;
     }
@@ -35,9 +45,10 @@ export function AuthProvider({ children }) {
   const [platformInfo] = useState(() => detectPlatformInfo());
 
   const persistUser = (u) => {
-    setUser(u);
+    const normalized = normalizeUserBrand(u);
+    setUser(normalized);
     try {
-      if (u) localStorage.setItem(USER_CACHE_KEY, JSON.stringify(u));
+      if (normalized) localStorage.setItem(USER_CACHE_KEY, JSON.stringify(normalized));
       else localStorage.removeItem(USER_CACHE_KEY);
     } catch {
       // Ignore storage quota errors

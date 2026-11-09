@@ -27,6 +27,7 @@ import DeepQuantAgent from './pages/DeepQuantAgent'
 import MacroAgent from './pages/MacroAgent'
 import Profile from './pages/Profile'
 import AuthPage, { PinLockScreen } from './pages/AuthPage'
+import GaloraLogo from './components/GaloraLogo'
 
 function AlgoRedirect() {
   const location = useLocation();
@@ -95,7 +96,7 @@ function TopHeader() {
               type="button"
               onClick={logout}
               className="logout-header-btn"
-              title="Sign Out of Satvam Invest"
+              title="Sign Out of Galora AI"
             >
               <MdLogout />
               <span>Sign Out</span>
@@ -162,10 +163,10 @@ function Navigation() {
     <>
       {/* Mobile Header */}
       <div className="md-hidden flex justify-between items-center p-3.5 bg-black/50 border-b border-white/5">
-        <div className="flex items-center gap-2">
-          <div style={{ background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', width: '26px', height: '26px', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'white', fontSize: '13px', flexShrink: 0 }}>S</div>
+        <div className="flex items-center gap-2.5">
+          <GaloraLogo size={30} />
           <div>
-            <h1 className="text-gradient font-bold" style={{ fontSize: '1.1rem', margin: 0, lineHeight: 1.1 }}>Satvam Invest</h1>
+            <h1 className="text-gradient font-bold" style={{ fontSize: '1.1rem', margin: 0, lineHeight: 1.1 }}>Galora AI</h1>
             <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>AI-Powered Wealth Generation</span>
           </div>
         </div>
@@ -210,21 +211,10 @@ function Navigation() {
 
       {/* Desktop & Tablet Nav */}
       <nav className="desktop-nav glass-panel">
-        <div className="brand-header flex flex-col items-start gap-1 mb-8" style={{ padding: '0 0.75rem' }}>
-          <div className="flex items-center gap-2">
-            <div style={{
-              background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))',
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              color: 'white',
-              flexShrink: 0
-            }}>S</div>
-            <h1 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>Satvam Invest</h1>
+        <div className="brand-header flex flex-col items-start gap-1.5 mb-8" style={{ padding: '0 0.75rem' }}>
+          <div className="flex items-center gap-2.5">
+            <GaloraLogo size={36} />
+            <h1 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>Galora AI</h1>
           </div>
           <span className="brand-subtitle" style={{ fontSize: '0.68rem', color: 'var(--text-muted)', letterSpacing: '0.03em', fontWeight: '500' }}>
             AI-Powered Wealth Generation
@@ -339,7 +329,7 @@ function SimulatorBanner() {
           Simulator Platform
         </span>
         <p className="text-xs sm:text-sm md:text-[15px] text-slate-200 font-normal leading-relaxed m-0">
-          Satvam Invest is currently operating as a <strong className="text-amber-300 font-semibold">simulation &amp; paper-trading platform</strong>. Real-time market data and quantitative AI models are live; all balances, trades, and portfolio assets are simulated with <strong className="text-white font-semibold">virtual currency</strong>.
+          Galora AI is currently operating as a <strong className="text-amber-300 font-semibold">simulation &amp; paper-trading platform</strong>. Real-time market data and quantitative AI models are live; all balances, trades, and portfolio assets are simulated with <strong className="text-white font-semibold">virtual currency</strong>.
         </p>
       </div>
       <span 
@@ -358,8 +348,10 @@ function AppShell() {
   if (loading) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-[#030712]">
-        <div className="inline-block animate-spin w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full mb-3" />
-        <p className="text-xs text-slate-400 font-mono">Initializing Satvam Invest Security Enclave...</p>
+        <div className="mb-3 animate-pulse">
+          <GaloraLogo size={48} />
+        </div>
+        <p className="text-xs text-slate-400 font-mono">Initializing Galora AI Security Enclave...</p>
       </div>
     );
   }

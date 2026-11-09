@@ -139,7 +139,7 @@ function loadDatabase() {
     users: [
       {
         id: 'usr_demo_satvam_01',
-        name: 'Satvam Institutional Investor',
+        name: 'Galora Institutional Investor',
         email: 'investor@vestra.ai',
         role: 'Institutional Pro',
         defaultMarket: 'US',
@@ -989,8 +989,10 @@ export function mountAuthAndSecurity(app) {
   // 14. Multi-Platform Rollout Architecture Status Endpoint
   app.get('/api/mobile/release-manifest', (req, res) => {
     res.json({
-      appId: 'com.satvaminvest.vestraai',
-      appName: 'VestraAI',
+      appId: 'com.galora.ai',
+      appName: 'Galora AI',
+      domain: 'https://galora.ai',
+      cloudRunOrigin: 'https://satvam-invest-364673139154.us-central1.run.app',
       version: '2.4.0',
       strategy: 'Web -> Android -> iOS',
       database: getDatabaseStatus(),

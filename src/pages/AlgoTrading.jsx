@@ -251,7 +251,7 @@ export default function AlgoTrading() {
           <div className="glass-panel p-6 rounded-xl flex items-center gap-4" style={{ borderLeft: '4px solid var(--accent-primary)' }}>
             <Bot size={24} className="text-primary" />
             <p className="text-sm md:text-base leading-relaxed text-white">
-              Vestra AI has analyzed real-time market streaming data and proprietary institutional signals for your query. Below are the ranked opportunities optimized for risk-adjusted outperformance.
+              Galora AI has analyzed real-time market streaming data and proprietary institutional signals for your query. Below are the ranked opportunities optimized for risk-adjusted outperformance.
             </p>
           </div>
 

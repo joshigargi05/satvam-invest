@@ -588,7 +588,7 @@ export default function Profile() {
                   Web First → Android Native (Google Play) → iOS Native (App Store)
                 </h2>
                 <p className="text-xs text-slate-300 mt-0.5">
-                  App Bundle ID: <code className="text-purple-300 font-mono">{releaseManifest?.appId || 'com.satvaminvest.vestraai'}</code> • Shared React 18 + Capacitor Native Bridge
+                  App Bundle ID: <code className="text-purple-300 font-mono">{releaseManifest?.appId || 'com.galora.ai'}</code> • Shared React 18 + Capacitor Native Bridge
                 </p>
               </div>
               <div className="px-3.5 py-2 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-xs text-emerald-300 font-mono">
