@@ -82,39 +82,6 @@ export default function TopStocks() {
       <div>
         <TopAlgoPicks pageContext="top-stocks" />
       </div>
-
-      {/* Methodology & Execution Highlights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 hover:border-amber-500/30 transition-all">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3">
-            <Target size={20} />
-          </div>
-          <h3 className="text-sm font-bold text-white mb-1.5">Stabilized 15m Horizon</h3>
-          <p className="text-xs text-slate-300 leading-relaxed">
-            Recommendations remain locked within steady 15-minute rebalance windows to prevent high-frequency noise and overtrading, while quotes stream live.
-          </p>
-        </div>
-
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 hover:border-blue-500/30 transition-all">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-3">
-            <Cpu size={20} />
-          </div>
-          <h3 className="text-sm font-bold text-white mb-1.5">Multi-Factor Quant Model</h3>
-          <p className="text-xs text-slate-300 leading-relaxed">
-            Every top pick is scored through our 4-layer institutional matrix: technical momentum, fundamental FCF yield, SEC filing sentiment, and XGBoost probability.
-          </p>
-        </div>
-
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 hover:border-emerald-500/30 transition-all">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3">
-            <ShieldCheck size={20} />
-          </div>
-          <h3 className="text-sm font-bold text-white mb-1.5">1-Click Dual Allocation</h3>
-          <p className="text-xs text-slate-300 leading-relaxed">
-            Deploy capital directly into your Long-Term Core portfolio or Tactical Agent Vault with automated +10% Take-Profit execution rules.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

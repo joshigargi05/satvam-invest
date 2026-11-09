@@ -233,9 +233,6 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
               <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-mono">
                 ⚡ Proprietary AI Intelligence
               </span>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 font-mono flex items-center gap-1">
-                🛡️ Stabilized for Investment (15m Horizon)
-              </span>
               <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 font-mono">
                 {market === 'US'
                   ? `🇺🇸 Scanning Top Institutional US Leaders`

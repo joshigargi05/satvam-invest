@@ -2669,6 +2669,26 @@ ${pages
   res.send(xml);
 });
 
+// Explicit Favicon & Brand Icon Routes (Prevents SPA HTML fallback on /favicon.ico)
+const publicDir = path.join(process.cwd(), 'public');
+const serveBrandAsset = (fileName, contentType) => (req, res) => {
+  const distCandidate = path.join(process.cwd(), 'dist', fileName);
+  const publicCandidate = path.join(publicDir, fileName);
+  const target = fs.existsSync(distCandidate) ? distCandidate : publicCandidate;
+  if (fs.existsSync(target)) {
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.sendFile(target);
+  }
+  return res.status(404).end();
+};
+
+app.get('/favicon.ico', serveBrandAsset('favicon.ico', 'image/x-icon'));
+app.get('/favicon.png', serveBrandAsset('favicon.png', 'image/png'));
+app.get('/favicon.svg', serveBrandAsset('galora-logo.svg', 'image/svg+xml'));
+app.get('/galora-logo.svg', serveBrandAsset('galora-logo.svg', 'image/svg+xml'));
+app.get('/apple-touch-icon.png', serveBrandAsset('apple-touch-icon.png', 'image/png'));
+
 // GCP Cloud Run Production Static Serving (Serves built Vite SPA from dist/)
 const distDir = path.join(process.cwd(), 'dist');
 const distIndexHtml = path.join(distDir, 'index.html');

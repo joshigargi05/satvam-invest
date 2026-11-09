@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="galoraBg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#1e1b4b" />
+      <stop offset="100%" stop-color="#090d16" />
+    </linearGradient>
+    <linearGradient id="galoraStroke" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+    <linearGradient id="galoraG" x1="14" y1="12" x2="50" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="45%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#e879f9" />
+    </linearGradient>
+    <linearGradient id="galoraAccent" x1="26" y1="22" x2="50" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Outer Rounded Squircle Badge -->
+  <rect x="3" y="3" width="58" height="58" rx="16" fill="url(#galoraBg)" stroke="url(#galoraStroke)" stroke-width="2.5" />
+
+  <!-- Subtle Inner Orbital Ring -->
+  <circle cx="32" cy="32" r="21" stroke="url(#galoraStroke)" stroke-opacity="0.16" stroke-width="1.2" stroke-dasharray="3 3" />
+
+  <!-- Geometric 'G' Arc -->
+  <path
+    d="M43.5 21.5C40.6 18.4 36.5 16.5 32 16.5C23.44 16.5 16.5 23.44 16.5 32C16.5 40.56 23.44 47.5 32 47.5C39.85 47.5 46.33 41.66 47.36 34H33"
+    stroke="url(#galoraG)"
+    stroke-width="5.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#glow)"
+  />
+
+  <!-- Ascending Quantum Alpha Trend Arrow Inside the G -->
+  <path
+    d="M24.5 36.5L30.5 30.5L35 34L44.5 24.5"
+    stroke="url(#galoraAccent)"
+    stroke-width="3.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M39.5 24.5H44.5V29.5"
+    stroke="url(#galoraAccent)"
+    stroke-width="3.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- AI Neural Spark Star at Top Right -->
+  <path
+    d="M48 13L49.4 16.6L53 18L49.4 19.4L48 23L46.6 19.4L43 18L46.6 16.6L48 13Z"
+    fill="#38bdf8"
+  />
+</svg>

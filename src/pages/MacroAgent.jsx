@@ -1545,235 +1545,6 @@ export default function MacroAgent() {
 
       </div>
 
-      {/* SECTION 2: Commodities & Metals Desk (Full-Width Spacious Trading Floor) */}
-      <div className="glass-panel p-6 mb-8">
-        
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-white/10">
-          <div>
-            <div className="flex items-center gap-2.5 mb-1">
-              <Flame size={24} className="text-amber-400" />
-              <h2 className="text-2xl font-bold text-white">Commodities & Precious Metals Desk</h2>
-              <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                Direct Trading Floor
-              </span>
-            </div>
-            <p className="text-sm text-slate-300">
-              Acquire physical gold bullion, silver trusts, crude oil barrels, copper, and platinum into your <strong>⚡ Tactical Vault</strong> or <strong>🛡️ Long-Term Core</strong>.
-            </p>
-          </div>
-
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-            {[
-              { id: 'ALL', label: 'All Commodities' },
-              { id: 'PRECIOUS', label: '🥇 Precious Metals' },
-              { id: 'ENERGY', label: '🛢️ Energy & Petroleum' },
-              { id: 'INDUSTRIAL', label: '⚡ Industrial Metals' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveCommodityFilter(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all ${
-                  activeCommodityFilter === tab.id
-                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25 font-extrabold'
-                    : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700/80 border border-white/5'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Spacious 4-Column Responsive Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filteredCommodities.map((comm) => {
-            const isGold = comm.ticker.includes('GC') || comm.ticker.includes('GLD');
-            const isSilver = comm.ticker.includes('SI') || comm.ticker.includes('SLV');
-            const isOil = comm.ticker.includes('CL') || comm.ticker.includes('BZ') || comm.ticker.includes('USO');
-            const isCopper = comm.ticker.includes('HG') || comm.ticker.includes('COPPER');
-            const isPlat = comm.ticker.includes('PL');
-            const isGas = comm.ticker.includes('NG');
-
-            const emblemIcon = isGold ? '🥇' : isSilver ? '🥈' : isOil ? '🛢️' : isCopper ? '⚡' : isPlat ? '💎' : isGas ? '💨' : '📦';
-            const badgeColor = isGold ? 'from-amber-500/20 to-yellow-500/10 text-amber-300 border-amber-500/30' :
-                               isSilver ? 'from-slate-400/20 to-slate-200/10 text-slate-200 border-slate-400/30' :
-                               isOil ? 'from-rose-500/20 to-red-500/10 text-rose-300 border-rose-500/30' :
-                               isCopper ? 'from-orange-500/20 to-amber-600/10 text-orange-300 border-orange-500/30' :
-                               'from-blue-500/20 to-cyan-500/10 text-blue-300 border-blue-500/30';
-
-            return (
-              <div 
-                key={comm.ticker}
-                className="p-5 rounded-2xl border border-white/10 bg-slate-900/80 hover:bg-slate-900/95 hover:border-amber-500/40 transition-all shadow-lg flex flex-col justify-between group"
-              >
-                <div>
-                  {/* Top Bar: Icon Emblem, Ticker & Category */}
-                  <div className="flex items-center justify-between mb-3.5 gap-2">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-white/10 flex items-center justify-center text-xl shadow-inner shrink-0">
-                        {emblemIcon}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-extrabold text-base text-white tracking-wide font-mono truncate">
-                          {comm.ticker}
-                        </div>
-                        <div className="text-[11px] font-semibold text-slate-400 truncate">
-                          {comm.category}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Change % Badge */}
-                    <div className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1 shrink-0 ${
-                      comm.up 
-                        ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' 
-                        : 'bg-red-500/15 text-red-300 border border-red-500/30'
-                    }`}>
-                      {comm.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                      <span>{comm.up ? '+' : ''}{comm.changePct?.toFixed(2)}%</span>
-                    </div>
-                  </div>
-
-                  {/* Name & Unit Subtitle */}
-                  <h4 className="font-bold text-base text-white mb-1 group-hover:text-amber-400 transition-colors">
-                    {comm.name}
-                  </h4>
-                  <p className="text-xs text-slate-400 mb-4 line-clamp-2 leading-relaxed">
-                    {comm.description || `Benchmark physical trading contract quoted per ${comm.unit}.`}
-                  </p>
-                </div>
-
-                {/* Bottom Row: Large Clear Price & Trade Button with explicit stacked layout */}
-                <div className="pt-4 border-t border-white/10 flex items-end justify-between mt-2 gap-3">
-                  <div className="space-y-1">
-                    <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                      Live Quote ({comm.unit}):
-                    </div>
-                    <div className="text-xl font-extrabold text-white font-mono tracking-tight leading-tight">
-                      {currency}{comm.price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setSelectedCommodity(comm);
-                      setCommodityTradeUnits(1);
-                    }}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/25 transition-all flex items-center gap-1.5 hover:scale-105 shrink-0"
-                  >
-                    <ShoppingBag size={14} />
-                    <span>Trade</span>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Dedicated Interactive Commodity Trade Modal */}
-        {selectedCommodity && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
-            <div className="glass-panel p-6 max-w-lg w-full border border-amber-500/40 rounded-2xl animate-fade-in shadow-2xl">
-              
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-                <div className="flex items-center gap-2.5">
-                  <Flame size={22} className="text-amber-400" />
-                  <h3 className="text-lg font-bold text-white">Acquire {selectedCommodity.name}</h3>
-                </div>
-                <button 
-                  type="button" 
-                  onClick={() => setSelectedCommodity(null)}
-                  className="text-slate-400 hover:text-white text-sm"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-900 border border-white/10 mb-4 flex items-center justify-between">
-                <div>
-                  <span className="font-mono text-sm font-bold text-blue-400">{selectedCommodity.ticker}</span>
-                  <h4 className="text-base font-bold text-white">{selectedCommodity.name}</h4>
-                  <span className="text-xs text-muted">{selectedCommodity.category}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs text-muted block">Market Price</span>
-                  <span className="text-xl font-bold font-mono text-white">
-                    {currency}{selectedCommodity.price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                  <span className="text-xs text-slate-400 block">per {selectedCommodity.unit}</span>
-                </div>
-              </div>
-
-              <form onSubmit={handleBuyCommodity}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="text-xs text-slate-300 font-bold block mb-1.5">
-                      Units to Acquire ({selectedCommodity.unit})
-                    </label>
-                    <input 
-                      type="number"
-                      step="any"
-                      min="0.01"
-                      value={commodityTradeUnits}
-                      onChange={(e) => setCommodityTradeUnits(e.target.value)}
-                      className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-white font-mono text-sm outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-300 font-bold block mb-1.5">
-                      Destination Bucket
-                    </label>
-                    <select
-                      value={tradeTargetBucket}
-                      onChange={(e) => setTradeTargetBucket(e.target.value)}
-                      className="w-full bg-slate-950 border border-white/15 rounded-xl px-3 py-2.5 text-white text-xs outline-none focus:border-amber-400"
-                    >
-                      <option value="agent_vault">⚡ Global Agent Tactical Vault</option>
-                      <option value="core">🛡️ Core Long-Term Portfolio</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 space-y-1.5 text-xs text-slate-300 mb-5">
-                  <div className="flex justify-between items-center">
-                    <span>Estimated Total Cost:</span>
-                    <strong className="text-white font-mono text-sm">
-                      {currency}{(Number(selectedCommodity.price || 0) * Number(commodityTradeUnits || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between items-center text-slate-400">
-                    <span>Available Cash Buying Power:</span>
-                    <span className="font-mono">{currency}{balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-3">
-                  <button 
-                    type="button"
-                    onClick={() => setSelectedCommodity(null)}
-                    className="btn btn-outline py-2.5 px-4 text-xs"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary py-2.5 px-6 text-sm font-bold flex items-center gap-2"
-                    style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#000' }}
-                  >
-                    <DollarSign size={16} /> Confirm Acquisition
-                  </button>
-                </div>
-              </form>
-
-            </div>
-          </div>
-        )}
-
-      </div>
-
       {/* SECTION 3: Agent Allocation Recommendation & Capital Divergence Desk */}
       <div className="glass-panel p-6 mb-8">
         
@@ -2360,6 +2131,235 @@ export default function MacroAgent() {
           </div>
         </div>
       )}
+
+      {/* SECTION 4: Commodities & Metals Desk (Full-Width Spacious Trading Floor at Bottom) */}
+      <div className="glass-panel p-6 mb-8 mt-8">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-white/10">
+          <div>
+            <div className="flex items-center gap-2.5 mb-1">
+              <Flame size={24} className="text-amber-400" />
+              <h2 className="text-2xl font-bold text-white">Commodities & Precious Metals Desk</h2>
+              <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                Direct Trading Floor
+              </span>
+            </div>
+            <p className="text-sm text-slate-300">
+              Acquire physical gold bullion, silver trusts, crude oil barrels, copper, and platinum into your <strong>⚡ Tactical Vault</strong> or <strong>🛡️ Long-Term Core</strong>.
+            </p>
+          </div>
+
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+            {[
+              { id: 'ALL', label: 'All Commodities' },
+              { id: 'PRECIOUS', label: '🥇 Precious Metals' },
+              { id: 'ENERGY', label: '🛢️ Energy & Petroleum' },
+              { id: 'INDUSTRIAL', label: '⚡ Industrial Metals' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveCommodityFilter(tab.id)}
+                className={`px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all ${
+                  activeCommodityFilter === tab.id
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25 font-extrabold'
+                    : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700/80 border border-white/5'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Spacious 4-Column Responsive Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {filteredCommodities.map((comm) => {
+            const isGold = comm.ticker.includes('GC') || comm.ticker.includes('GLD');
+            const isSilver = comm.ticker.includes('SI') || comm.ticker.includes('SLV');
+            const isOil = comm.ticker.includes('CL') || comm.ticker.includes('BZ') || comm.ticker.includes('USO');
+            const isCopper = comm.ticker.includes('HG') || comm.ticker.includes('COPPER');
+            const isPlat = comm.ticker.includes('PL');
+            const isGas = comm.ticker.includes('NG');
+
+            const emblemIcon = isGold ? '🥇' : isSilver ? '🥈' : isOil ? '🛢️' : isCopper ? '⚡' : isPlat ? '💎' : isGas ? '💨' : '📦';
+            const badgeColor = isGold ? 'from-amber-500/20 to-yellow-500/10 text-amber-300 border-amber-500/30' :
+                               isSilver ? 'from-slate-400/20 to-slate-200/10 text-slate-200 border-slate-400/30' :
+                               isOil ? 'from-rose-500/20 to-red-500/10 text-rose-300 border-rose-500/30' :
+                               isCopper ? 'from-orange-500/20 to-amber-600/10 text-orange-300 border-orange-500/30' :
+                               'from-blue-500/20 to-cyan-500/10 text-blue-300 border-blue-500/30';
+
+            return (
+              <div 
+                key={comm.ticker}
+                className="p-5 rounded-2xl border border-white/10 bg-slate-900/80 hover:bg-slate-900/95 hover:border-amber-500/40 transition-all shadow-lg flex flex-col justify-between group"
+              >
+                <div>
+                  {/* Top Bar: Icon Emblem, Ticker & Category */}
+                  <div className="flex items-center justify-between mb-3.5 gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-white/10 flex items-center justify-center text-xl shadow-inner shrink-0">
+                        {emblemIcon}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-extrabold text-base text-white tracking-wide font-mono truncate">
+                          {comm.ticker}
+                        </div>
+                        <div className="text-[11px] font-semibold text-slate-400 truncate">
+                          {comm.category}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Change % Badge */}
+                    <div className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1 shrink-0 ${
+                      comm.up 
+                        ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' 
+                        : 'bg-red-500/15 text-red-300 border border-red-500/30'
+                    }`}>
+                      {comm.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                      <span>{comm.up ? '+' : ''}{comm.changePct?.toFixed(2)}%</span>
+                    </div>
+                  </div>
+
+                  {/* Name & Unit Subtitle */}
+                  <h4 className="font-bold text-base text-white mb-1 group-hover:text-amber-400 transition-colors">
+                    {comm.name}
+                  </h4>
+                  <p className="text-xs text-slate-400 mb-4 line-clamp-2 leading-relaxed">
+                    {comm.description || `Benchmark physical trading contract quoted per ${comm.unit}.`}
+                  </p>
+                </div>
+
+                {/* Bottom Row: Large Clear Price & Trade Button with explicit stacked layout */}
+                <div className="pt-4 border-t border-white/10 flex items-end justify-between mt-2 gap-3">
+                  <div className="space-y-1">
+                    <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                      Live Quote ({comm.unit}):
+                    </div>
+                    <div className="text-xl font-extrabold text-white font-mono tracking-tight leading-tight">
+                      {currency}{comm.price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setSelectedCommodity(comm);
+                      setCommodityTradeUnits(1);
+                    }}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/25 transition-all flex items-center gap-1.5 hover:scale-105 shrink-0"
+                  >
+                    <ShoppingBag size={14} />
+                    <span>Trade</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Dedicated Interactive Commodity Trade Modal */}
+        {selectedCommodity && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
+            <div className="glass-panel p-6 max-w-lg w-full border border-amber-500/40 rounded-2xl animate-fade-in shadow-2xl">
+              
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <Flame size={22} className="text-amber-400" />
+                  <h3 className="text-lg font-bold text-white">Acquire {selectedCommodity.name}</h3>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedCommodity(null)}
+                  className="text-slate-400 hover:text-white text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-900 border border-white/10 mb-4 flex items-center justify-between">
+                <div>
+                  <span className="font-mono text-sm font-bold text-blue-400">{selectedCommodity.ticker}</span>
+                  <h4 className="text-base font-bold text-white">{selectedCommodity.name}</h4>
+                  <span className="text-xs text-muted">{selectedCommodity.category}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-muted block">Market Price</span>
+                  <span className="text-xl font-bold font-mono text-white">
+                    {currency}{selectedCommodity.price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                  <span className="text-xs text-slate-400 block">per {selectedCommodity.unit}</span>
+                </div>
+              </div>
+
+              <form onSubmit={handleBuyCommodity}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="text-xs text-slate-300 font-bold block mb-1.5">
+                      Units to Acquire ({selectedCommodity.unit})
+                    </label>
+                    <input 
+                      type="number"
+                      step="any"
+                      min="0.01"
+                      value={commodityTradeUnits}
+                      onChange={(e) => setCommodityTradeUnits(e.target.value)}
+                      className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-white font-mono text-sm outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-slate-300 font-bold block mb-1.5">
+                      Destination Bucket
+                    </label>
+                    <select
+                      value={tradeTargetBucket}
+                      onChange={(e) => setTradeTargetBucket(e.target.value)}
+                      className="w-full bg-slate-950 border border-white/15 rounded-xl px-3 py-2.5 text-white text-xs outline-none focus:border-amber-400"
+                    >
+                      <option value="agent_vault">⚡ Global Agent Tactical Vault</option>
+                      <option value="core">🛡️ Core Long-Term Portfolio</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 space-y-1.5 text-xs text-slate-300 mb-5">
+                  <div className="flex justify-between items-center">
+                    <span>Estimated Total Cost:</span>
+                    <strong className="text-white font-mono text-sm">
+                      {currency}{(Number(selectedCommodity.price || 0) * Number(commodityTradeUnits || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-400">
+                    <span>Available Cash Buying Power:</span>
+                    <span className="font-mono">{currency}{balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setSelectedCommodity(null)}
+                    className="btn btn-outline py-2.5 px-4 text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary py-2.5 px-6 text-sm font-bold flex items-center gap-2"
+                    style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#000' }}
+                  >
+                    <DollarSign size={16} /> Confirm Acquisition
+                  </button>
+                </div>
+              </form>
+
+            </div>
+          </div>
+        )}
+
+      </div>
 
     </div>
   );
