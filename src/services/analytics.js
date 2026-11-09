@@ -2,15 +2,21 @@
 import { detectPlatformInfo, getDeviceId, getApiBaseUrl } from './platform';
 
 const GA_STORAGE_KEY = 'galora_ga_measurement_id';
-const DEFAULT_GA_ID = import.meta.env?.VITE_GA_MEASUREMENT_ID || '';
+const DEFAULT_GA_ID = import.meta.env?.VITE_GA_MEASUREMENT_ID || 'GTM-54LZ246K';
 
 let initializedGaId = null;
+
+function isValidGoogleTagId(id) {
+  if (!id) return false;
+  const clean = String(id).trim().toUpperCase();
+  return clean.startsWith('G-') || clean.startsWith('GTM-') || clean.startsWith('GT-');
+}
 
 export function getGaMeasurementId() {
   try {
     const stored = localStorage.getItem(GA_STORAGE_KEY);
-    if (stored && stored.trim().startsWith('G-')) {
-      return stored.trim();
+    if (isValidGoogleTagId(stored)) {
+      return stored.trim().toUpperCase();
     }
   } catch {
     // ignore storage errors
@@ -29,7 +35,7 @@ export function setGaMeasurementId(measurementId) {
   } catch {
     // ignore
   }
-  if (clean && clean.startsWith('G-')) {
+  if (isValidGoogleTagId(clean)) {
     initGoogleAnalytics(clean);
   }
   return clean;
@@ -47,12 +53,11 @@ export function initGoogleAnalytics(customId = null) {
     window.gtag('js', new Date());
   }
 
-  if (!gaId || !gaId.startsWith('G-')) return;
+  if (!isValidGoogleTagId(gaId)) return;
   if (initializedGaId === gaId) return;
 
-  // Inject Google Tag Manager / gtag.js script if not already present for this ID
-  const existingScript = document.querySelector(`script[data-ga-id="${gaId}"]`);
-  if (!existingScript) {
+  // Inject additional gtag.js script only if a custom G- or GT- ID is configured beyond the head GTM-54LZ246K tag
+  if ((gaId.startsWith('G-') || gaId.startsWith('GT-')) && !document.querySelector(`script[data-ga-id="${gaId}"]`)) {
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;
@@ -60,10 +65,12 @@ export function initGoogleAnalytics(customId = null) {
     document.head.appendChild(script);
   }
 
-  window.gtag('config', gaId, {
-    send_page_view: false, // Handled explicitly by RouteSeoManager on SPA navigation
-    cookie_flags: 'SameSite=None;Secure'
-  });
+  if (gaId.startsWith('G-') || gaId.startsWith('GT-')) {
+    window.gtag('config', gaId, {
+      send_page_view: false, // Handled explicitly by RouteSeoManager on SPA navigation
+      cookie_flags: 'SameSite=None;Secure'
+    });
+  }
 
   initializedGaId = gaId;
 }
@@ -80,14 +87,17 @@ export function trackPageView(path, title) {
   const pageTitle = title || document.title || 'Galora AI';
   const pageLocation = window.location.href;
 
-  // 1. Send to Google Analytics 4 (gtag.js)
-  if (typeof window.gtag === 'function' && gaId && gaId.startsWith('G-')) {
-    window.gtag('event', 'page_view', {
+  // 1. Send to Google Tag / GA4 (gtag.js & dataLayer)
+  if (typeof window.gtag === 'function' && isValidGoogleTagId(gaId)) {
+    const payload = {
       page_title: pageTitle,
       page_location: pageLocation,
-      page_path: pagePath,
-      send_to: gaId
-    });
+      page_path: pagePath
+    };
+    if (gaId.startsWith('G-') || gaId.startsWith('GT-')) {
+      payload.send_to = gaId;
+    }
+    window.gtag('event', 'page_view', payload);
   }
 
   // 2. Send to First-Party Backend Visitor Telemetry
@@ -109,7 +119,7 @@ export function trackPageView(path, title) {
   })
     .then(r => (r.ok ? r.json() : null))
     .then(data => {
-      if (data?.gaMeasurementId && data.gaMeasurementId.startsWith('G-') && !getGaMeasurementId()) {
+      if (isValidGoogleTagId(data?.gaMeasurementId) && !localStorage.getItem(GA_STORAGE_KEY)) {
         setGaMeasurementId(data.gaMeasurementId);
       }
     })
@@ -120,11 +130,12 @@ export function trackAnalyticsEvent(eventName, params = {}) {
   if (typeof window === 'undefined') return;
 
   const gaId = getGaMeasurementId();
-  if (typeof window.gtag === 'function' && gaId && gaId.startsWith('G-')) {
-    window.gtag('event', eventName, {
-      ...params,
-      send_to: gaId
-    });
+  if (typeof window.gtag === 'function' && isValidGoogleTagId(gaId)) {
+    const payload = { ...params };
+    if (gaId.startsWith('G-') || gaId.startsWith('GT-')) {
+      payload.send_to = gaId;
+    }
+    window.gtag('event', eventName, payload);
   }
 
   const platformInfo = detectPlatformInfo();

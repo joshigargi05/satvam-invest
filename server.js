@@ -2318,7 +2318,7 @@ const loadAnalyticsStore = () => {
     }
   } catch (e) {}
   return {
-    gaMeasurementId: process.env.GA_MEASUREMENT_ID || process.env.VITE_GA_MEASUREMENT_ID || '',
+    gaMeasurementId: process.env.GA_MEASUREMENT_ID || process.env.VITE_GA_MEASUREMENT_ID || 'GTM-54LZ246K',
     totalPageViews: 14,
     visitors: {
       'dev_web_seed_1': { firstSeen: new Date(Date.now() - 3600000).toISOString(), lastSeen: new Date().toISOString(), platform: 'web', views: 8 },
@@ -2411,10 +2411,10 @@ app.get('/api/analytics/summary', (req, res) => {
 app.post('/api/analytics/config', (req, res) => {
   const { gaMeasurementId = '' } = req.body || {};
   const clean = String(gaMeasurementId).trim().toUpperCase();
-  if (clean && !clean.startsWith('G-')) {
-    return res.status(400).json({ error: 'Google Analytics 4 Measurement ID must start with G- (e.g., G-XXXXXXXXXX)' });
+  if (clean && !clean.startsWith('G-') && !clean.startsWith('GTM-') && !clean.startsWith('GT-')) {
+    return res.status(400).json({ error: 'Google Tag / GA4 ID must start with GTM-, G-, or GT- (e.g., GTM-54LZ246K)' });
   }
-  analyticsState.gaMeasurementId = clean;
+  analyticsState.gaMeasurementId = clean || 'GTM-54LZ246K';
   saveAnalyticsStore();
   res.json({
     ok: true,

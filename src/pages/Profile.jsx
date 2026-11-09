@@ -91,8 +91,8 @@ export default function Profile() {
   const handleSaveGaConfig = async (e) => {
     e.preventDefault();
     const clean = String(gaIdInput || '').trim().toUpperCase();
-    if (clean && !clean.startsWith('G-')) {
-      showBanner('Google Analytics 4 Measurement ID must start with "G-" (e.g. G-XXXXXXXXXX).', true);
+    if (clean && !clean.startsWith('G-') && !clean.startsWith('GTM-') && !clean.startsWith('GT-')) {
+      showBanner('Google Tag / GA4 ID must start with "GTM-", "G-", or "GT-" (e.g. GTM-54LZ246K).', true);
       return;
     }
     setSaving(true);
@@ -896,7 +896,7 @@ export default function Profile() {
                   type="text"
                   value={gaIdInput}
                   onChange={(e) => setGaIdInput(e.target.value)}
-                  placeholder="G-XXXXXXXXXX"
+                  placeholder="GTM-54LZ246K or G-XXXXXXXXXX"
                   className="chat-input w-full py-2.5 px-3.5 text-sm font-mono uppercase"
                 />
               </div>

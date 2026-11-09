@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Google tag (gtag.js / gtm.js) for Galora AI (galora.ai) -->
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-54LZ246K"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/galora-logo.svg" />
     <link rel="manifest" href="/manifest.json" />
@@ -127,26 +134,6 @@
           }
         ]
       }
-    </script>
-
-    <!-- Google Analytics 4 (gtag.js) Visitor & Traffic Tracking -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      (function() {
-        try {
-          var savedGaId = localStorage.getItem('galora_ga_measurement_id');
-          if (savedGaId && savedGaId.indexOf('G-') === 0) {
-            var s = document.createElement('script');
-            s.async = true;
-            s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(savedGaId);
-            s.setAttribute('data-ga-id', savedGaId);
-            document.head.appendChild(s);
-            gtag('config', savedGaId, { send_page_view: false });
-          }
-        } catch (e) {}
-      })();
     </script>
 
     <!-- Google Identity Services for 1-Click Social Sign-In -->
