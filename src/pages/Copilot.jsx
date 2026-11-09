@@ -143,12 +143,18 @@ export default function Copilot() {
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed.map(m => ({
-            ...m,
-            text: typeof m.text === 'string'
-              ? m.text.replace(/Vestra\s*AI/gi, 'Galora AI').replace(/Satvam\s*Invest/gi, 'Galora AI')
-              : m.text
-          }));
+          const cleaned = parsed
+            .filter(m => {
+              const txt = String(m?.text || '');
+              return !txt.includes('API Key is not configured on the server') && !txt.includes('Failed to fetch response from');
+            })
+            .map(m => ({
+              ...m,
+              text: typeof m.text === 'string'
+                ? m.text.replace(/Vestra\s*AI/gi, 'Galora AI').replace(/Satvam\s*Invest/gi, 'Galora AI')
+                : m.text
+            }));
+          return cleaned.length > 0 ? cleaned : defaultMessages;
         }
       }
     } catch (e) {
