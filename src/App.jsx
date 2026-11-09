@@ -29,6 +29,7 @@ import MacroAgent from './pages/MacroAgent'
 import Profile from './pages/Profile'
 import AuthPage, { PinLockScreen } from './pages/AuthPage'
 import GaloraLogo from './components/GaloraLogo'
+import { initGoogleAnalytics, trackPageView } from './services/analytics'
 
 function AlgoRedirect() {
   const location = useLocation();
@@ -390,6 +391,10 @@ function RouteSeoManager() {
   const location = useLocation();
 
   useEffect(() => {
+    initGoogleAnalytics();
+  }, []);
+
+  useEffect(() => {
     const meta = SEO_ROUTES[location.pathname] || SEO_ROUTES['/'];
     document.title = meta.title;
 
@@ -407,6 +412,8 @@ function RouteSeoManager() {
 
     const canonicalEl = document.querySelector('link[rel="canonical"]');
     if (canonicalEl) canonicalEl.setAttribute('href', meta.canonical);
+
+    trackPageView(location.pathname, meta.title);
   }, [location.pathname]);
 
   return null;

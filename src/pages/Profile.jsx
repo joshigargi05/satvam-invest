@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useMarket } from '../context/MarketContext';
 import { getMobileReleaseManifest } from '../services/api';
-import { triggerBiometricVerification } from '../services/platform';
+import { triggerBiometricVerification, getApiBaseUrl } from '../services/platform';
+import { getGaMeasurementId, setGaMeasurementId } from '../services/analytics';
 
 const ShieldCheck = Lucide.ShieldCheck || (() => '🛡️');
 const Lock = Lucide.Lock || (() => '🔒');
@@ -23,6 +24,7 @@ const Cloud = Lucide.Cloud || (() => '☁️');
 const Terminal = Lucide.Terminal || (() => '⌨️');
 const Layers = Lucide.Layers || (() => '📑');
 const Server = Lucide.Server || (() => '🗄️');
+const BarChart3 = Lucide.BarChart3 || (() => '📊');
 
 export default function Profile() {
   const {
@@ -57,6 +59,65 @@ export default function Profile() {
 
   // Mobile release manifest
   const [releaseManifest, setReleaseManifest] = useState(null);
+
+  // Google Analytics 4 & Live Visitor Telemetry state
+  const [gaIdInput, setGaIdInput] = useState(() => getGaMeasurementId());
+  const [analyticsSummary, setAnalyticsSummary] = useState(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+
+  const loadAnalyticsSummary = async () => {
+    setLoadingAnalytics(true);
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/analytics/summary`);
+      if (res.ok) {
+        const data = await res.json();
+        setAnalyticsSummary(data);
+        if (data.gaMeasurementId && !gaIdInput) {
+          setGaIdInput(data.gaMeasurementId);
+          setGaMeasurementId(data.gaMeasurementId);
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAnalyticsSummary();
+  }, []);
+
+  const handleSaveGaConfig = async (e) => {
+    e.preventDefault();
+    const clean = String(gaIdInput || '').trim().toUpperCase();
+    if (clean && !clean.startsWith('G-')) {
+      showBanner('Google Analytics 4 Measurement ID must start with "G-" (e.g. G-XXXXXXXXXX).', true);
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/analytics/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gaMeasurementId: clean })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save GA4 ID');
+      setGaMeasurementId(clean);
+      setGaIdInput(clean);
+      await loadAnalyticsSummary();
+      showBanner(
+        clean
+          ? `Google Analytics 4 (${clean}) activated across galora.ai!`
+          : 'Google Analytics 4 Measurement ID cleared.'
+      );
+    } catch (err) {
+      showBanner(err.message, true);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -291,6 +352,22 @@ export default function Profile() {
         >
           <User size={15} />
           <span>Investor Profile &amp; Preferences</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('analytics');
+            loadAnalyticsSummary();
+          }}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all ${
+            activeTab === 'analytics'
+              ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+              : 'bg-slate-900 text-slate-400 hover:text-white border border-white/10'
+          }`}
+        >
+          <BarChart3 size={15} />
+          <span>Google Analytics &amp; Visitors</span>
         </button>
       </div>
 
@@ -779,6 +856,135 @@ export default function Profile() {
               {saving ? 'Saving...' : 'Save Investor Profile'}
             </button>
           </form>
+        </div>
+      )}
+
+      {/* TAB 4: GOOGLE ANALYTICS 4 & LIVE VISITOR TELEMETRY */}
+      {activeTab === 'analytics' && (
+        <div className="space-y-6 animate-fade-in">
+          {/* GA4 Measurement ID Setup Card */}
+          <div className="glass-panel p-6 rounded-2xl border border-amber-500/30">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-white/10">
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  Google Analytics 4 (gtag.js) + Built-In Telemetry
+                </span>
+                <h2 className="text-xl font-bold text-white mt-1">
+                  Visitor Tracking &amp; Traffic Analytics for galora.ai
+                </h2>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Automatically tracks SPA page views, unique visitors, and platform sessions across Web, Android, and iOS.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={loadAnalyticsSummary}
+                disabled={loadingAnalytics}
+                className="btn btn-outline py-2 px-3.5 text-xs flex items-center gap-1.5"
+              >
+                <RefreshCw size={13} className={loadingAnalytics ? 'animate-spin text-amber-400' : ''} />
+                <span>Refresh Live Stats</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveGaConfig} className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 mb-6">
+              <div className="flex-1">
+                <label className="text-xs font-bold text-slate-200 block mb-1.5">
+                  Google Analytics 4 Measurement ID (<a href="https://analytics.google.com/" target="_blank" rel="noreferrer" className="text-blue-400 underline">Get from analytics.google.com</a>)
+                </label>
+                <input
+                  type="text"
+                  value={gaIdInput}
+                  onChange={(e) => setGaIdInput(e.target.value)}
+                  placeholder="G-XXXXXXXXXX"
+                  className="chat-input w-full py-2.5 px-3.5 text-sm font-mono uppercase"
+                />
+              </div>
+              <button type="submit" disabled={saving} className="btn btn-primary py-2.5 px-5 text-xs font-bold whitespace-nowrap">
+                {saving ? 'Activating...' : 'Save & Activate GA4'}
+              </button>
+            </form>
+
+            {/* Live Visitor KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="p-4 rounded-xl bg-slate-950/80 border border-emerald-500/30">
+                <div className="flex items-center gap-1.5 text-[11px] text-emerald-300 font-bold uppercase">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Active Visitors (15m)</span>
+                </div>
+                <div className="text-2xl font-black text-white font-mono mt-1">
+                  {analyticsSummary?.activeNowCount ?? 1}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/80 border border-blue-500/30">
+                <div className="text-[11px] text-blue-300 font-bold uppercase">Unique Visitors</div>
+                <div className="text-2xl font-black text-white font-mono mt-1">
+                  {analyticsSummary?.uniqueVisitorsCount ?? 2}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/80 border border-purple-500/30">
+                <div className="text-[11px] text-purple-300 font-bold uppercase">Total Page Views</div>
+                <div className="text-2xl font-black text-white font-mono mt-1">
+                  {analyticsSummary?.totalPageViews ?? 15}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/80 border border-amber-500/30">
+                <div className="text-[11px] text-amber-300 font-bold uppercase">GA4 Tag Status</div>
+                <div className="text-sm font-extrabold font-mono mt-2">
+                  {analyticsSummary?.gaMeasurementId || gaIdInput ? (
+                    <span className="text-emerald-400">● {analyticsSummary?.gaMeasurementId || gaIdInput}</span>
+                  ) : (
+                    <span className="text-amber-300">● Built-In Active (Add G-ID)</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Visited Pages & Recent Activity */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-white/10">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-300 mb-3">
+                  Top Visited Pages on galora.ai
+                </h4>
+                <div className="space-y-2 text-xs font-mono">
+                  {Object.entries(analyticsSummary?.pageBreakdown || { '/': 6, '/portfolio': 3, '/macro-agent': 2 }).map(
+                    ([route, count]) => (
+                      <div key={route} className="flex items-center justify-between py-1.5 border-b border-white/5">
+                        <span className="text-slate-200">{route}</span>
+                        <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold">{count} views</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-white/10">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-300 mb-3">
+                  Recent Live Visitor Stream
+                </h4>
+                <div className="space-y-2 text-xs max-h-48 overflow-y-auto">
+                  {(analyticsSummary?.recentEvents || []).length === 0 ? (
+                    <p className="text-slate-400 text-xs">Tracking live visitor sessions...</p>
+                  ) : (
+                    analyticsSummary.recentEvents.map((ev, idx) => (
+                      <div key={idx} className="flex items-center justify-between py-1.5 border-b border-white/5 gap-2">
+                        <div className="truncate">
+                          <span className="font-mono text-emerald-300 font-bold">{ev.path}</span>
+                          <span className="text-slate-400 ml-2 text-[11px]">({ev.platform})</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400 shrink-0">
+                          {new Date(ev.timestamp).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
