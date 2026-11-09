@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, useNavigate, Navigate } from 'react-router-dom'
 import * as Md from 'react-icons/md'
 import * as Io5 from 'react-icons/io5'
@@ -342,6 +343,75 @@ function SimulatorBanner() {
   );
 }
 
+const SEO_ROUTES = {
+  '/': {
+    title: 'Galora AI | Top 3 AI-Recommended Stocks (India & US Markets)',
+    description: 'Discover daily Top 3 AI-ranked stocks for Indian (NSE/BSE NIFTY 50) and US (NYSE/NASDAQ) markets with Quarterly, 6-Month, and 12-Month algorithmic price targets.',
+    canonical: 'https://galora.ai/'
+  },
+  '/top-stocks': {
+    title: 'Top 3 AI Stock Picks Today | Galora AI Quantitative Engine',
+    description: 'High-conviction Top 3 stock picks powered by Galora AI 5-module ensemble and 23-feature XGBoost machine learning engine across India and US markets.',
+    canonical: 'https://galora.ai/top-stocks'
+  },
+  '/portfolio': {
+    title: 'My Portfolio & Tactical Vault | Galora AI Wealth OS',
+    description: 'Track your Core Protected holdings, Autonomous Tactical Vault, and #1 Top Pick compounding cycles with real-time P&L and GTT auto-exit rules on Galora AI.',
+    canonical: 'https://galora.ai/portfolio'
+  },
+  '/markets': {
+    title: 'Live Global Markets, Stocks & Commodities | Galora AI',
+    description: 'Real-time NIFTY 50, S&P 500, NASDAQ equities, Gold, Silver, and Crude Oil prices with instant AI conviction ratings on Galora AI.',
+    canonical: 'https://galora.ai/markets'
+  },
+  '/macro-agent': {
+    title: 'Global Macro Radar & Autonomous Portfolio Agent | Galora AI',
+    description: 'Autonomous geopolitical & macro intelligence radar that rotates capital across top conviction equities, precious metals, and energy hedges.',
+    canonical: 'https://galora.ai/macro-agent'
+  },
+  '/deep-analysis': {
+    title: 'Quant Agent & XGBoost Deep Stock Analysis | Galora AI',
+    description: 'Institutional 4-layer quantitative stock analysis combining Macro Regime, Derivatives OI/PCR, Technical Momentum, and Fundamental Earnings.',
+    canonical: 'https://galora.ai/deep-analysis'
+  },
+  '/copilot': {
+    title: 'Galora AI Copilot | Financial Research & Fundamental Charts',
+    description: 'Ask Galora AI Copilot to analyze any US or Indian stock with live multi-year revenue, profit, cash flow charts, and institutional investment theses.',
+    canonical: 'https://galora.ai/copilot'
+  },
+  '/profile': {
+    title: 'Investor Security Enclave & Multi-Device Sync | Galora AI',
+    description: 'Manage your Galora AI investor profile, biometric passkeys, 4-digit trading PIN, and Cloud SQL portfolio synchronization.',
+    canonical: 'https://galora.ai/profile'
+  }
+};
+
+function RouteSeoManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const meta = SEO_ROUTES[location.pathname] || SEO_ROUTES['/'];
+    document.title = meta.title;
+
+    const descEl = document.querySelector('meta[name="description"]');
+    if (descEl) descEl.setAttribute('content', meta.description);
+
+    const ogTitleEl = document.querySelector('meta[property="og:title"]');
+    if (ogTitleEl) ogTitleEl.setAttribute('content', meta.title);
+
+    const ogDescEl = document.querySelector('meta[property="og:description"]');
+    if (ogDescEl) ogDescEl.setAttribute('content', meta.description);
+
+    const ogUrlEl = document.querySelector('meta[property="og:url"]');
+    if (ogUrlEl) ogUrlEl.setAttribute('content', meta.canonical);
+
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) canonicalEl.setAttribute('href', meta.canonical);
+  }, [location.pathname]);
+
+  return null;
+}
+
 function AppShell() {
   const { isAuthenticated, isLocked, loading } = useAuth();
 
@@ -360,10 +430,10 @@ function AppShell() {
 
   return (
     <div className="relative min-h-screen w-full bg-[#030712] overflow-x-hidden">
+      <RouteSeoManager />
       {/* Background Home Page / Portfolio Dashboard (Deeply blurred when unauthenticated, smoothly sharp upon login) */}
       <div
         className={`app-container ${isBlurred ? 'app-container-blurred' : 'app-container-clear'}`}
-        aria-hidden={isBlurred}
       >
         <Navigation />
         <main className="main-content md:pt-6">

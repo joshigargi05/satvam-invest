@@ -2296,13 +2296,69 @@ app.get('/api/commodities', async (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'vestra-ai-api',
-    version: '2.4.0',
+    service: 'galora-ai-api',
+    domain: 'https://galora.ai',
+    version: '2.5.0',
     uptimeSeconds: Math.round(process.uptime()),
     timestamp: new Date().toISOString(),
     database: getDatabaseStatus(),
     mlEngineTickersCached: Object.keys(realXgbPredictions).length
   });
+});
+
+// SEO & Google Search Console Crawling Endpoints (/robots.txt & /sitemap.xml)
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(
+    [
+      'User-agent: *',
+      'Allow: /',
+      'Allow: /top-stocks',
+      'Allow: /markets',
+      'Allow: /macro-agent',
+      'Allow: /deep-analysis',
+      'Allow: /portfolio',
+      'Allow: /copilot',
+      'Disallow: /api/',
+      '',
+      'User-agent: Googlebot',
+      'Allow: /',
+      'Disallow: /api/',
+      '',
+      'Sitemap: https://galora.ai/sitemap.xml',
+      'Host: https://galora.ai'
+    ].join('\n')
+  );
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  const today = new Date().toISOString().split('T')[0];
+  const pages = [
+    { loc: 'https://galora.ai/', changefreq: 'hourly', priority: '1.0' },
+    { loc: 'https://galora.ai/top-stocks', changefreq: 'hourly', priority: '0.95' },
+    { loc: 'https://galora.ai/markets', changefreq: 'hourly', priority: '0.90' },
+    { loc: 'https://galora.ai/macro-agent', changefreq: 'daily', priority: '0.90' },
+    { loc: 'https://galora.ai/deep-analysis', changefreq: 'daily', priority: '0.90' },
+    { loc: 'https://galora.ai/portfolio', changefreq: 'daily', priority: '0.85' },
+    { loc: 'https://galora.ai/copilot', changefreq: 'weekly', priority: '0.80' }
+  ];
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages
+  .map(
+    (p) => `  <url>
+    <loc>${p.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${p.changefreq}</changefreq>
+    <priority>${p.priority}</priority>
+  </url>`
+  )
+  .join('\n')}
+</urlset>`;
+
+  res.header('Content-Type', 'application/xml; charset=utf-8');
+  res.send(xml);
 });
 
 // GCP Cloud Run Production Static Serving (Serves built Vite SPA from dist/)

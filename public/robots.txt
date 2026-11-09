@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /top-stocks
+Allow: /markets
+Allow: /macro-agent
+Allow: /deep-analysis
+Allow: /portfolio
+Allow: /copilot
+Disallow: /api/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+
+Sitemap: https://galora.ai/sitemap.xml
+Host: https://galora.ai
