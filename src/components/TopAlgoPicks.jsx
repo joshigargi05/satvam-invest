@@ -26,6 +26,7 @@ const PartyPopper = Lucide.PartyPopper || Lucide.Sparkles || (() => '🎉');
 const Clock = Lucide.Clock || (() => '⏱️');
 const Target = Lucide.Target || (() => '🎯');
 const History = Lucide.History || (() => '📜');
+const ChevronDown = Lucide.ChevronDown || (() => '▼');
 
 export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
   const navigate = useNavigate();
@@ -257,66 +258,55 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
 
         {/* Market Switcher & Controls */}
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end">
-          {/* High-Visibility IND Top 3 / US Top 3 Market Switcher */}
-          <div className="grid grid-cols-2 sm:flex items-center bg-slate-950/90 p-1.5 rounded-2xl border-2 border-white/15 shadow-xl gap-1.5 w-full sm:w-auto">
+          {/* High-Visibility IND Top 3 (Orange) / US Top 3 (Blue) Market Switcher */}
+          <div className="grid grid-cols-2 sm:flex items-center bg-slate-900/95 p-1.5 rounded-2xl border border-white/20 shadow-xl gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setMarket('INDIA')}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 market === 'INDIA'
-                  ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black shadow-lg shadow-orange-500/40 border-2 border-amber-300 ring-2 ring-orange-400/40 scale-[1.02]'
-                  : 'bg-slate-900/80 text-slate-400 border border-white/10 hover:bg-slate-800 hover:text-slate-200'
+                  ? 'bg-gradient-to-r from-orange-500 via-orange-600 to-amber-600 text-white shadow-lg shadow-orange-500/50 border-2 border-orange-300 ring-2 ring-orange-400/40 scale-[1.02]'
+                  : 'bg-slate-800/80 text-slate-300 border border-white/15 hover:bg-slate-700 hover:text-white'
               }`}
             >
-              {market === 'INDIA' && <span className="w-2.5 h-2.5 rounded-full bg-slate-950 border border-white/80 animate-pulse"></span>}
+              {market === 'INDIA' && <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>}
               <span>🇮🇳 ₹ IND Top 3</span>
             </button>
             <button
               type="button"
               onClick={() => setMarket('US')}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 market === 'US'
-                  ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black shadow-lg shadow-teal-500/40 border-2 border-emerald-200 ring-2 ring-teal-400/40 scale-[1.02]'
-                  : 'bg-slate-900/80 text-slate-400 border border-white/10 hover:bg-slate-800 hover:text-slate-200'
+                  ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/50 border-2 border-blue-300 ring-2 ring-blue-400/40 scale-[1.02]'
+                  : 'bg-slate-800/80 text-slate-300 border border-white/15 hover:bg-slate-700 hover:text-white'
               }`}
             >
-              {market === 'US' && <span className="w-2.5 h-2.5 rounded-full bg-slate-950 border border-white/80 animate-pulse"></span>}
+              {market === 'US' && <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>}
               <span>🇺🇸 $ US Top 3</span>
             </button>
           </div>
 
-          {/* Secondary Controls Row: Target (6M / 12M), Recalculate, Quant Agent */}
+          {/* Secondary Controls Row: Elegant Target Dropdown, Recalculate, Quant Agent */}
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            {/* Modern Segmented Target Horizon Selector: 6 Months or 12 Months */}
-            <div className="inline-flex items-center bg-slate-950/90 p-1 rounded-xl border border-white/15 text-[11px] sm:text-xs shadow-inner gap-1">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-1.5 flex items-center gap-1">
-                <Target size={12} className="text-emerald-400 shrink-0" />
-                <span className="hidden xs:inline">Target:</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => setTargetTimeframe('sixMonths')}
-                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
-                  targetTimeframe === 'sixMonths'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black shadow-md shadow-emerald-500/30 border border-emerald-300/40'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
-                }`}
-                title="Calculate targets for a 6-Month algorithmic horizon"
-              >
-                6 Months
-              </button>
-              <button
-                type="button"
-                onClick={() => setTargetTimeframe('twelveMonths')}
-                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
-                  targetTimeframe === 'twelveMonths'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black shadow-md shadow-emerald-500/30 border border-emerald-300/40'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
-                }`}
-                title="Calculate targets for a 12-Month algorithmic horizon"
-              >
-                12 Months
-              </button>
+            {/* Elegant Target Horizon Dropdown */}
+            <div className="flex items-center gap-2 bg-slate-900/95 px-3 py-1.5 rounded-xl border border-emerald-500/40 shadow-inner">
+              <div className="flex items-center gap-1.5 text-emerald-400 font-extrabold text-xs">
+                <Target size={14} className="text-emerald-400 shrink-0" />
+                <span className="uppercase tracking-wider text-[11px] text-emerald-300 font-bold">Target:</span>
+              </div>
+              <div className="relative inline-flex items-center">
+                <select
+                  value={targetTimeframe}
+                  onChange={(e) => setTargetTimeframe(e.target.value)}
+                  className="appearance-none bg-slate-800/90 hover:bg-slate-800 text-emerald-300 font-black pl-2.5 pr-7 py-1 rounded-lg border border-emerald-400/40 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer text-xs sm:text-sm transition-all"
+                  style={{ minWidth: '110px' }}
+                  title="Select dynamic target price timeframe (6 Months or 12 Months)"
+                >
+                  <option value="sixMonths" className="bg-slate-900 text-white font-bold">6 Months</option>
+                  <option value="twelveMonths" className="bg-slate-900 text-white font-bold">12 Months</option>
+                </select>
+                <ChevronDown size={13} className="absolute right-2 pointer-events-none text-emerald-400" />
+              </div>
             </div>
 
             <button
