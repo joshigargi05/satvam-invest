@@ -2700,6 +2700,51 @@ app.get('/favicon.svg', serveBrandAsset('galora-logo.svg', 'image/svg+xml'));
 app.get('/galora-logo.svg', serveBrandAsset('galora-logo.svg', 'image/svg+xml'));
 app.get('/apple-touch-icon.png', serveBrandAsset('apple-touch-icon.png', 'image/png'));
 
+// Public Privacy Policy & Data Deletion Page (Required by Google Play Console & Apple App Store Connect)
+app.get('/privacy', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.ico" />
+  <title>Privacy Policy & Data Safety | Galora Wealth AI</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #030712; color: #e2e8f0; line-height: 1.65; margin: 0; padding: 2rem 1rem; }
+    main { max-width: 820px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; }
+    h1, h2 { color: #f8fafc; }
+    a { color: #38bdf8; }
+    .badge { display: inline-block; background: rgba(56,189,248,0.15); color: #38bdf8; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <main>
+    <span class="badge">Galora Wealth AI • Official Policy</span>
+    <h1>Privacy Policy &amp; Data Safety Disclosure</h1>
+    <p><strong>Effective Date:</strong> November 2026 | <strong>App Name:</strong> Galora Wealth AI (<code>com.galora.ai</code>)</p>
+    <h2>1. Overview &amp; Simulator Disclosure</h2>
+    <p>Galora Wealth AI ("Galora AI", <a href="https://galora.ai">https://galora.ai</a>) is an AI-powered quantitative stock intelligence and paper-trading simulation platform for US and Indian equity markets. All portfolio balances, virtual currency allocations, and simulated trades inside the application are for educational, analytical, and paper-trading simulation purposes only and do not constitute real-money brokerage execution.</p>
+    <h2>2. Information We Collect</h2>
+    <ul>
+      <li><strong>Account Identity:</strong> Name and email address when signing in via Google Sign-In, Email OTP, or password.</li>
+      <li><strong>Simulated Portfolio State:</strong> Virtual holdings, paper-trading balances, and AI chat history stored for cross-device synchronization.</li>
+      <li><strong>Device Security Enclave:</strong> Optional 4-digit PIN and local device biometric unlock (Face ID / Touch ID / Android BiometricPrompt) are verified locally on your device. Biometric templates never leave your device.</li>
+    </ul>
+    <h2>3. How We Use &amp; Protect Your Data</h2>
+    <p>All data transmitted between the Galora Wealth AI mobile apps (Android &amp; iOS) and <code>https://galora.ai</code> is encrypted in transit using TLS 1.3. We never sell or share personal user data with third-party advertisers.</p>
+    <h2 id="account-deletion">4. Account &amp; Data Deletion (Google Play &amp; Apple App Store Policy)</h2>
+    <p>You may permanently reset and delete your portfolio and account data at any time:</p>
+    <ul>
+      <li><strong>Inside the App:</strong> Open <strong>Profile</strong> or tap <strong>Reset</strong> in the header bar to immediately purge local and synced portfolio data.</li>
+      <li><strong>By Web / Email Request:</strong> Email <a href="mailto:support@galora.ai">support@galora.ai</a> with the subject line <code>Delete My Galora Wealth AI Account</code> and your registered email address; all associated records are permanently purged within 48 hours.</li>
+    </ul>
+    <p><a href="https://galora.ai/">← Return to Galora Wealth AI</a></p>
+  </main>
+</body>
+</html>`);
+});
+
 // GCP Cloud Run Production Static Serving (Serves built Vite SPA from dist/)
 const distDir = path.join(process.cwd(), 'dist');
 const distIndexHtml = path.join(distDir, 'index.html');
