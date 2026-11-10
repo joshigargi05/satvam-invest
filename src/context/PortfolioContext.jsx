@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { getQuotes, getMacroAllocationRecommendation, getTopAlgoPicks, getCloudPortfolio, syncCloudPortfolio } from '../services/api';
 import { useMarket } from './MarketContext';
 import { useAuth } from './AuthContext';
+import { TradeResultModal, SellPositionModal } from '../components/TradeModals';
 
 const PortfolioContext = createContext();
 
@@ -30,6 +31,50 @@ export function PortfolioProvider({ children }) {
       return { US: 10000.00, INDIA: 150000.00 };
     }
   });
+
+  // In-App Trade Action Box & Modal States (Replaces crude browser notifications/alerts)
+  const [tradeResultModal, setTradeResultModal] = useState({
+    isOpen: false,
+    type: 'success',
+    action: 'BUY',
+    ticker: '',
+    name: '',
+    units: 1,
+    price: 0,
+    total: 0,
+    currency: '$',
+    autoExit: null,
+    market: 'US',
+    balanceAfter: null,
+    title: '',
+    message: ''
+  });
+
+  const [sellModalState, setSellModalState] = useState({
+    isOpen: false,
+    asset: null
+  });
+
+  const openSellModal = (asset) => {
+    setSellModalState({ isOpen: true, asset });
+  };
+
+  const closeSellModal = () => {
+    setSellModalState({ isOpen: false, asset: null });
+  };
+
+  const closeTradeResultModal = () => {
+    setTradeResultModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const showTradeAlert = ({ title = 'Order Notice', message = '', type = 'warning' }) => {
+    setTradeResultModal({
+      isOpen: true,
+      type,
+      title,
+      message
+    });
+  };
 
   const defaultIndianHoldings = [
     {
@@ -1489,7 +1534,10 @@ export function PortfolioProvider({ children }) {
     }
 
     if (!ticker || isNaN(price) || price <= 0 || isNaN(units) || units <= 0) {
-      alert("Invalid order parameters.");
+      showTradeAlert({
+        title: 'Invalid Order Parameters',
+        message: 'Please ensure valid quantity and non-zero price before submitting the order.'
+      });
       return false;
     }
 
@@ -1501,13 +1549,17 @@ export function PortfolioProvider({ children }) {
 
     const totalCost = Number((price * units).toFixed(2));
     if (currentBalance < totalCost) {
-      alert(`Insufficient funds in ${targetMarket === 'INDIA' ? 'Indian (₹)' : 'US ($)'} wallet! Required: ${targetCurrency}${totalCost.toFixed(2)}, Available: ${targetCurrency}${currentBalance.toFixed(2)}`);
+      showTradeAlert({
+        title: 'Insufficient Cash Balance',
+        message: `Order requires ${targetCurrency}${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}, but your ${targetMarket === 'INDIA' ? 'Indian (₹)' : 'US ($)'} wallet balance is ${targetCurrency}${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. Please adjust order size or deposit funds.`
+      });
       return false;
     }
 
+    const balanceAfter = Number((currentBalance - totalCost).toFixed(2));
     setBalances(prev => ({
       ...prev,
-      [targetMarket]: Number((prev[targetMarket] - totalCost).toFixed(2))
+      [targetMarket]: balanceAfter
     }));
     
     setHoldingsMap(prev => {
@@ -1558,12 +1610,27 @@ export function PortfolioProvider({ children }) {
       return { ...prev, [targetMarket]: newHoldings };
     });
 
+    setTradeResultModal({
+      isOpen: true,
+      type: 'success',
+      action: 'BUY',
+      ticker,
+      name: name || ticker,
+      units,
+      price,
+      total: totalCost,
+      currency: targetCurrency,
+      autoExit: resolvedAutoExit,
+      market: targetMarket,
+      balanceAfter
+    });
+
     return true;
   };
 
   // Backwards compatibility alias for stocks
   const buyStock = (ticker, name, price, shares = 1) => {
-    const success = buyAsset({
+    return buyAsset({
       ticker,
       name,
       price,
@@ -1572,42 +1639,62 @@ export function PortfolioProvider({ children }) {
       assetType: 'stock',
       bucket: 'core'
     });
-    if (success) {
-      alert(`Successfully bought ${shares} share(s) of ${ticker}!`);
-    }
   };
 
   // Sell an asset (stock or commodity)
   const sellAsset = (ticker, unitsToSell, targetBucket = null) => {
-    const holding = holdings.find(h => h.ticker === ticker && (!targetBucket || (h.bucket || 'core') === targetBucket));
+    const currentMarket = market;
+    const currentHoldings = holdingsMap[currentMarket] || [];
+    const holding = currentHoldings.find(h => h.ticker === ticker && (!targetBucket || (h.bucket || 'core') === targetBucket));
     if (!holding) {
-      alert("Asset not found in holdings.");
+      showTradeAlert({
+        title: 'Position Not Found',
+        message: 'The selected asset could not be located in your current portfolio holdings.'
+      });
       return false;
     }
 
     const currentPrice = holding.currentPrice || holding.avgPrice;
     const sellCount = (!unitsToSell || unitsToSell >= holding.shares) ? holding.shares : Number(unitsToSell);
     const proceeds = Number((sellCount * currentPrice).toFixed(2));
+    const targetCurrency = currentMarket === 'INDIA' ? '₹' : '$';
+    const oldBalance = balances[currentMarket] ?? balance;
+    const newBalance = Number((oldBalance + proceeds).toFixed(2));
 
     setBalances(prev => ({
       ...prev,
-      [market]: Number((prev[market] + proceeds).toFixed(2))
+      [currentMarket]: newBalance
     }));
 
     setHoldingsMap(prev => {
-      const currentHoldings = prev[market] || [];
+      const holdingsForMkt = prev[currentMarket] || [];
       let newHoldings;
       if (sellCount >= holding.shares) {
-        newHoldings = currentHoldings.filter(h => !(h.ticker === ticker && h.bucket === holding.bucket));
+        newHoldings = holdingsForMkt.filter(h => !(h.ticker === ticker && h.bucket === holding.bucket));
       } else {
         const remainingShares = Number((holding.shares - sellCount).toFixed(4));
-        newHoldings = currentHoldings.map(h => 
+        newHoldings = holdingsForMkt.map(h => 
           (h.ticker === ticker && h.bucket === holding.bucket)
             ? { ...h, shares: remainingShares, totalValue: Number((remainingShares * currentPrice).toFixed(2)) }
             : h
         );
       }
-      return { ...prev, [market]: newHoldings };
+      return { ...prev, [currentMarket]: newHoldings };
+    });
+
+    setSellModalState({ isOpen: false, asset: null });
+    setTradeResultModal({
+      isOpen: true,
+      type: 'success',
+      action: 'SELL',
+      ticker,
+      name: holding.name || ticker,
+      units: sellCount,
+      price: currentPrice,
+      total: proceeds,
+      currency: targetCurrency,
+      market: currentMarket,
+      balanceAfter: newBalance
     });
 
     return true;
@@ -1626,7 +1713,7 @@ export function PortfolioProvider({ children }) {
     enableAutoPilot = null
   }) => {
     if (!allocations || !Array.isArray(allocations) || allocations.length === 0) {
-      alert("Invalid allocation plan provided.");
+      showTradeAlert({ title: 'Invalid Allocation', message: 'Invalid allocation plan provided.' });
       return false;
     }
 
@@ -1657,7 +1744,7 @@ export function PortfolioProvider({ children }) {
     const totalNetWorth = balance + currentCoreValue + currentVaultValue;
 
     if (totalNetWorth <= 0) {
-      alert("Portfolio value is zero. Please deposit funds first.");
+      showTradeAlert({ title: 'Zero Portfolio Value', message: 'Portfolio value is zero. Please deposit funds first.' });
       return false;
     }
 
@@ -1673,7 +1760,7 @@ export function PortfolioProvider({ children }) {
       const actualVaultCapital = Math.min(targetVaultCapital, maxAvailableForVault);
 
       if (actualVaultCapital <= 0) {
-        alert("Insufficient liquid cash to fund the Tactical Vault without liquidating core holdings.");
+        showTradeAlert({ title: 'Insufficient Liquid Cash', message: 'Insufficient liquid cash to fund the Tactical Vault without liquidating core holdings.' });
         return false;
       }
 
@@ -1900,9 +1987,23 @@ export function PortfolioProvider({ children }) {
       autoExitHistory,
       rebalancePortfolio,
       rebalanceHistory,
-      lastCloudSyncAt
+      lastCloudSyncAt,
+      openSellModal,
+      closeSellModal,
+      tradeResultModal,
+      closeTradeResultModal,
+      showTradeAlert
     }}>
       {children}
+      <TradeResultModal
+        modalState={tradeResultModal}
+        onClose={closeTradeResultModal}
+      />
+      <SellPositionModal
+        modalState={sellModalState}
+        onClose={closeSellModal}
+        onConfirmSell={(ticker, units, bucket) => sellAsset(ticker, units, bucket)}
+      />
     </PortfolioContext.Provider>
   );
 }

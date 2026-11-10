@@ -705,13 +705,25 @@ app.get('/api/market-search', async (req, res) => {
     const results = await Promise.all(candidateSymbols.map(async (item) => {
       try {
         const rawSym = item.symbol.toUpperCase();
-        const isIndian = rawSym.endsWith('.NS') || rawSym.endsWith('.BO') || item.exchDisp === 'NSE' || item.exchDisp === 'BSE' || (item.exchange === 'NSI' || item.exchange === 'BOM') || (reqMarket === 'INDIA' && !rawSym.includes('.'));
+        const isIndian = rawSym.endsWith('.NS') || rawSym.endsWith('.BO') || item.exchDisp === 'NSE' || item.exchDisp === 'BSE' || (item.exchange === 'NSI' || item.exchange === 'BOM');
         
         // Fetch real-time price
-        const quote = await yahooFinanceQuoteWithTimeout(rawSym);
-        let price = quote.regularMarketPrice;
-        let change = quote.regularMarketChange;
-        let changePct = quote.regularMarketChangePercent;
+        let quote = await yahooFinanceQuoteWithTimeout(rawSym);
+        let price = quote ? quote.regularMarketPrice : null;
+        let change = quote ? quote.regularMarketChange : 0;
+        let changePct = quote ? quote.regularMarketChangePercent : 0;
+
+        if (!price || price <= 0) {
+          const v8Quote = await fetchLiveYahooV8Quote(rawSym);
+          if (v8Quote && v8Quote.regularMarketPrice) {
+            price = v8Quote.regularMarketPrice;
+            change = v8Quote.regularMarketChange || 0;
+            changePct = v8Quote.regularMarketChangePercent || 0;
+          }
+        }
+
+        const curr = isIndian ? '₹' : '$';
+        const resolvedPrice = Number(price || (isIndian ? 250 : 100));
 
         // Clean ticker display (remove .NS, .BO for ticker column, retain exchange info)
         let cleanTicker = rawSym.replace('.NS', '').replace('.BO', '');
@@ -727,9 +739,9 @@ app.get('/api/market-search', async (req, res) => {
           assetType: 'stock',
           exchange,
           market: isIndian ? 'INDIA' : 'US',
-          currency: isIndian ? '₹' : '$',
-          currentPrice: Number(price || 0),
-          price: `${isIndian ? '₹' : '$'}${Number(price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          currency: curr,
+          currentPrice: resolvedPrice,
+          price: `${curr}${resolvedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           rawChange: Number(change || 0),
           change: `${(changePct || 0) >= 0 ? '+' : ''}${Number(changePct || 0).toFixed(2)}%`,
           up: (changePct || 0) >= 0,

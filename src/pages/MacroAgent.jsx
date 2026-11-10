@@ -60,6 +60,7 @@ export default function MacroAgent() {
     simulateTopPickProfitCycle,
     forceRotateTopPickNow,
     buyAsset, 
+    showTradeAlert,
     rebalancePortfolio, 
     rebalanceHistory 
   } = usePortfolio();
@@ -297,7 +298,11 @@ export default function MacroAgent() {
 
     const units = parseFloat(commodityTradeUnits);
     if (isNaN(units) || units <= 0) {
-      alert("Please enter a valid amount.");
+      if (showTradeAlert) {
+        showTradeAlert({ title: 'Invalid Units', message: 'Please enter a valid amount.' });
+      } else {
+        alert("Please enter a valid amount.");
+      }
       return;
     }
 

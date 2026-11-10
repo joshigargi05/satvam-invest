@@ -31,7 +31,7 @@ const ChevronDown = Lucide.ChevronDown || (() => '▼');
 export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
   const navigate = useNavigate();
   const { market, setMarket } = useMarket();
-  const { buyAsset, balance } = usePortfolio();
+  const { buyAsset, balance, showTradeAlert } = usePortfolio();
 
   const [picksData, setPicksData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -142,7 +142,11 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
     if (!tradeModalStock) return;
     const units = Number(tradeShares);
     if (isNaN(units) || units <= 0) {
-      alert('Please enter a valid number of shares.');
+      if (showTradeAlert) {
+        showTradeAlert({ title: 'Invalid Shares', message: 'Please enter a valid number of shares.' });
+      } else {
+        alert('Please enter a valid number of shares.');
+      }
       return;
     }
 
@@ -159,7 +163,11 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
     } else if (tradeExitOption === 'custom_price') {
       const customP = Number(tradeCustomExitPrice);
       if (isNaN(customP) || customP <= 0) {
-        alert('Please enter a valid custom auto-exit target price.');
+        if (showTradeAlert) {
+          showTradeAlert({ title: 'Invalid Exit Price', message: 'Please enter a valid custom auto-exit target price.' });
+        } else {
+          alert('Please enter a valid custom auto-exit target price.');
+        }
         return;
       }
       autoExitRule = { enabled: true, mode: 'price', targetPrice: customP };

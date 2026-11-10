@@ -43,6 +43,8 @@ export default function Dashboard() {
     agentModeEnabled,
     setAgentModeEnabled,
     sellAsset,
+    openSellModal,
+    showTradeAlert,
     setAutoExitRule,
     autoExitHistory = []
   } = usePortfolio();
@@ -79,7 +81,11 @@ export default function Dashboard() {
     } else if (exitMode === 'percentage') {
       const pctVal = Number(exitProfitPct);
       if (isNaN(pctVal) || pctVal <= -99) {
-        alert('Please enter a valid profit percentage (e.g., 10 for +10% profit).');
+        if (showTradeAlert) {
+          showTradeAlert({ title: 'Invalid Target', message: 'Please enter a valid profit percentage (e.g., 10 for +10% profit).' });
+        } else {
+          alert('Please enter a valid profit percentage (e.g., 10 for +10% profit).');
+        }
         return;
       }
       const computedPrice = Number((avg * (1 + pctVal / 100)).toFixed(2));
@@ -93,7 +99,11 @@ export default function Dashboard() {
     } else {
       const priceVal = Number(exitTargetPrice);
       if (isNaN(priceVal) || priceVal <= 0) {
-        alert('Please enter a valid target sell price.');
+        if (showTradeAlert) {
+          showTradeAlert({ title: 'Invalid Price', message: 'Please enter a valid target sell price.' });
+        } else {
+          alert('Please enter a valid target sell price.');
+        }
         return;
       }
       const impliedPct = Number((((priceVal - avg) / avg) * 100).toFixed(2));
@@ -735,12 +745,8 @@ export default function Dashboard() {
                         <div className="inline-flex items-center justify-end gap-2">
                           {/* Primary Default Action: Manual Sell */}
                           <button 
-                            onClick={() => {
-                              if (window.confirm(`Liquidate position in ${asset.ticker}?`)) {
-                                sellAsset(asset.ticker, null, asset.bucket);
-                              }
-                            }}
-                            className="text-xs font-bold text-red-400 transition-all"
+                            onClick={() => openSellModal(asset)}
+                            className="text-xs font-bold text-red-400 transition-all hover:bg-red-500/20 active:scale-95"
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',

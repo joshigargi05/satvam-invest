@@ -13,6 +13,7 @@ const Zap = Lucide.Zap || (() => '⚡');
 import { getQuotes, searchGlobalMarkets } from '../services/api';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useMarket } from '../context/MarketContext';
+import { CrossMarketPromptModal } from '../components/TradeModals';
 
 const defaultStocksUS = [
   // Top 50+ US Equities (S&P 500 & NASDAQ-100)
@@ -152,8 +153,8 @@ const defaultStocksIndia = [
 
 export default function Markets() {
   const navigate = useNavigate();
-  const { buyAsset, balance } = usePortfolio();
-  const { market, currency, getCurrency } = useMarket();
+  const { buyAsset, balance, showTradeAlert } = usePortfolio();
+  const { market, setMarket, currency, getCurrency } = useMarket();
   const currentStocksList = market === 'US' ? defaultStocksUS : defaultStocksIndia;
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -168,6 +169,7 @@ export default function Markets() {
   const [marketToast, setMarketToast] = useState('');
   const [globalSearchResults, setGlobalSearchResults] = useState([]);
   const [searchingGlobal, setSearchingGlobal] = useState(false);
+  const [crossMarketPrompt, setCrossMarketPrompt] = useState({ isOpen: false, asset: null, currentMarket: market });
   const tableRef = useRef(null);
 
   // Auto-scroll to results table whenever a search term is entered
@@ -206,14 +208,11 @@ export default function Markets() {
 
   // Unified asset catalog with market tagging
   const allAvailableStocks = React.useMemo(() => {
-    const list = currentStocksList.map(s => ({ ...s, isOtherMarket: false }));
-    const otherList = market === 'US' ? defaultStocksIndia : defaultStocksUS;
-    otherList.forEach(s => {
-      if (!list.some(existing => existing.ticker === s.ticker)) {
-        list.push({ ...s, isOtherMarket: true });
-      }
-    });
-    return list;
+    return currentStocksList.map(s => ({
+      ...s,
+      isOtherMarket: false,
+      market
+    }));
   }, [market, currentStocksList]);
 
   // Initialize stocks based on catalog
@@ -263,7 +262,17 @@ export default function Markets() {
     return () => clearInterval(interval);
   }, [allAvailableStocks]);
 
+  // Cross-market asset detection: check if global search returned an asset native to the OTHER market
+  const crossMarketAsset = React.useMemo(() => {
+    if (!searchTerm.trim() || searchTerm.trim().length < 2) return null;
+    return globalSearchResults.find(s => s.market && s.market !== market) || null;
+  }, [globalSearchResults, searchTerm, market]);
+
   const handleBuy = (asset) => {
+    if (asset.market && asset.market !== market) {
+      setCrossMarketPrompt({ isOpen: true, asset, currentMarket: market });
+      return;
+    }
     if (asset.currentPrice > 0) {
       setBuyModalAsset(asset);
       setBuyUnits('1');
@@ -271,8 +280,27 @@ export default function Markets() {
       setBuyExitPct('10');
       setBuyExitPrice((asset.currentPrice * 1.10).toFixed(2));
     } else {
-      alert("Cannot buy asset: Real-time price currently updating.");
+      if (showTradeAlert) {
+        showTradeAlert({
+          title: 'Real-Time Price Updating',
+          message: 'Please wait a moment while the live market quote for this asset is retrieved.'
+        });
+      } else {
+        alert("Cannot buy asset: Real-time price currently updating.");
+      }
     }
+  };
+
+  const handleSwitchAndBuy = (targetMarket, asset) => {
+    setCrossMarketPrompt({ isOpen: false, asset: null, currentMarket: targetMarket });
+    setMarket(targetMarket);
+    setTimeout(() => {
+      setBuyModalAsset(asset);
+      setBuyUnits('1');
+      setBuyExitMode('none');
+      setBuyExitPct('10');
+      setBuyExitPrice((asset.currentPrice * 1.10).toFixed(2));
+    }, 150);
   };
 
   const handleConfirmMarketBuy = (e) => {
@@ -280,7 +308,14 @@ export default function Markets() {
     if (!buyModalAsset) return;
     const units = Number(buyUnits);
     if (isNaN(units) || units <= 0) {
-      alert("Please enter a valid number of units.");
+      if (showTradeAlert) {
+        showTradeAlert({
+          title: 'Invalid Units',
+          message: 'Please enter a valid number of units to purchase.'
+        });
+      } else {
+        alert("Please enter a valid number of units.");
+      }
       return;
     }
 
@@ -293,7 +328,14 @@ export default function Markets() {
     } else if (buyExitMode === 'price') {
       const priceVal = Number(buyExitPrice);
       if (isNaN(priceVal) || priceVal <= 0) {
-        alert("Please enter a valid target exit price.");
+        if (showTradeAlert) {
+          showTradeAlert({
+            title: 'Invalid Target Price',
+            message: 'Please enter a valid target exit price.'
+          });
+        } else {
+          alert("Please enter a valid target exit price.");
+        }
         return;
       }
       autoExitRule = { enabled: true, mode: 'price', targetPrice: priceVal };
@@ -312,15 +354,6 @@ export default function Markets() {
     });
 
     if (success) {
-      const curr = buyModalAsset.currency || getCurrency(buyModalAsset.ticker);
-      const exitMsg = autoExitRule
-        ? (buyExitMode === 'percentage'
-            ? ` • Auto-Exit armed at +${buyExitPct}% (${curr}${(buyModalAsset.currentPrice * (1 + Number(buyExitPct) / 100)).toFixed(2)})`
-            : ` • Auto-Exit armed at ${curr}${Number(buyExitPrice).toFixed(2)}`)
-        : '';
-      const exchLabel = buyModalAsset.exchange ? ` (${buyModalAsset.exchange})` : '';
-      setMarketToast(`Purchased ${units} share(s) of ${buyModalAsset.ticker}${exchLabel}${exitMsg}!`);
-      setTimeout(() => setMarketToast(''), 5500);
       setBuyModalAsset(null);
     }
   };
@@ -467,6 +500,45 @@ export default function Markets() {
         </div>
       </div>
 
+      {/* Cross-Market Notification Banner */}
+      {crossMarketAsset && (
+        <div className="p-4 mb-4 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-950/40 via-slate-900/95 to-blue-950/40 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl shrink-0 mt-0.5">
+              {market === 'INDIA' ? '🇺🇸' : '🇮🇳'}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-black uppercase tracking-wider text-amber-300">
+                  {market === 'INDIA' ? 'US Exchange Stock Found' : 'Indian Exchange Stock Found'}
+                </span>
+                <span className="text-[11px] font-mono font-black px-2 py-0.5 rounded bg-amber-500/25 text-amber-200 border border-amber-500/40">
+                  {crossMarketAsset.ticker} • {crossMarketAsset.exchange || (market === 'INDIA' ? 'NASDAQ' : 'NSE')}
+                </span>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  {crossMarketAsset.currency} {crossMarketAsset.price}
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                {market === 'INDIA'
+                  ? `You are currently browsing the Indian Market (₹ INR). To trade US stocks like ${crossMarketAsset.ticker} in USD ($), please switch to US Stocks.`
+                  : `You are currently browsing the US Market ($ USD). To trade Indian equities like ${crossMarketAsset.ticker} in INR (₹), please switch to Indian Stocks.`}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setMarket(market === 'INDIA' ? 'US' : 'INDIA');
+            }}
+            className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/25 shrink-0 flex items-center gap-2 transition-all transform active:scale-95 cursor-pointer"
+          >
+            <span>Switch to {market === 'INDIA' ? 'US Stocks (🇺🇸 USD)' : 'Indian Stocks (🇮🇳 ₹ INR)'}</span>
+            <span>→</span>
+          </button>
+        </div>
+      )}
+
       {/* Asset Catalog Table */}
       <div ref={tableRef} className="glass-panel overflow-x-auto rounded-xl scroll-mt-24">
         {searchTerm.trim() && (
@@ -553,12 +625,22 @@ export default function Markets() {
                   </span>
                 </td>
                 <td className="p-4 text-right">
-                  <button 
-                    className="btn btn-primary py-1.5 px-4 text-xs font-bold" 
-                    onClick={() => handleBuy(stock)}
-                  >
-                    Buy {stock.assetType === 'commodity' ? 'Commodity' : 'Stock'}
-                  </button>
+                  {stock.market && stock.market !== market ? (
+                    <button 
+                      className="btn py-1.5 px-3 text-xs font-bold border border-amber-500/40 text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 transition-all active:scale-95" 
+                      onClick={() => handleBuy(stock)}
+                      title={`This is a ${stock.market === 'INDIA' ? 'Indian (₹)' : 'US ($)'} stock. Click to switch market & buy.`}
+                    >
+                      Switch &amp; Buy
+                    </button>
+                  ) : (
+                    <button 
+                      className="btn btn-primary py-1.5 px-4 text-xs font-bold" 
+                      onClick={() => handleBuy(stock)}
+                    >
+                      Buy {stock.assetType === 'commodity' ? 'Commodity' : 'Stock'}
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -787,6 +869,13 @@ export default function Markets() {
           </div>
         );
       })()}
+
+      {/* Cross-Market Purchase Prompt Modal */}
+      <CrossMarketPromptModal
+        promptState={crossMarketPrompt}
+        onClose={() => setCrossMarketPrompt({ isOpen: false, asset: null, currentMarket: market })}
+        onSwitchAndBuy={handleSwitchAndBuy}
+      />
 
     </div>
   );
