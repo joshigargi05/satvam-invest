@@ -135,6 +135,13 @@ const mockPrices = {
   BEL: { price: 410.50, change: 8.90, changePct: 2.22 },
   HAL: { price: 3566.10, change: 74.50, changePct: 2.13 },
   TRENT: { price: 3525.10, change: 69.20, changePct: 2.00 },
+  MEESHO: { price: 215.00, change: 3.50, changePct: 1.65 },
+  SWIGGY: { price: 412.50, change: 8.20, changePct: 2.03 },
+  ZOMATO: { price: 248.80, change: 4.60, changePct: 1.88 },
+  PAYTM: { price: 785.40, change: 12.10, changePct: 1.56 },
+  NYKAA: { price: 184.20, change: 2.40, changePct: 1.32 },
+  JIOFIN: { price: 324.60, change: 4.80, changePct: 1.50 },
+  TATATECH: { price: 975.00, change: 11.20, changePct: 1.16 },
   // Metals & Commodities
   'GC=F': { price: 4150.10, change: 7.50, changePct: 0.18 },
   'GLD': { price: 382.40, change: 0.72, changePct: 0.19 },
@@ -259,7 +266,9 @@ export const getLastTradingSessionDate = (market = 'US', referenceDate = new Dat
 const yahooFinanceQuoteWithTimeout = async (sym) => {
   const rawUpper = String(sym || '').trim().toUpperCase();
   const cleanSym = rawUpper.includes('=') ? rawUpper : rawUpper.split('.')[0];
-  const base = mockPrices[cleanSym] || mockPrices[rawUpper] || { price: 100.0, change: 0.0, changePct: 0.0 };
+  const isIndSym = (typeof indianTickers !== 'undefined' && indianTickers.has(cleanSym)) || rawUpper.endsWith('.NS') || rawUpper.endsWith('.BO');
+  const fallbackDefault = isIndSym ? { price: 225.0, change: 3.2, changePct: 1.44 } : { price: 100.0, change: 0.0, changePct: 0.0 };
+  const base = mockPrices[cleanSym] || mockPrices[rawUpper] || fallbackDefault;
   
   // Clean official quote baseline (no artificial random walk)
   const mockResult = {
@@ -418,7 +427,8 @@ const indianTickers = new Set([
   'COALINDIA', 'JSWSTEEL', 'M&M', 'BAJAJ-AUTO', 'BAJAJFINSV', 'NESTLEIND', 'GRASIM', 'TECHM',
   'HINDALCO', 'CIPLA', 'DRREDDY', 'EICHERMOT', 'SBILIFE', 'HDFCLIFE', 'BPCL', 'BRITANNIA',
   'APOLLOHOSP', 'DIVISLAB', 'TATACONSUM', 'HEROMOTOCO', 'ASIANPAINT', 'INDUSINDBK', 'SHRIRAMFIN',
-  'BEL', 'HAL', 'TRENT', 'GOLDBEES', 'SILVERBEES'
+  'BEL', 'HAL', 'TRENT', 'GOLDBEES', 'SILVERBEES',
+  'MEESHO', 'SWIGGY', 'ZOMATO', 'PAYTM', 'NYKAA', 'JIOFIN', 'TATATECH', 'OLA', 'OLAELEC', 'ZEPTO', 'GROWW', 'ZERODHA'
 ]);
 
 const commodityFutures = new Set(['GC=F', 'SI=F', 'CL=F', 'BZ=F', 'HG=F', 'PL=F', 'NG=F', 'CRUDEOIL', 'NATGAS', 'COPPER']);
@@ -594,23 +604,40 @@ app.get('/api/upcoming-earnings', async (req, res) => {
 
 // Live Quotes Endpoint
 app.get('/api/quotes', async (req, res) => {
-  const { symbols } = req.query;
+  const { symbols, market } = req.query;
   if (!symbols) return res.status(400).json({ error: 'Symbols are required' });
 
   try {
     const symbolArray = symbols.split(',');
+    const isIndiaBatch = market === 'INDIA' || symbolArray.some(s => indianTickers.has(s.trim().toUpperCase()));
     
     const quotesData = {};
     
     // Fetch all quotes in parallel
     const promises = symbolArray.map(async (rawSym) => {
       try {
+        const cleanKey = rawSym.replace('.NS', '').trim().toUpperCase();
         const sym = formatSymbol(rawSym);
         const quote = await yahooFinanceQuoteWithTimeout(sym);
+        let finalPrice = quote.regularMarketPrice;
+        let finalChange = quote.regularMarketChange;
+        let finalChangePct = quote.regularMarketChangePercent;
+
+        // If Yahoo returned default 100 or had no quote, check mockPrices for realistic Indian/US price
+        if (mockPrices[cleanKey] && (finalPrice === 100.0 || !finalPrice)) {
+          finalPrice = mockPrices[cleanKey].price;
+          finalChange = mockPrices[cleanKey].change;
+          finalChangePct = mockPrices[cleanKey].changePct;
+        } else if (isIndiaBatch && (finalPrice === 100.0 || !finalPrice) && !indianTickers.has(cleanKey)) {
+          finalPrice = 245.00;
+          finalChange = 3.20;
+          finalChangePct = 1.32;
+        }
+
         quotesData[rawSym] = {
-          price: quote.regularMarketPrice,
-          change: quote.regularMarketChange,
-          changePct: quote.regularMarketChangePercent
+          price: finalPrice,
+          change: finalChange,
+          changePct: finalChangePct
         };
       } catch (err) {
         console.error(`Failed to fetch quote for ${rawSym}:`, err.message);
@@ -839,7 +866,14 @@ const algoStockCatalog = [
   { t: 'HEROMOTOCO', n: 'Hero MotoCorp', s: 'Two-Wheelers', market: 'INDIA', alphaBoost: 9, keywords: ['HEROMOTOCO', 'HERO'] },
   { t: 'SHRIRAMFIN', n: 'Shriram Finance', s: 'Commercial Vehicle NBFC', market: 'INDIA', alphaBoost: 10, keywords: ['SHRIRAMFIN', 'SHRIRAM'] },
   { t: 'ASIANPAINT', n: 'Asian Paints', s: 'Decorative Paints', market: 'INDIA', alphaBoost: 9, keywords: ['ASIANPAINT'] },
-  { t: 'INDUSINDBK', n: 'IndusInd Bank', s: 'Private Banking', market: 'INDIA', alphaBoost: 8, keywords: ['INDUSINDBK'] }
+  { t: 'INDUSINDBK', n: 'IndusInd Bank', s: 'Private Banking', market: 'INDIA', alphaBoost: 8, keywords: ['INDUSINDBK'] },
+  { t: 'MEESHO', n: 'Meesho Inc.', s: 'E-Commerce / Social Commerce', market: 'INDIA', alphaBoost: 12, keywords: ['MEESHO', 'ECOMMERCE', 'RETAIL'] },
+  { t: 'SWIGGY', n: 'Swiggy Limited', s: 'Food Delivery & Quick Commerce', market: 'INDIA', alphaBoost: 12, keywords: ['SWIGGY', 'INSTAMART'] },
+  { t: 'ZOMATO', n: 'Zomato Limited', s: 'Food Delivery & Blinkit Quick Commerce', market: 'INDIA', alphaBoost: 13, keywords: ['ZOMATO', 'BLINKIT'] },
+  { t: 'PAYTM', n: 'One97 Communications', s: 'Digital Payments & Fintech', market: 'INDIA', alphaBoost: 11, keywords: ['PAYTM', 'ONE97'] },
+  { t: 'NYKAA', n: 'FSN E-Commerce (Nykaa)', s: 'Beauty & Fashion E-Commerce', market: 'INDIA', alphaBoost: 10, keywords: ['NYKAA'] },
+  { t: 'JIOFIN', n: 'Jio Financial Services', s: 'Digital NBFC & Wealth', market: 'INDIA', alphaBoost: 12, keywords: ['JIOFIN', 'JIO'] },
+  { t: 'TATATECH', n: 'Tata Technologies', s: 'Engineering & EV Software', market: 'INDIA', alphaBoost: 11, keywords: ['TATATECH'] }
 ];
 
 const stockThesisMap = {
@@ -975,7 +1009,9 @@ setInterval(loadRealMLPredictions, 60 * 1000);
 // Shared 5-Module Ensemble + 4-Layer Institutional Quantitative Evaluator
 const computeStockAlgoEvaluation = (company, quote = {}, extraBoost = 0) => {
   const boost = (company.alphaBoost ?? 10) + extraBoost;
-  const currentPrice = typeof quote.price === 'number' ? quote.price : (mockPrices[company.t]?.price || 100);
+  const isIndiaCompany = company.market === 'INDIA' || (typeof indianTickers !== 'undefined' && indianTickers.has(company.t));
+  const fallbackPrice = isIndiaCompany ? (mockPrices[company.t]?.price || 245.00) : (mockPrices[company.t]?.price || 150.00);
+  const currentPrice = typeof quote.price === 'number' ? quote.price : fallbackPrice;
   const liveChange = typeof quote.change === 'number' ? quote.change : (mockPrices[company.t]?.change || 0);
   const liveChangePct = typeof quote.changePct === 'number' ? quote.changePct : (mockPrices[company.t]?.changePct || 0);
 
@@ -984,7 +1020,6 @@ const computeStockAlgoEvaluation = (company, quote = {}, extraBoost = 0) => {
 
   // Deterministic Base Seed (Ticker + Active Trading Session Date):
   // Uses the active or last completed market session so factor scores stay locked over weekends and market closures
-  const isIndiaCompany = company.market === 'INDIA' || (typeof indianTickers !== 'undefined' && indianTickers.has(company.t));
   const tradingSessionDate = getLastTradingSessionDate(isIndiaCompany ? 'INDIA' : 'US');
   const seedStr = `${company.t}-${tradingSessionDate}`;
   let hash = 0;
@@ -1363,6 +1398,7 @@ app.get('/api/algo-top-picks', async (req, res) => {
 // Single Unified Stock Algorithmic Evaluation Endpoint (Guarantees target price & metrics consistency across all agents)
 app.get('/api/evaluate-stocks', async (req, res) => {
   const rawTickers = String(req.query.tickers || '').trim().toUpperCase();
+  const reqMarket = String(req.query.market || '').trim().toUpperCase();
   if (!rawTickers) {
     return res.status(400).json({ error: 'Tickers parameter is required' });
   }
@@ -1376,13 +1412,16 @@ app.get('/api/evaluate-stocks', async (req, res) => {
       console.warn('Batch quote fetch warning in evaluate-stocks:', e.message);
     }
 
+    const hasIndianCompanion = symbols.some(s => indianTickers.has(s) || s.endsWith('.NS') || s.endsWith('.BO'));
+    const isIndiaBatchContext = reqMarket === 'INDIA' || (hasIndianCompanion && !symbols.every(s => !indianTickers.has(s)));
+
     const results = symbols.map(sym => {
       let company = algoStockCatalog.find(c => c.t === sym);
       if (!company) {
-        const isIndia = sym.endsWith('.NS') || sym.endsWith('.BO') || indianTickers.has(sym);
+        const isIndia = sym.endsWith('.NS') || sym.endsWith('.BO') || indianTickers.has(sym) || isIndiaBatchContext;
         company = {
           t: sym,
-          n: `${sym} Corp.`,
+          n: `${sym} Ltd.`,
           s: isIndia ? 'Indian Enterprise' : 'US Technology / Growth',
           market: isIndia ? 'INDIA' : 'US',
           alphaBoost: 10,

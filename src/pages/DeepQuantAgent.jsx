@@ -71,7 +71,18 @@ const COMPANY_NAMES = {
   ADANIENT: 'Adani Enterprises Ltd.',
   ADANIPORTS: 'Adani Ports & SEZ',
   WIPRO: 'Wipro Limited',
-  SUNPHARMA: 'Sun Pharma Ltd.'
+  SUNPHARMA: 'Sun Pharma Ltd.',
+  'M&M': 'Mahindra & Mahindra Ltd.',
+  MEESHO: 'Meesho Inc. (E-Commerce)',
+  SWIGGY: 'Swiggy Limited',
+  ZOMATO: 'Zomato Limited',
+  PAYTM: 'One97 Communications (Paytm)',
+  NYKAA: 'FSN E-Commerce (Nykaa)',
+  JIOFIN: 'Jio Financial Services',
+  TATATECH: 'Tata Technologies Ltd.',
+  BEL: 'Bharat Electronics Ltd.',
+  HAL: 'Hindustan Aeronautics Ltd.',
+  TRENT: 'Trent Limited'
 };
 
 const getCompanyName = (ticker) => COMPANY_NAMES[ticker] || `${ticker} Corp.`;
@@ -308,8 +319,8 @@ export default function DeepQuantAgent() {
 
     try {
       const [quotesRes, evalRes] = await Promise.all([
-        getQuotes(tickersToAnalyze.join(',')),
-        evaluateStocks(tickersToAnalyze)
+        getQuotes(tickersToAnalyze.join(','), market),
+        evaluateStocks(tickersToAnalyze, market)
       ]);
       quotesMap = quotesRes || {};
       if (evalRes?.results && Array.isArray(evalRes.results)) {
@@ -353,18 +364,25 @@ export default function DeepQuantAgent() {
         setTimeout(() => {
           setAnalyzing(false);
 
+          const isComparingIndianContext = market === 'INDIA' || tickersToAnalyze.some(t => isIndianTicker(t));
           const computedResults = tickersToAnalyze.map((cleanTicker, idx) => {
-            const assetCurrency = getCurrency(cleanTicker);
-            const quote = quotesMap[cleanTicker] || {};
             const evalItem = evalMap[cleanTicker];
+            const isInd = isIndianTicker(cleanTicker) || (isComparingIndianContext && !cleanTicker.endsWith('.US'));
+            const assetCurrency = evalItem?.currency || (isInd ? '₹' : getCurrency(cleanTicker));
+            const quote = quotesMap[cleanTicker] || {};
 
-            let currentPrice = typeof quote.price === 'number'
-              ? quote.price
-              : (evalItem?.currentPrice || (assetCurrency === '₹' ? 1200.00 : 180.00));
+            let currentPrice;
+            if (typeof evalItem?.currentPrice === 'number' && evalItem.currentPrice > 0) {
+              currentPrice = evalItem.currentPrice;
+            } else if (typeof quote.price === 'number') {
+              currentPrice = quote.price;
+            } else {
+              currentPrice = assetCurrency === '₹' ? (cleanTicker === 'MEESHO' ? 215.00 : 250.00) : 180.00;
+            }
 
             const liveChange = typeof quote.change === 'number' ? quote.change : (evalItem?.change || 0);
             const liveChangePct = typeof quote.changePct === 'number' ? quote.changePct : (evalItem?.changePct || 0);
-            const safePrice = Number(currentPrice) || (assetCurrency === '₹' ? 1200.00 : 180.00);
+            const safePrice = Number(currentPrice) || (assetCurrency === '₹' ? 215.00 : 180.00);
 
             // Unified Algorithmic Target Price & Upside
             let targetPrice;

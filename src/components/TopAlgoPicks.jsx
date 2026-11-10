@@ -258,29 +258,29 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
         {/* Market Switcher & Controls */}
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end">
           {/* High-Visibility IND Top 3 / US Top 3 Market Switcher */}
-          <div className="grid grid-cols-2 sm:flex items-center bg-slate-950 p-1.5 rounded-2xl border-2 border-blue-500/40 shadow-lg shadow-blue-500/10 gap-1.5 w-full sm:w-auto">
+          <div className="grid grid-cols-2 sm:flex items-center bg-slate-950/90 p-1.5 rounded-2xl border-2 border-white/15 shadow-xl gap-1.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setMarket('INDIA')}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 market === 'INDIA'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border border-blue-400/50'
-                  : 'bg-slate-800/90 text-slate-200 border border-white/15 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black shadow-lg shadow-orange-500/40 border-2 border-amber-300 ring-2 ring-orange-400/40 scale-[1.02]'
+                  : 'bg-slate-900/80 text-slate-400 border border-white/10 hover:bg-slate-800 hover:text-slate-200'
               }`}
             >
-              {market === 'INDIA' && <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse"></span>}
+              {market === 'INDIA' && <span className="w-2.5 h-2.5 rounded-full bg-slate-950 border border-white/80 animate-pulse"></span>}
               <span>🇮🇳 ₹ IND Top 3</span>
             </button>
             <button
               type="button"
               onClick={() => setMarket('US')}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 market === 'US'
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/35 border border-emerald-400/50'
-                  : 'bg-slate-800/90 text-slate-200 border border-white/15 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black shadow-lg shadow-teal-500/40 border-2 border-emerald-200 ring-2 ring-teal-400/40 scale-[1.02]'
+                  : 'bg-slate-900/80 text-slate-400 border border-white/10 hover:bg-slate-800 hover:text-slate-200'
               }`}
             >
-              {market === 'US' && <span className="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span>}
+              {market === 'US' && <span className="w-2.5 h-2.5 rounded-full bg-slate-950 border border-white/80 animate-pulse"></span>}
               <span>🇺🇸 $ US Top 3</span>
             </button>
           </div>

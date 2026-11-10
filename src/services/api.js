@@ -44,9 +44,10 @@ export const getUpcomingEarnings = async (symbols) => {
   }
 };
 
-export const getQuotes = async (symbols) => {
+export const getQuotes = async (symbols, market = '') => {
   try {
-    const response = await apiFetch(`/api/quotes?symbols=${symbols}`);
+    const marketParam = market ? `&market=${encodeURIComponent(market)}` : '';
+    const response = await apiFetch(`/api/quotes?symbols=${symbols}${marketParam}`);
     if (!response.ok) return {};
     return await response.json();
   } catch (error) {
@@ -96,10 +97,11 @@ export const getTopAlgoPicks = async (market = 'US', forceRefresh = false, rotat
   }
 };
 
-export const evaluateStocks = async (tickers) => {
+export const evaluateStocks = async (tickers, market = '') => {
   try {
     const symbols = Array.isArray(tickers) ? tickers.join(',') : tickers;
-    const response = await apiFetch(`/api/evaluate-stocks?tickers=${encodeURIComponent(symbols)}`);
+    const marketParam = market ? `&market=${encodeURIComponent(market)}` : '';
+    const response = await apiFetch(`/api/evaluate-stocks?tickers=${encodeURIComponent(symbols)}${marketParam}`);
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
