@@ -15,7 +15,7 @@ import {
   acknowledgeCelebration
 } from './server/db.js';
 
-const yahooFinance = new YahooFinance();
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 dotenv.config();
 
@@ -338,12 +338,12 @@ const yahooFinanceQuoteWithTimeout = async (sym) => {
 
 const yahooFinanceSearchWithTimeout = async (sym, options) => {
   if (MOCK_MODE) {
-    return { news: [] };
+    return { quotes: [], news: [] };
   }
   const timeoutPromise = new Promise((resolve) => {
     setTimeout(() => {
-      resolve({ news: [] });
-    }, 4000);
+      resolve({ quotes: [], news: [] });
+    }, 4500);
   });
   try {
     return await Promise.race([
@@ -351,7 +351,7 @@ const yahooFinanceSearchWithTimeout = async (sym, options) => {
       timeoutPromise
     ]);
   } catch (err) {
-    return { news: [] };
+    return { quotes: [], news: [] };
   }
 };
 
@@ -649,6 +649,103 @@ app.get('/api/quotes', async (req, res) => {
   } catch (error) {
     console.error('Error fetching quotes:', error.message);
     res.status(500).json({ error: 'Failed to fetch quotes' });
+  }
+});
+
+// Universal Global Market Search Endpoint (BSE, NSE, NYSE, NASDAQ, Dow)
+const globalSearchCache = new Map();
+const SEARCH_CACHE_TTL = 30 * 1000;
+
+app.get('/api/market-search', async (req, res) => {
+  const query = String(req.query.q || '').trim();
+  const reqMarket = String(req.query.market || '').trim().toUpperCase();
+
+  if (!query || query.length < 1) {
+    return res.json({ results: [] });
+  }
+
+  const cacheKey = `${query.toUpperCase()}_${reqMarket}`;
+  const cached = globalSearchCache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp < SEARCH_CACHE_TTL)) {
+    return res.json({ results: cached.data });
+  }
+
+  try {
+    const searchRes = await yahooFinanceSearchWithTimeout(query, {
+      newsCount: 0,
+      quotesCount: 12
+    });
+
+    const rawQuotes = (searchRes?.quotes || []).filter(q => {
+      if (!q || !q.symbol) return false;
+      const type = (q.quoteType || '').toUpperCase();
+      return type === 'EQUITY' || type === 'ETF' || type === 'MUTUALFUND' || !type;
+    });
+
+    // Score and filter by market preference if specified
+    const sortedQuotes = rawQuotes.sort((a, b) => {
+      const aSym = a.symbol.toUpperCase();
+      const bSym = b.symbol.toUpperCase();
+      const aIsInd = aSym.endsWith('.NS') || aSym.endsWith('.BO') || a.exchDisp === 'NSE' || a.exchDisp === 'BSE' || a.exchange === 'NSI' || a.exchange === 'BOM';
+      const bIsInd = bSym.endsWith('.NS') || bSym.endsWith('.BO') || b.exchDisp === 'NSE' || b.exchDisp === 'BSE' || b.exchange === 'NSI' || b.exchange === 'BOM';
+
+      if (reqMarket === 'INDIA') {
+        if (aIsInd && !bIsInd) return -1;
+        if (!aIsInd && bIsInd) return 1;
+      } else if (reqMarket === 'US') {
+        if (!aIsInd && bIsInd) return -1;
+        if (aIsInd && !bIsInd) return 1;
+      }
+      return (b.score || 0) - (a.score || 0);
+    });
+
+    // Filter to top candidate stocks (limit 8)
+    const candidateSymbols = sortedQuotes.slice(0, 8);
+
+    const results = await Promise.all(candidateSymbols.map(async (item) => {
+      try {
+        const rawSym = item.symbol.toUpperCase();
+        const isIndian = rawSym.endsWith('.NS') || rawSym.endsWith('.BO') || item.exchDisp === 'NSE' || item.exchDisp === 'BSE' || (item.exchange === 'NSI' || item.exchange === 'BOM') || (reqMarket === 'INDIA' && !rawSym.includes('.'));
+        
+        // Fetch real-time price
+        const quote = await yahooFinanceQuoteWithTimeout(rawSym);
+        let price = quote.regularMarketPrice;
+        let change = quote.regularMarketChange;
+        let changePct = quote.regularMarketChangePercent;
+
+        // Clean ticker display (remove .NS, .BO for ticker column, retain exchange info)
+        let cleanTicker = rawSym.replace('.NS', '').replace('.BO', '');
+        let exchange = item.exchDisp || (rawSym.endsWith('.NS') ? 'NSE' : (rawSym.endsWith('.BO') ? 'BSE' : (item.exchange || (isIndian ? 'NSE' : 'NYSE'))));
+        if (exchange === 'NSI') exchange = 'NSE';
+        if (exchange === 'BOM') exchange = 'BSE';
+
+        return {
+          ticker: cleanTicker,
+          fullTicker: rawSym,
+          name: item.shortname || item.longname || cleanTicker,
+          sector: item.sector || item.industry || (isIndian ? 'Indian Equities' : 'US Equities'),
+          assetType: 'stock',
+          exchange,
+          market: isIndian ? 'INDIA' : 'US',
+          currency: isIndian ? '₹' : '$',
+          currentPrice: Number(price || 0),
+          price: `${isIndian ? '₹' : '$'}${Number(price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          rawChange: Number(change || 0),
+          change: `${(changePct || 0) >= 0 ? '+' : ''}${Number(changePct || 0).toFixed(2)}%`,
+          up: (changePct || 0) >= 0,
+          isGlobalSearch: true
+        };
+      } catch (e) {
+        return null;
+      }
+    }));
+
+    const validResults = results.filter(Boolean);
+    globalSearchCache.set(cacheKey, { timestamp: Date.now(), data: validResults });
+    res.json({ results: validResults });
+  } catch (err) {
+    console.error('Error in market-search:', err.message);
+    res.json({ results: [] });
   }
 });
 

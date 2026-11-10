@@ -1493,19 +1493,25 @@ export function PortfolioProvider({ children }) {
       return false;
     }
 
+    const targetMarket = (typeof params === 'object' && params.market)
+      ? params.market
+      : (isIndianTicker(ticker) ? 'INDIA' : market);
+    const targetCurrency = targetMarket === 'INDIA' ? '₹' : '$';
+    const currentBalance = balances[targetMarket] ?? balance;
+
     const totalCost = Number((price * units).toFixed(2));
-    if (balance < totalCost) {
-      alert(`Insufficient funds! Required: $${totalCost.toFixed(2)}, Available: $${balance.toFixed(2)}`);
+    if (currentBalance < totalCost) {
+      alert(`Insufficient funds in ${targetMarket === 'INDIA' ? 'Indian (₹)' : 'US ($)'} wallet! Required: ${targetCurrency}${totalCost.toFixed(2)}, Available: ${targetCurrency}${currentBalance.toFixed(2)}`);
       return false;
     }
 
     setBalances(prev => ({
       ...prev,
-      [market]: Number((prev[market] - totalCost).toFixed(2))
+      [targetMarket]: Number((prev[targetMarket] - totalCost).toFixed(2))
     }));
     
     setHoldingsMap(prev => {
-      const currentHoldings = prev[market] || [];
+      const currentHoldings = prev[targetMarket] || [];
       const existing = currentHoldings.find(h => h.ticker === ticker && (h.bucket || 'core') === bucket);
       let newHoldings;
       
@@ -1549,7 +1555,7 @@ export function PortfolioProvider({ children }) {
           }
         ];
       }
-      return { ...prev, [market]: newHoldings };
+      return { ...prev, [targetMarket]: newHoldings };
     });
 
     return true;

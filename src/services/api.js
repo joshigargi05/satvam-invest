@@ -56,6 +56,20 @@ export const getQuotes = async (symbols, market = '') => {
   }
 };
 
+export const searchGlobalMarkets = async (query, market = '') => {
+  if (!query || query.trim().length < 2) return [];
+  try {
+    const marketParam = market ? `&market=${encodeURIComponent(market)}` : '';
+    const response = await apiFetch(`/api/market-search?q=${encodeURIComponent(query.trim())}${marketParam}`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.results || [];
+  } catch (error) {
+    console.error('Error searching global markets:', error);
+    return [];
+  }
+};
+
 export const getPortfolioHistory = async (holdings, balance, period) => {
   try {
     const response = await apiFetch('/api/portfolio-history', {

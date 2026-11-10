@@ -10,7 +10,7 @@ const RefreshCw = Lucide.RefreshCw || (() => '🔄');
 const Sparkles = Lucide.Sparkles || (() => '✨');
 const Zap = Lucide.Zap || (() => '⚡');
 
-import { getQuotes } from '../services/api';
+import { getQuotes, searchGlobalMarkets } from '../services/api';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useMarket } from '../context/MarketContext';
 
@@ -166,6 +166,8 @@ export default function Markets() {
   const [buyExitPct, setBuyExitPct] = useState('10');
   const [buyExitPrice, setBuyExitPrice] = useState('');
   const [marketToast, setMarketToast] = useState('');
+  const [globalSearchResults, setGlobalSearchResults] = useState([]);
+  const [searchingGlobal, setSearchingGlobal] = useState(false);
   const tableRef = useRef(null);
 
   // Auto-scroll to results table whenever a search term is entered
@@ -174,6 +176,33 @@ export default function Markets() {
       tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [searchTerm]);
+
+  // Universal Live Search across all BSE, NSE, NYSE & NASDAQ stocks
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (term.length < 2) {
+      setGlobalSearchResults([]);
+      setSearchingGlobal(false);
+      return;
+    }
+
+    setSearchingGlobal(true);
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchGlobalMarkets(term, market);
+        // Exclude symbols that already exist in our local catalog to avoid duplicates
+        const existingTickers = new Set(stocks.map(s => s.ticker.toUpperCase()));
+        const uniqueGlobal = results.filter(r => !existingTickers.has(r.ticker.toUpperCase()));
+        setGlobalSearchResults(uniqueGlobal);
+      } catch (err) {
+        console.error('Error fetching global market search results:', err);
+      } finally {
+        setSearchingGlobal(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, market, stocks]);
 
   // Unified asset catalog with market tagging
   const allAvailableStocks = React.useMemo(() => {
@@ -277,36 +306,52 @@ export default function Markets() {
       units,
       category: buyModalAsset.sector,
       assetType: buyModalAsset.assetType,
+      market: buyModalAsset.market || market,
       bucket: 'core',
       autoExit: autoExitRule
     });
 
     if (success) {
-      const curr = getCurrency(buyModalAsset.ticker);
+      const curr = buyModalAsset.currency || getCurrency(buyModalAsset.ticker);
       const exitMsg = autoExitRule
         ? (buyExitMode === 'percentage'
             ? ` • Auto-Exit armed at +${buyExitPct}% (${curr}${(buyModalAsset.currentPrice * (1 + Number(buyExitPct) / 100)).toFixed(2)})`
             : ` • Auto-Exit armed at ${curr}${Number(buyExitPrice).toFixed(2)}`)
         : '';
-      setMarketToast(`Purchased ${units} unit(s) of ${buyModalAsset.ticker}${exitMsg}!`);
+      const exchLabel = buyModalAsset.exchange ? ` (${buyModalAsset.exchange})` : '';
+      setMarketToast(`Purchased ${units} share(s) of ${buyModalAsset.ticker}${exchLabel}${exitMsg}!`);
       setTimeout(() => setMarketToast(''), 5500);
       setBuyModalAsset(null);
     }
   };
 
-  const filteredStocks = stocks.filter(item => {
-    // If not searching, only show assets native to the selected market tab
-    if (!searchTerm.trim() && item.isOtherMarket) return false;
+  const filteredStocks = React.useMemo(() => {
+    const localMatches = stocks.filter(item => {
+      // If not searching, only show assets native to the selected market tab
+      if (!searchTerm.trim() && item.isOtherMarket) return false;
 
-    const matchesSearch = item.ticker.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.sector.toLowerCase().includes(searchTerm.toLowerCase());
-    if (!matchesSearch) return false;
+      const matchesSearch = item.ticker.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            item.sector.toLowerCase().includes(searchTerm.toLowerCase());
+      if (!matchesSearch) return false;
 
-    if (selectedTab === 'STOCKS') return item.assetType === 'stock';
-    if (selectedTab === 'COMMODITIES') return item.assetType === 'commodity';
-    return true;
-  });
+      if (selectedTab === 'STOCKS') return item.assetType === 'stock';
+      if (selectedTab === 'COMMODITIES') return item.assetType === 'commodity';
+      return true;
+    });
+
+    if (!searchTerm.trim()) {
+      return localMatches;
+    }
+
+    // When searching, append the live global search results from BSE/NSE/NYSE/NASDAQ
+    const globalMatches = globalSearchResults.filter(item => {
+      if (selectedTab === 'COMMODITIES') return item.assetType === 'commodity';
+      return true;
+    });
+
+    return [...localMatches, ...globalMatches];
+  }, [stocks, searchTerm, selectedTab, globalSearchResults]);
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
@@ -348,7 +393,7 @@ export default function Markets() {
             />
             <input 
               type="text" 
-              placeholder="Search stocks, gold, oil..." 
+              placeholder="Search all Indian (BSE/NSE) & US (NYSE/NASDAQ) stocks, gold, oil..." 
               className="chat-input w-full"
               style={{ paddingLeft: '3rem', paddingRight: '1rem', paddingTop: '0.85rem', paddingBottom: '0.85rem', minHeight: '50px' }}
               value={searchTerm}
@@ -361,7 +406,7 @@ export default function Markets() {
             />
           </div>
           <button className="btn btn-outline shrink-0" style={{ padding: '0.75rem' }} onClick={fetchLiveData}>
-            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={18} className={loading || searchingGlobal ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
@@ -425,13 +470,24 @@ export default function Markets() {
       {/* Asset Catalog Table */}
       <div ref={tableRef} className="glass-panel overflow-x-auto rounded-xl scroll-mt-24">
         {searchTerm.trim() && (
-          <div className="p-3 px-4 bg-blue-500/10 border-b border-blue-500/20 flex items-center justify-between text-xs text-blue-300">
-            <span>
-              🔍 Showing {filteredStocks.length} search result{filteredStocks.length === 1 ? '' : 's'} for <strong>&quot;{searchTerm}&quot;</strong>
-            </span>
+          <div className="p-3 px-4 bg-blue-500/10 border-b border-blue-500/20 flex items-center justify-between text-xs text-blue-300 flex-wrap gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span>
+                🔍 Showing {filteredStocks.length} result{filteredStocks.length === 1 ? '' : 's'} across <strong>BSE, NSE, NYSE &amp; NASDAQ</strong> for <strong>&quot;{searchTerm}&quot;</strong>
+              </span>
+              {searchingGlobal && (
+                <span className="flex items-center gap-1 text-[11px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30">
+                  <RefreshCw size={11} className="animate-spin" />
+                  <span>Searching Global Exchanges...</span>
+                </span>
+              )}
+            </div>
             <button
-              onClick={() => setSearchTerm('')}
-              className="text-slate-400 hover:text-white underline text-[11px]"
+              onClick={() => {
+                setSearchTerm('');
+                setGlobalSearchResults([]);
+              }}
+              className="text-slate-400 hover:text-white underline text-[11px] cursor-pointer"
             >
               Clear Search
             </button>
@@ -451,14 +507,30 @@ export default function Markets() {
           <tbody>
             {filteredStocks.map((stock, index) => (
               <tr key={index} style={{ borderBottom: '1px solid var(--glass-border)', transition: 'background 0.2s' }} className="hover:bg-white/5 text-sm">
-                <td className="p-4 font-bold flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold" style={{
+                <td className="p-4 font-bold flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0" style={{
                     background: stock.assetType === 'commodity' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(59, 130, 246, 0.2)',
                     color: stock.assetType === 'commodity' ? '#fbbf24' : '#60a5fa'
                   }}>
                     {stock.ticker.substring(0, 2)}
                   </div>
-                  <span>{stock.ticker}</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-white font-bold">{stock.ticker}</span>
+                    {stock.exchange && (
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-extrabold border ${
+                        stock.exchange === 'NSE' || stock.exchange === 'BSE'
+                          ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+                          : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                      }`}>
+                        {stock.exchange}
+                      </span>
+                    )}
+                    {stock.isGlobalSearch && (
+                      <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        Live Global
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="p-4 text-slate-300 font-medium">
                   {stock.name}
@@ -505,7 +577,7 @@ export default function Markets() {
 
       {/* Buy Asset + Auto-Exit Configuration Modal */}
       {buyModalAsset && (() => {
-        const assetCurr = getCurrency(buyModalAsset.ticker);
+        const assetCurr = buyModalAsset.currency || getCurrency(buyModalAsset.ticker);
         const livePrice = Number(buyModalAsset.currentPrice || 100);
         const qty = Number(buyUnits || 1);
         const totalOrderCost = Number((livePrice * qty).toFixed(2));
@@ -518,10 +590,17 @@ export default function Markets() {
             <div className="glass-panel p-4 sm:p-6 rounded-2xl max-w-md w-full border border-blue-500/40 shadow-2xl bg-slate-900/95 my-auto max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-start mb-4 pb-3 border-b border-white/10">
                 <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                    Instant Order + Auto-Exit
-                  </span>
-                  <h3 className="text-lg font-bold text-white mt-1.5">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      Instant Order + Auto-Exit
+                    </span>
+                    {buyModalAsset.exchange && (
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30">
+                        {buyModalAsset.exchange}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-white mt-1">
                     Buy {buyModalAsset.ticker} — {buyModalAsset.name}
                   </h3>
                   <p className="text-xs text-slate-400">{buyModalAsset.sector}</p>
