@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Galora Wealth AI</string>
-    <string name="title_activity_main">Galora Wealth AI</string>
+    <string name="app_name">Galora AI</string>
+    <string name="title_activity_main">Galora AI</string>
     <string name="package_name">com.galora.ai</string>
     <string name="custom_url_scheme">com.galora.ai</string>
 </resources>

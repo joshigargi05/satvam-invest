@@ -501,7 +501,7 @@ export default function AuthPage() {
               <div className="flex items-center gap-3">
                 <GaloraLogo size={46} />
                 <div>
-                  <h1 className="text-gradient text-2xl font-black m-0">Galora Wealth AI</h1>
+                  <h1 className="text-gradient text-2xl font-black m-0">Galora AI</h1>
                   <span className="text-xs text-slate-400">AI-Powered Wealth Generation</span>
                 </div>
               </div>
@@ -606,7 +606,7 @@ export default function AuthPage() {
               <div className="flex items-center gap-2.5">
                 <GaloraLogo size={36} />
                 <div>
-                  <h1 className="text-gradient text-lg font-black m-0" style={{ lineHeight: 1.15 }}>Galora Wealth AI</h1>
+                  <h1 className="text-gradient text-lg font-black m-0" style={{ lineHeight: 1.15 }}>Galora AI</h1>
                   <span className="text-[11px] text-slate-400 block">AI-Powered Wealth Generation</span>
                 </div>
               </div>
@@ -624,7 +624,7 @@ export default function AuthPage() {
                   ? 'Create Investor Account'
                   : mode === 'email_otp'
                   ? 'Passwordless Email OTP'
-                  : 'Sign In to Galora Wealth AI'}
+                  : 'Sign In to Galora AI'}
               </h3>
               <p className="text-xs text-slate-400" style={{ lineHeight: '1.5', margin: 0 }}>
                 {pending2FA

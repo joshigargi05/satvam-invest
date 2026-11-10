@@ -168,7 +168,7 @@ function Navigation() {
         <div className="flex items-center gap-2.5">
           <GaloraLogo size={30} />
           <div>
-            <h1 className="text-gradient font-bold" style={{ fontSize: '1.05rem', margin: 0, lineHeight: 1.1 }}>Galora Wealth AI</h1>
+            <h1 className="text-gradient font-bold" style={{ fontSize: '1.1rem', margin: 0, lineHeight: 1.1 }}>Galora AI</h1>
             <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>AI-Powered Wealth Generation</span>
           </div>
         </div>
@@ -217,7 +217,7 @@ function Navigation() {
         <div className="brand-header flex flex-col items-start gap-1.5 mb-8" style={{ padding: '0 0.75rem' }}>
           <div className="flex items-center gap-2.5">
             <GaloraLogo size={36} />
-            <h1 className="text-gradient" style={{ fontSize: '1.35rem', margin: 0 }}>Galora Wealth AI</h1>
+            <h1 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>Galora AI</h1>
           </div>
           <span className="brand-subtitle" style={{ fontSize: '0.68rem', color: 'var(--text-muted)', letterSpacing: '0.03em', fontWeight: '500' }}>
             AI-Powered Wealth Generation

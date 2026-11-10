@@ -1,6 +1,6 @@
 {
   "appId": "com.galora.ai",
-  "appName": "Galora Wealth AI",
+  "appName": "Galora AI",
   "webDir": "dist",
   "server": {
     "androidScheme": "https",
