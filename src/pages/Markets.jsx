@@ -341,20 +341,24 @@ export default function Markets() {
       autoExitRule = { enabled: true, mode: 'price', targetPrice: priceVal };
     }
 
-    const success = buyAsset({
-      ticker: buyModalAsset.ticker,
-      name: buyModalAsset.name,
-      price: buyModalAsset.currentPrice,
-      units,
-      category: buyModalAsset.sector,
-      assetType: buyModalAsset.assetType,
-      market: buyModalAsset.market || market,
-      bucket: 'core',
-      autoExit: autoExitRule
-    });
+    try {
+      const success = buyAsset({
+        ticker: buyModalAsset.ticker,
+        name: buyModalAsset.name,
+        price: buyModalAsset.currentPrice,
+        units,
+        category: buyModalAsset.sector,
+        assetType: buyModalAsset.assetType,
+        market: buyModalAsset.market || market,
+        bucket: 'core',
+        autoExit: autoExitRule
+      });
 
-    if (success) {
-      setBuyModalAsset(null);
+      if (success) {
+        setBuyModalAsset(null);
+      }
+    } catch (err) {
+      console.error('Error executing buy order:', err);
     }
   };
 

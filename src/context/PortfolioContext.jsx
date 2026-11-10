@@ -1561,6 +1561,11 @@ export function PortfolioProvider({ children }) {
       [targetMarket]: balanceAfter
     }));
     
+    let finalAutoExit = null;
+    if (autoExitInput) {
+      finalAutoExit = buildAutoExitRule(autoExitInput, price);
+    }
+
     setHoldingsMap(prev => {
       const currentHoldings = prev[targetMarket] || [];
       const existing = currentHoldings.find(h => h.ticker === ticker && (h.bucket || 'core') === bucket);
@@ -1572,6 +1577,7 @@ export function PortfolioProvider({ children }) {
         const resolvedAutoExit = autoExitInput
           ? buildAutoExitRule(autoExitInput, updatedAvgPrice)
           : (existing.autoExit?.enabled ? buildAutoExitRule(existing.autoExit, updatedAvgPrice) : null);
+        finalAutoExit = resolvedAutoExit;
 
         newHoldings = currentHoldings.map(h => 
           (h.ticker === ticker && (h.bucket || 'core') === bucket)
@@ -1590,6 +1596,7 @@ export function PortfolioProvider({ children }) {
         );
       } else {
         const resolvedAutoExit = autoExitInput ? buildAutoExitRule(autoExitInput, price) : null;
+        finalAutoExit = resolvedAutoExit;
         newHoldings = [
           ...currentHoldings, 
           { 
@@ -1619,7 +1626,7 @@ export function PortfolioProvider({ children }) {
       price,
       total: totalCost,
       currency: targetCurrency,
-      autoExit: resolvedAutoExit,
+      autoExit: finalAutoExit,
       market: targetMarket,
       balanceAfter
     });
