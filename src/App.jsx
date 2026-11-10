@@ -360,7 +360,7 @@ const SEO_ROUTES = {
   },
   '/top-stocks': {
     title: 'Top 3 AI Stock Picks Today | Galora AI Quantitative Engine',
-    description: 'High-conviction Top 3 stock picks powered by Galora AI 5-module ensemble and 23-feature XGBoost machine learning engine across India and US markets.',
+    description: 'High-conviction Top 3 stock picks powered by Galora AI 5-module ensemble and 23-feature predictive machine learning engine across India and US markets.',
     canonical: 'https://galora.ai/top-stocks'
   },
   '/portfolio': {
@@ -379,7 +379,7 @@ const SEO_ROUTES = {
     canonical: 'https://galora.ai/macro-agent'
   },
   '/deep-analysis': {
-    title: 'Quant Agent & XGBoost Deep Stock Analysis | Galora AI',
+    title: 'Quant Agent & Deep Stock Analysis | Galora AI',
     description: 'Institutional 4-layer quantitative stock analysis combining Macro Regime, Derivatives OI/PCR, Technical Momentum, and Fundamental Earnings.',
     canonical: 'https://galora.ai/deep-analysis'
   },

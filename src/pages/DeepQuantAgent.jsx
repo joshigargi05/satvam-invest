@@ -635,7 +635,7 @@ export default function DeepQuantAgent() {
               </span>
             </div>
             <p className="text-muted text-xs md:text-sm mt-0.5">
-              Unified cross-asset workspace combining proprietary XGBoost factor algorithms, SEC transcripts, and autopilot execution.
+              Unified cross-asset workspace combining proprietary quantitative factor algorithms, SEC transcripts, and autopilot execution.
             </p>
           </div>
         </div>
@@ -1253,7 +1253,7 @@ export default function DeepQuantAgent() {
               <div className="inline-block animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mb-6"></div>
               <p className="font-bold text-lg mb-2 text-white">Running Multi-Layer Quantitative Matrix Analysis...</p>
               <ul className="text-sm space-y-2">
-                <li className="flex items-center gap-2"><Activity size={14} className="text-emerald-500"/> Ingesting XGBoost Trees &amp; Momentum Factors</li>
+                <li className="flex items-center gap-2"><Activity size={14} className="text-emerald-500"/> Ingesting Quantitative Decision Models &amp; Momentum Factors</li>
                 <li className="flex items-center gap-2"><Activity size={14} className="text-blue-500"/> Calculating Gamma Exposure &amp; Put-Call Ratio</li>
                 <li className="flex items-center gap-2"><Activity size={14} className="text-purple-500"/> Synthesizing Risk-Adjusted 12M Price Targets</li>
               </ul>

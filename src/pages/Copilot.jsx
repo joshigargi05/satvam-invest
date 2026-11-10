@@ -8,6 +8,8 @@ const AlertTriangle = Lucide.AlertTriangle || (() => '⚠️');
 const Settings2 = Lucide.Settings2 || (() => '⚙️');
 const Trash2 = Lucide.Trash2 || (() => '🗑️');
 const Info = Lucide.Info || (() => 'ℹ️');
+const Zap = Lucide.Zap || (() => '⚡');
+const Cpu = Lucide.Cpu || (() => '💻');
 
 import { generateAIResponse } from '../services/ai';
 import ReactMarkdown from 'react-markdown';
@@ -217,26 +219,38 @@ export default function Copilot() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button onClick={clearHistory} className="btn" style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
-            <Trash2 size={16} />
-            <span className="hidden md:inline ml-2">Clear</span>
-          </button>
-          
-          {/* Model Selection Dropdown */}
-          <div className="flex items-center gap-2 glass-panel px-4 py-2">
-            <Settings2 size={16} className="text-muted" />
-            <select 
-              value={provider} 
-              onChange={(e) => setProvider(e.target.value)}
-              className="bg-transparent border-none text-white outline-none"
-              style={{ fontFamily: 'var(--font-body)', cursor: 'pointer' }}
-            >
-              <option value="gemini" style={{ color: 'black' }}>Google Gemini</option>
-              <option value="openai" style={{ color: 'black' }}>OpenAI (GPT-4o)</option>
-              <option value="grok" style={{ color: 'black' }}>xAI Grok</option>
-            </select>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Modern Model Selector with Symbols */}
+          <div className="flex items-center bg-slate-950/90 p-1 rounded-2xl border border-white/10 shadow-inner gap-1">
+            {[
+              { id: 'openai', name: 'OpenAI', model: 'GPT-4o', symbol: '🧠', gradient: 'from-emerald-500 to-teal-600' },
+              { id: 'gemini', name: 'Gemini', model: 'Google', symbol: '✨', gradient: 'from-blue-600 to-indigo-600' },
+              { id: 'grok', name: 'Grok', model: 'xAI', symbol: '⚡', gradient: 'from-amber-500 to-rose-600' }
+            ].map(m => {
+              const active = provider === m.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setProvider(m.id)}
+                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                    active
+                      ? `bg-gradient-to-r ${m.gradient} text-white shadow-md shadow-blue-500/25 border border-white/20`
+                      : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  }`}
+                  title={`Switch active AI model to ${m.name} (${m.model})`}
+                >
+                  <span className="text-sm">{m.symbol}</span>
+                  <span className="font-extrabold">{m.name}</span>
+                </button>
+              );
+            })}
           </div>
+
+          <button onClick={clearHistory} className="btn py-2 px-3 text-xs" style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }} title="Clear Chat History">
+            <Trash2 size={15} />
+            <span className="hidden sm:inline ml-1.5">Clear</span>
+          </button>
         </div>
       </div>
 

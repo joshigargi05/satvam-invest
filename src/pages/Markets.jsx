@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 
@@ -13,7 +13,6 @@ const Zap = Lucide.Zap || (() => '⚡');
 import { getQuotes } from '../services/api';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useMarket } from '../context/MarketContext';
-import TopAlgoPicks from '../components/TopAlgoPicks';
 
 const defaultStocksUS = [
   // Top 50+ US Equities (S&P 500 & NASDAQ-100)
@@ -167,6 +166,14 @@ export default function Markets() {
   const [buyExitPct, setBuyExitPct] = useState('10');
   const [buyExitPrice, setBuyExitPrice] = useState('');
   const [marketToast, setMarketToast] = useState('');
+  const tableRef = useRef(null);
+
+  // Auto-scroll to results table whenever a search term is entered
+  useEffect(() => {
+    if (searchTerm.trim().length > 0 && tableRef.current) {
+      tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [searchTerm]);
 
   // Unified asset catalog with market tagging
   const allAvailableStocks = React.useMemo(() => {
@@ -346,6 +353,11 @@ export default function Markets() {
               style={{ paddingLeft: '3rem', paddingRight: '1rem', paddingTop: '0.85rem', paddingBottom: '0.85rem', minHeight: '50px' }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && tableRef.current) {
+                  tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
             />
           </div>
           <button className="btn btn-outline shrink-0" style={{ padding: '0.75rem' }} onClick={fetchLiveData}>
@@ -353,9 +365,6 @@ export default function Markets() {
           </button>
         </div>
       </div>
-
-      {/* Top 3 Algorithmic Stock Picks (US & India Markets) */}
-      <TopAlgoPicks pageContext="markets" />
 
       {/* Asset Segment Switcher */}
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
@@ -414,7 +423,20 @@ export default function Markets() {
       </div>
 
       {/* Asset Catalog Table */}
-      <div className="glass-panel overflow-x-auto rounded-xl">
+      <div ref={tableRef} className="glass-panel overflow-x-auto rounded-xl scroll-mt-24">
+        {searchTerm.trim() && (
+          <div className="p-3 px-4 bg-blue-500/10 border-b border-blue-500/20 flex items-center justify-between text-xs text-blue-300">
+            <span>
+              🔍 Showing {filteredStocks.length} search result{filteredStocks.length === 1 ? '' : 's'} for <strong>&quot;{searchTerm}&quot;</strong>
+            </span>
+            <button
+              onClick={() => setSearchTerm('')}
+              className="text-slate-400 hover:text-white underline text-[11px]"
+            >
+              Clear Search
+            </button>
+          </div>
+        )}
         <table className="w-full text-left border-collapse">
           <thead>
             <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>

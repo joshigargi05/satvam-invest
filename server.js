@@ -843,7 +843,7 @@ const algoStockCatalog = [
 ];
 
 const stockThesisMap = {
-  GOOGL: `Alphabet's Gemini multi-modal AI infrastructure, search monetization resilience, and Google Cloud operating margin expansion create a high-conviction multi-factor moat. XGBoost trees flag strong earnings revision momentum.`,
+  GOOGL: `Alphabet's Gemini multi-modal AI infrastructure, search monetization resilience, and Google Cloud operating margin expansion create a high-conviction multi-factor moat. Machine learning models flag strong earnings revision momentum.`,
   NVDA: `NVIDIA dominates hyperscale AI cluster deployments and Blackwell/Rubin GPU rack architecture. Institutional options flow (bullish gamma) and 30%+ FCF margins drive our highest ensemble conviction score.`,
   MU: `High-Bandwidth Memory (HBM3e/HBM4) supply shortages for AI accelerators give Micron unprecedented pricing power and gross margin expansion across the semiconductor supercycle.`,
   AVGO: `Broadcom's custom AI XPU silicon partnerships with hyperscalers and VMware enterprise software recurring revenue synergies trigger top-decile institutional accumulation.`,
@@ -859,7 +859,7 @@ const stockThesisMap = {
   BEL: `Defense radar, electronic warfare, and missile electronics order inflows drive high-margin revenue compounding across our Nifty 50 quantitative screen.`,
   TRENT: `Zudio and Westside store network expansion continues to deliver industry-leading same-store sales growth and strong institutional momentum in Indian retail.`,
   'M&M': `Market-leading SUV order book and rural tractor recovery position Mahindra & Mahindra as a premier Nifty 50 earnings momentum leader.`,
-  SBIN: `Robust credit growth, multi-year low gross NPA ratios, and attractive valuation multiples trigger strong buy signals across our factor and XGBoost models.`,
+  SBIN: `Robust credit growth, multi-year low gross NPA ratios, and attractive valuation multiples trigger strong buy signals across our factor and machine learning models.`,
   INFY: `Large deal wins in generative AI enterprise modernization and strong dividend/FCF payout yield support high multi-factor conviction.`,
   ICICIBANK: `Best-in-class net interest margins (NIM), granular retail deposit growth, and pristine asset quality make ICICI Bank a top private banking pick.`
 };
@@ -1821,7 +1821,7 @@ const buildInstitutionalAnalystReport = async (promptText = '', requestedProvide
 
 #### 2. Key Growth Drivers
 - **Proprietary Quantitative Momentum:** ${evalData.explanation}
-- **XGBoost 23-Feature ML Signal (${evalData.scores.xgboost}/100):** Institutional accumulation supported by bullish EMA 20/50 alignment, strong relative volume expansion, and positive earnings revisions.
+- **Predictive Machine Learning Signal (${evalData.scores.xgboost}/100):** Institutional accumulation supported by bullish EMA 20/50 alignment, strong relative volume expansion, and positive earnings revisions.
 - **Derivatives & Market Structure (${evalData.layers.derivatives.score}/100):** Put-Call Ratio (${evalData.layers.derivatives.pcr}) and dealer gamma positioning indicate **${evalData.layers.derivatives.status}** support on pullbacks.
 - **Technical Regime (${evalData.layers.technical.score}/100):** Trading **${evalData.layers.technical.status}** with 14-day RSI at **${evalData.layers.technical.rsi}**, signaling sustained institutional demand without extreme exhaustion.
 
@@ -1838,7 +1838,7 @@ Our 5-Module Quantitative Ensemble projects attractive risk-adjusted upside acro
 
 #### 5. Overall Rating
 - **Institutional Verdict:** **${overallRating.toUpperCase()}** (*4-Layer Agent Signal: ${evalData.layers.agentSignal}*)
-- **Ensemble Composite Score:** **${evalData.finalScore} / 100** (Factor: ${evalData.scores.factor} • XGBoost: ${evalData.scores.xgboost} • Sentiment: ${evalData.scores.sentiment} • Technical: ${evalData.scores.technical} • LLM Catalyst: ${evalData.scores.llm})
+- **Ensemble Composite Score:** **${evalData.finalScore} / 100** (Factor: ${evalData.scores.factor} • Predictive ML: ${evalData.scores.xgboost} • Sentiment: ${evalData.scores.sentiment} • Technical: ${evalData.scores.technical} • LLM Catalyst: ${evalData.scores.llm})
 
 #### 6. Confidence Score (1–10)
 - **Confidence Score:** **${confidence10} / 10** (Win Probability: **${evalData.probability}%**)

@@ -608,28 +608,14 @@ export default function MacroAgent() {
       {/* 🎯 #1 TOP CONVICTION AUTO-COMPOUNDER (SEBI / SEC COMPLIANT 1-CLICK GTT DEFAULT + SANDBOX MODE) */}
       <div className="glass-panel p-5 rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/35 via-slate-900/95 to-blue-950/35 shadow-2xl mb-6">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-white/10">
-          <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-lg shadow-emerald-500/10">
-              <ShieldCheck size={24} />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-lg shadow-emerald-500/10">
+              <ShieldCheck size={22} />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h3 className="text-lg font-extrabold text-white tracking-tight">
-                  #1 Top Conviction Auto-Compounder (US &amp; India)
-                </h3>
-                <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
-                  topPickComplianceMode === 'compliant_1click_gtt'
-                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40'
-                    : 'bg-amber-500/25 text-amber-300 border-amber-500/40'
-                }`}>
-                  {topPickComplianceMode === 'compliant_1click_gtt'
-                    ? '🛡️ SEBI & SEC Compliant: 1-Click GTT Stage + 100% Auto-Sale'
-                    : '🧪 Sandbox Mode: 100% Zero-Touch Auto Loop'}
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Assign an exclusive capital allocation (e.g., <strong className="text-emerald-300">10%</strong>) and target profit goal (<strong className="text-emerald-300">1%, 2%, or custom %</strong>) separately for <strong className="text-white">🇺🇸 US ($)</strong> and <strong className="text-white">🇮🇳 India (₹)</strong>. In <strong className="text-emerald-300">Compliant 1-Click GTT Mode</strong> (default), the Agent attaches a native <strong className="text-amber-300">Broker GTT / OCO Take-Profit Order</strong> so the <strong className="text-emerald-300">sale happens 100% automatically when your profit limit hits</strong>, then stages the newest <strong className="text-amber-300">#1 Top Conviction</strong> stock with your compounded fund for 1-click re-entry.
-              </p>
+              <h3 className="text-lg font-extrabold text-white tracking-tight">
+                Top Conviction Auto-Compounder
+              </h3>
             </div>
           </div>
 
@@ -1006,10 +992,10 @@ export default function MacroAgent() {
                     <button
                       type="button"
                       onClick={() => handleApproveStagedTopPick(mktKey)}
-                      className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-400 hover:from-amber-300 hover:to-emerald-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer text-center"
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/25 border border-white/20 transition-all cursor-pointer text-center"
                     >
-                      <ShieldCheck size={15} className="shrink-0" />
-                      <span>
+                      <ShieldCheck size={15} className="shrink-0 text-amber-200" />
+                      <span className="text-white font-extrabold">
                         🛡️ 1-Click Approve Buy #1 ({staged.ticker}) + Arm +{staged.profitTargetPct}% Auto-Sale GTT
                       </span>
                     </button>
@@ -1018,10 +1004,10 @@ export default function MacroAgent() {
                       type="button"
                       disabled={simulatingTopPickMkt === mktKey}
                       onClick={() => handleSimulateTopPickCycle(mktKey)}
-                      className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer text-center"
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/30 border border-emerald-400/40 transition-all cursor-pointer text-center"
                     >
-                      <Zap size={14} className="shrink-0" />
-                      <span>
+                      <Zap size={14} className="shrink-0 text-amber-300" />
+                      <span className="text-white font-extrabold tracking-wide">
                         {simulatingTopPickMkt === mktKey
                           ? `Executing GTT Auto-Sale...`
                           : topPickComplianceMode === 'compliant_1click_gtt'
@@ -1339,211 +1325,6 @@ export default function MacroAgent() {
           </div>
         </div>
       )}
-
-      {/* SECTION 1: Full-Width Autonomous World Intelligence Stream & Cognition Wire */}
-      <div className="glass-panel p-6 mb-8">
-        
-        {/* Live Scanner Header & Controls */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-white/10">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Globe size={22} className="text-blue-400" />
-              <h3 className="font-bold text-2xl text-white">Live Autonomous Intelligence Stream</h3>
-            </div>
-            <p className="text-sm text-muted">
-              Continuously ingesting defense satellite telemetry, Persian Gulf shipping wires, central bank reserve reports, and AI infrastructure backlogs.
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-2 shrink-0">
-            <button 
-              onClick={() => setIsAutoScrolling(!isAutoScrolling)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold transition-all shadow-sm ${
-                isAutoScrolling 
-                  ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300' 
-                  : 'border-slate-700 bg-slate-800 text-slate-400'
-              }`}
-            >
-              {isAutoScrolling ? <Pause size={14} /> : <Play size={14} />}
-              <span>{isAutoScrolling ? 'Auto-Scroll ON' : 'Paused'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 text-xs">
-          {[
-            { id: 'ALL', label: 'All Global Intel' },
-            { id: 'GEOPOLITICS', label: '🛡️ Geopolitics & War' },
-            { id: 'AI', label: '💻 AI & Semis' },
-            { id: 'METALS', label: '✨ Metals & Reserves' },
-            { id: 'COMMODITIES', label: '🔥 Energy & Commodities' }
-          ].map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${
-                activeCategory === cat.id 
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 border border-blue-400/30' 
-                  : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700/80 border border-white/5'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Live Scrolling Wire Cards - 2-Column Responsive Grid with Generous Padding */}
-        <div 
-          ref={scrollContainerRef}
-          onMouseEnter={() => { isHoveredRef.current = true; }}
-          onMouseLeave={() => { isHoveredRef.current = false; }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto pr-2" 
-          style={{ 
-            maxHeight: '620px', 
-            overflowY: 'auto', 
-            paddingBottom: '1rem' 
-          }}
-        >
-          {loadingStream ? (
-            <div className="col-span-full py-20 text-center text-muted text-sm">
-              <div className="inline-block animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mb-3"></div>
-              <p>Agent scanning global satellite & news networks...</p>
-            </div>
-          ) : filteredStream.map((item) => {
-            const isGeo = item.category.toUpperCase().includes('GEOPOLITICS');
-            const isAI = item.category.toUpperCase().includes('AI');
-            const isMetals = item.category.toUpperCase().includes('METALS');
-            
-            return (
-              <div 
-                key={item.id} 
-                className="p-6 rounded-2xl border border-white/10 bg-slate-900/85 hover:bg-slate-900/95 transition-all shadow-xl flex flex-col justify-between"
-                style={{
-                  minHeight: '280px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  gap: '1rem'
-                }}
-              >
-                <div>
-                  {/* Top Meta Row */}
-                  <div className="flex items-center justify-between gap-3 mb-3.5" style={{ marginBottom: '0.875rem' }}>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-lg border ${
-                        isGeo ? 'bg-red-500/15 text-red-300 border-red-500/30' :
-                        isAI ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' :
-                        isMetals ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
-                        'bg-blue-500/15 text-blue-300 border-blue-500/30'
-                      }`}>
-                        {item.category}
-                      </span>
-
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-slate-800 text-slate-400 border border-white/5">
-                        {item.severity}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
-                      <Clock size={12} className="text-slate-500" />
-                      <span>{new Date(item.timestamp).toLocaleTimeString()}</span>
-                    </div>
-                  </div>
-
-                  {/* Headline */}
-                  <h4 className="text-base md:text-lg font-bold text-white mb-2.5 leading-snug tracking-tight" style={{ marginBottom: '0.625rem', lineHeight: '1.4' }}>
-                    {item.headline}
-                  </h4>
-
-                  {/* Summary */}
-                  <p className="text-sm text-slate-300 mb-4 leading-relaxed font-normal" style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
-                    {item.summary}
-                  </p>
-
-                  {/* Autonomous Verdict Banner */}
-                  <div className="p-4 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs md:text-sm text-blue-200 leading-relaxed mb-4 flex items-start gap-3 shadow-inner" style={{ padding: '1rem', marginBottom: '1rem', lineHeight: '1.6' }}>
-                    <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400 shrink-0 mt-0.5">
-                      <Zap size={16} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white text-xs font-bold uppercase tracking-wider mb-1.5" style={{ marginBottom: '0.375rem' }}>
-                        Autonomous Strategic Verdict:
-                      </div>
-                      <div className="text-blue-100/95 text-xs md:text-sm font-normal leading-relaxed" style={{ lineHeight: '1.6' }}>
-                        {item.agentVerdict}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Impact Assets Footer */}
-                <div 
-                  className="pt-3.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 mt-2"
-                  style={{
-                    paddingTop: '0.875rem',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '0.75rem',
-                    marginTop: 'auto'
-                  }}
-                >
-                  <div className="flex items-center gap-2 flex-wrap" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span className="text-xs text-muted font-medium" style={{ fontSize: '0.75rem', fontWeight: 600 }}>Impact Assets:</span>
-                    {item.impactAssets.map(rawSym => {
-                      const sym = mapTickerToMarket(rawSym, market);
-                      return (
-                        <span 
-                          key={sym} 
-                          className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-200 border border-white/10 shadow-sm"
-                          style={{
-                            fontSize: '0.75rem',
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            padding: '0.25rem 0.625rem',
-                            borderRadius: '0.5rem',
-                            backgroundColor: '#1e293b',
-                            color: '#e2e8f0',
-                            border: '1px solid rgba(255, 255, 255, 0.12)'
-                          }}
-                        >
-                          {sym}
-                        </span>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => setSelectedScenario(isGeo ? 'iran_war_ai' : isAI ? 'ai_supercycle' : 'stagflation_resource')}
-                    className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:underline ml-auto"
-                    style={{
-                      fontSize: '0.75rem',
-                      color: '#60a5fa',
-                      fontWeight: 600,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.35rem',
-                      marginLeft: 'auto',
-                      padding: '0.3rem 0.65rem',
-                      borderRadius: '0.5rem',
-                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                      border: '1px solid rgba(59, 130, 246, 0.25)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <span>Align Strategy</span>
-                    <ArrowRight size={13} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-      </div>
 
       {/* SECTION 3: Agent Allocation Recommendation & Capital Divergence Desk */}
       <div className="glass-panel p-6 mb-8">
@@ -2131,6 +1912,211 @@ export default function MacroAgent() {
           </div>
         </div>
       )}
+
+      {/* SECTION 1: Full-Width Autonomous World Intelligence Stream & Cognition Wire */}
+      <div className="glass-panel p-6 mb-8">
+        
+        {/* Live Scanner Header & Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-white/10">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Globe size={22} className="text-blue-400" />
+              <h3 className="font-bold text-2xl text-white">Live Autonomous Intelligence Stream</h3>
+            </div>
+            <p className="text-sm text-muted">
+              Continuously ingesting defense satellite telemetry, Persian Gulf shipping wires, central bank reserve reports, and AI infrastructure backlogs.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2 shrink-0">
+            <button 
+              onClick={() => setIsAutoScrolling(!isAutoScrolling)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold transition-all shadow-sm ${
+                isAutoScrolling 
+                  ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300' 
+                  : 'border-slate-700 bg-slate-800 text-slate-400'
+              }`}
+            >
+              {isAutoScrolling ? <Pause size={14} /> : <Play size={14} />}
+              <span>{isAutoScrolling ? 'Auto-Scroll ON' : 'Paused'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 text-xs">
+          {[
+            { id: 'ALL', label: 'All Global Intel' },
+            { id: 'GEOPOLITICS', label: '🛡️ Geopolitics & War' },
+            { id: 'AI', label: '💻 AI & Semis' },
+            { id: 'METALS', label: '✨ Metals & Reserves' },
+            { id: 'COMMODITIES', label: '🔥 Energy & Commodities' }
+          ].map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`px-4 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${
+                activeCategory === cat.id 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 border border-blue-400/30' 
+                  : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700/80 border border-white/5'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Live Scrolling Wire Cards - 2-Column Responsive Grid with Generous Padding */}
+        <div 
+          ref={scrollContainerRef}
+          onMouseEnter={() => { isHoveredRef.current = true; }}
+          onMouseLeave={() => { isHoveredRef.current = false; }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto pr-2" 
+          style={{ 
+            maxHeight: '620px', 
+            overflowY: 'auto', 
+            paddingBottom: '1rem' 
+          }}
+        >
+          {loadingStream ? (
+            <div className="col-span-full py-20 text-center text-muted text-sm">
+              <div className="inline-block animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mb-3"></div>
+              <p>Agent scanning global satellite & news networks...</p>
+            </div>
+          ) : filteredStream.map((item) => {
+            const isGeo = item.category.toUpperCase().includes('GEOPOLITICS');
+            const isAI = item.category.toUpperCase().includes('AI');
+            const isMetals = item.category.toUpperCase().includes('METALS');
+            
+            return (
+              <div 
+                key={item.id} 
+                className="p-6 rounded-2xl border border-white/10 bg-slate-900/85 hover:bg-slate-900/95 transition-all shadow-xl flex flex-col justify-between"
+                style={{
+                  minHeight: '280px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '1rem'
+                }}
+              >
+                <div>
+                  {/* Top Meta Row */}
+                  <div className="flex items-center justify-between gap-3 mb-3.5" style={{ marginBottom: '0.875rem' }}>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-lg border ${
+                        isGeo ? 'bg-red-500/15 text-red-300 border-red-500/30' :
+                        isAI ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' :
+                        isMetals ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
+                        'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                      }`}>
+                        {item.category}
+                      </span>
+
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-slate-800 text-slate-400 border border-white/5">
+                        {item.severity}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
+                      <Clock size={12} className="text-slate-500" />
+                      <span>{new Date(item.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                  </div>
+
+                  {/* Headline */}
+                  <h4 className="text-base md:text-lg font-bold text-white mb-2.5 leading-snug tracking-tight" style={{ marginBottom: '0.625rem', lineHeight: '1.4' }}>
+                    {item.headline}
+                  </h4>
+
+                  {/* Summary */}
+                  <p className="text-sm text-slate-300 mb-4 leading-relaxed font-normal" style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
+                    {item.summary}
+                  </p>
+
+                  {/* Autonomous Verdict Banner */}
+                  <div className="p-4 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs md:text-sm text-blue-200 leading-relaxed mb-4 flex items-start gap-3 shadow-inner" style={{ padding: '1rem', marginBottom: '1rem', lineHeight: '1.6' }}>
+                    <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400 shrink-0 mt-0.5">
+                      <Zap size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white text-xs font-bold uppercase tracking-wider mb-1.5" style={{ marginBottom: '0.375rem' }}>
+                        Autonomous Strategic Verdict:
+                      </div>
+                      <div className="text-blue-100/95 text-xs md:text-sm font-normal leading-relaxed" style={{ lineHeight: '1.6' }}>
+                        {item.agentVerdict}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Impact Assets Footer */}
+                <div 
+                  className="pt-3.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 mt-2"
+                  style={{
+                    paddingTop: '0.875rem',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.75rem',
+                    marginTop: 'auto'
+                  }}
+                >
+                  <div className="flex items-center gap-2 flex-wrap" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span className="text-xs text-muted font-medium" style={{ fontSize: '0.75rem', fontWeight: 600 }}>Impact Assets:</span>
+                    {item.impactAssets.map(rawSym => {
+                      const sym = mapTickerToMarket(rawSym, market);
+                      return (
+                        <span 
+                          key={sym} 
+                          className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-200 border border-white/10 shadow-sm"
+                          style={{
+                            fontSize: '0.75rem',
+                            fontFamily: 'monospace',
+                            fontWeight: 700,
+                            padding: '0.25rem 0.625rem',
+                            borderRadius: '0.5rem',
+                            backgroundColor: '#1e293b',
+                            color: '#e2e8f0',
+                            border: '1px solid rgba(255, 255, 255, 0.12)'
+                          }}
+                        >
+                          {sym}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedScenario(isGeo ? 'iran_war_ai' : isAI ? 'ai_supercycle' : 'stagflation_resource')}
+                    className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:underline ml-auto"
+                    style={{
+                      fontSize: '0.75rem',
+                      color: '#60a5fa',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      marginLeft: 'auto',
+                      padding: '0.3rem 0.65rem',
+                      borderRadius: '0.5rem',
+                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                      border: '1px solid rgba(59, 130, 246, 0.25)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>Align Strategy</span>
+                    <ArrowRight size={13} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+      </div>
 
       {/* SECTION 4: Commodities & Metals Desk (Full-Width Spacious Trading Floor at Bottom) */}
       <div className="glass-panel p-6 mb-8 mt-8">

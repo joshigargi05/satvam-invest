@@ -250,7 +250,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
               Top 3 Recommended Stocks to Buy ({market === 'US' ? 'US Stocks' : 'IND Stocks'})
             </h2>
             <p className="text-xs text-slate-300 mt-0.5 max-w-3xl">
-              High-conviction recommendations powered by <strong>Galora AI&apos;s Proprietary Intelligence Engine</strong>. Kept stable across an investment horizon to prevent rapid churn, with continuous real-time price synchronization.
+              High-conviction recommendations powered by <strong>Galora AI&apos;s Proprietary Intelligence Engine</strong>.
             </p>
           </div>
         </div>
@@ -287,22 +287,36 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
 
           {/* Secondary Controls Row: Target (6M / 12M), Recalculate, Quant Agent */}
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            {/* Dynamic Dropdown for Algo Stock Target: 6 Months or 12 Months */}
-            <div className="flex items-center gap-1.5 bg-slate-950/90 px-2.5 py-1.5 rounded-xl border border-white/15 text-[11px] sm:text-xs shadow-inner">
-              <span className="text-[11px] text-slate-300 font-semibold whitespace-nowrap flex items-center gap-1">
+            {/* Modern Segmented Target Horizon Selector: 6 Months or 12 Months */}
+            <div className="inline-flex items-center bg-slate-950/90 p-1 rounded-xl border border-white/15 text-[11px] sm:text-xs shadow-inner gap-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-1.5 flex items-center gap-1">
                 <Target size={12} className="text-emerald-400 shrink-0" />
-                <span>Target:</span>
+                <span className="hidden xs:inline">Target:</span>
               </span>
-              <select
-                value={targetTimeframe}
-                onChange={(e) => setTargetTimeframe(e.target.value)}
-                className="bg-transparent text-emerald-300 font-bold focus:outline-none cursor-pointer text-[11px] sm:text-xs"
-                style={{ fontSize: '0.75rem', lineHeight: 1.2 }}
-                title="Select dynamic target price timeframe (6 Months or 12 Months)"
+              <button
+                type="button"
+                onClick={() => setTargetTimeframe('sixMonths')}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+                  targetTimeframe === 'sixMonths'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black shadow-md shadow-emerald-500/30 border border-emerald-300/40'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
+                }`}
+                title="Calculate targets for a 6-Month algorithmic horizon"
               >
-                <option value="sixMonths" className="bg-slate-900 text-white" style={{ fontSize: '0.75rem' }}>6 Months</option>
-                <option value="twelveMonths" className="bg-slate-900 text-white" style={{ fontSize: '0.75rem' }}>12 Months</option>
-              </select>
+                6 Months
+              </button>
+              <button
+                type="button"
+                onClick={() => setTargetTimeframe('twelveMonths')}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+                  targetTimeframe === 'twelveMonths'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black shadow-md shadow-emerald-500/30 border border-emerald-300/40'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
+                }`}
+                title="Calculate targets for a 12-Month algorithmic horizon"
+              >
+                12 Months
+              </button>
             </div>
 
             <button
