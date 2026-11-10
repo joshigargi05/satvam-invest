@@ -17,7 +17,8 @@ const MdStars = Md.MdStars || Md.MdWorkspacePremium || (() => '⭐');
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { MarketProvider, useMarket } from './context/MarketContext'
-import { PortfolioProvider } from './context/PortfolioContext'
+import { PortfolioProvider, usePortfolio } from './context/PortfolioContext'
+import { TradeResultModal, SellPositionModal } from './components/TradeModals'
 
 // Pages
 import TopStocks from './pages/TopStocks'
@@ -41,8 +42,6 @@ function AlgoRedirect() {
 }
 
 import './index.css'
-
-import { usePortfolio } from './context/PortfolioContext'
 
 function TopHeader() {
   const { market, setMarket } = useMarket();
@@ -432,6 +431,7 @@ function RouteSeoManager() {
 
 function AppShell() {
   const { isAuthenticated, isLocked, loading } = useAuth();
+  const { tradeResultModal, closeTradeResultModal, sellModalState, closeSellModal, sellAsset } = usePortfolio();
 
   if (loading) {
     return (
@@ -472,6 +472,17 @@ function AppShell() {
         </main>
       </div>
 
+      {/* In-App Trade Action & Execution Confirmation Modals */}
+      <TradeResultModal
+        modalState={tradeResultModal}
+        onClose={closeTradeResultModal}
+      />
+      <SellPositionModal
+        modalState={sellModalState}
+        onClose={closeSellModal}
+        onConfirmSell={(ticker, units, bucket) => sellAsset(ticker, units, bucket)}
+      />
+
       {/* Auth Page Modal Overlay (Displays over the blurred background) */}
       {!isAuthenticated && (
         <div className="fixed inset-0 z-50 overflow-y-auto animate-fade-in">
@@ -491,15 +502,15 @@ function AppShell() {
 
 function App() {
   return (
-    <AuthProvider>
-      <MarketProvider>
-        <PortfolioProvider>
-          <Router>
+    <Router>
+      <AuthProvider>
+        <MarketProvider>
+          <PortfolioProvider>
             <AppShell />
-          </Router>
-        </PortfolioProvider>
-      </MarketProvider>
-    </AuthProvider>
+          </PortfolioProvider>
+        </MarketProvider>
+      </AuthProvider>
+    </Router>
   )
 }
 

@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { getQuotes, getMacroAllocationRecommendation, getTopAlgoPicks, getCloudPortfolio, syncCloudPortfolio } from '../services/api';
 import { useMarket } from './MarketContext';
 import { useAuth } from './AuthContext';
-import { TradeResultModal, SellPositionModal } from '../components/TradeModals';
 
 const PortfolioContext = createContext();
 
@@ -1990,20 +1989,12 @@ export function PortfolioProvider({ children }) {
       lastCloudSyncAt,
       openSellModal,
       closeSellModal,
+      sellModalState,
       tradeResultModal,
       closeTradeResultModal,
       showTradeAlert
     }}>
       {children}
-      <TradeResultModal
-        modalState={tradeResultModal}
-        onClose={closeTradeResultModal}
-      />
-      <SellPositionModal
-        modalState={sellModalState}
-        onClose={closeSellModal}
-        onConfirmSell={(ticker, units, bucket) => sellAsset(ticker, units, bucket)}
-      />
     </PortfolioContext.Provider>
   );
 }

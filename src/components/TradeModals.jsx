@@ -18,7 +18,12 @@ const Zap = Lucide.Zap || (() => '⚡');
  * Supports: Buy Confirmation, Sell Confirmation, Insufficient Funds / Order Alerts.
  */
 export function TradeResultModal({ modalState, onClose }) {
-  const navigate = useNavigate();
+  let navigate = null;
+  try {
+    navigate = useNavigate();
+  } catch (err) {
+    navigate = null;
+  }
 
   if (!modalState || !modalState.isOpen) return null;
 
@@ -157,7 +162,11 @@ export function TradeResultModal({ modalState, onClose }) {
                 type="button"
                 onClick={() => {
                   onClose();
-                  navigate('/portfolio');
+                  if (typeof navigate === 'function') {
+                    navigate('/portfolio');
+                  } else {
+                    window.location.href = '/portfolio';
+                  }
                 }}
                 className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-white/10 hover:bg-white/15 border border-white/20 transition-all flex items-center justify-center gap-1.5"
               >
