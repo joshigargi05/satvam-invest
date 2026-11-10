@@ -2633,6 +2633,12 @@ app.get('/robots.txt', (req, res) => {
       'Allow: /',
       'Disallow: /api/',
       '',
+      'User-agent: Googlebot-Image',
+      'Allow: /',
+      '',
+      'User-agent: Google-Favicon',
+      'Allow: /',
+      '',
       'Sitemap: https://galora.ai/sitemap.xml',
       'Host: https://galora.ai'
     ].join('\n')
@@ -2685,6 +2691,11 @@ const serveBrandAsset = (fileName, contentType) => (req, res) => {
 
 app.get('/favicon.ico', serveBrandAsset('favicon.ico', 'image/x-icon'));
 app.get('/favicon.png', serveBrandAsset('favicon.png', 'image/png'));
+app.get('/favicon-48x48.png', serveBrandAsset('favicon-48x48.png', 'image/png'));
+app.get('/favicon-96x96.png', serveBrandAsset('favicon-96x96.png', 'image/png'));
+app.get('/favicon-144x144.png', serveBrandAsset('favicon-144x144.png', 'image/png'));
+app.get('/favicon-192x192.png', serveBrandAsset('favicon-192x192.png', 'image/png'));
+app.get('/favicon-512x512.png', serveBrandAsset('favicon-512x512.png', 'image/png'));
 app.get('/favicon.svg', serveBrandAsset('galora-logo.svg', 'image/svg+xml'));
 app.get('/galora-logo.svg', serveBrandAsset('galora-logo.svg', 'image/svg+xml'));
 app.get('/apple-touch-icon.png', serveBrandAsset('apple-touch-icon.png', 'image/png'));

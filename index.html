@@ -1,6 +1,19 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <!-- Google Search & Browser Favicon Declarations (Multiples of 48px per Google Search Central spec) -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48 96x96" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="144x144" href="/favicon-144x144.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png" />
+    <link rel="icon" type="image/svg+xml" sizes="any" href="/galora-logo.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
     <!-- Google tag (gtag.js / gtm.js) for Galora AI (galora.ai) -->
     <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-54LZ246K"></script>
     <script>
@@ -8,12 +21,6 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
     </script>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/galora-logo.svg?v=4" />
-    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=4" />
-    <link rel="shortcut icon" href="/favicon.ico?v=4" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4" />
-    <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -60,7 +67,10 @@
     />
     <meta property="og:url" content="https://galora.ai/" />
     <meta property="og:site_name" content="Galora AI" />
-    <meta property="og:image" content="https://galora.ai/galora-logo.svg" />
+    <meta property="og:image" content="https://galora.ai/favicon-512x512.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
     <meta property="og:locale" content="en_US" />
 
     <!-- Twitter / X Card -->
@@ -70,7 +80,7 @@
       name="twitter:description"
       content="Real-time AI stock recommendations, 4-layer quantitative conviction scoring, and autonomous tactical portfolio management for India & US markets."
     />
-    <meta name="twitter:image" content="https://galora.ai/galora-logo.svg" />
+    <meta name="twitter:image" content="https://galora.ai/favicon-512x512.png" />
 
     <title>Galora AI | AI-Powered Quantitative Stock Picks &amp; Wealth OS</title>
 
@@ -84,7 +94,13 @@
             "@id": "https://galora.ai/#organization",
             "name": "Galora AI",
             "url": "https://galora.ai/",
-            "logo": "https://galora.ai/galora-logo.svg",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://galora.ai/favicon-512x512.png",
+              "width": 512,
+              "height": 512
+            },
+            "image": "https://galora.ai/favicon-512x512.png",
             "description": "AI-powered global investing and quantitative stock intelligence platform covering Indian (NSE/BSE) and US (NYSE/NASDAQ) markets."
           },
           {
