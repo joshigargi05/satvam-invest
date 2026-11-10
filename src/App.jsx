@@ -354,8 +354,8 @@ function SimulatorBanner() {
 
 const SEO_ROUTES = {
   '/': {
-    title: 'Galora AI | Top 3 AI-Recommended Stocks (India & US Markets)',
-    description: 'Discover daily Top 3 AI-ranked stocks for Indian (NSE/BSE NIFTY 50) and US (NYSE/NASDAQ) markets with Quarterly, 6-Month, and 12-Month algorithmic price targets.',
+    title: 'Galora AI | AI-Powered Quantitative Stock Picks & Wealth Agent',
+    description: 'Discover daily Top 3 AI-ranked stocks for Indian (NSE/BSE NIFTY 50) and US (NYSE/NASDAQ) markets with 6-Month and 12-Month algorithmic price targets.',
     canonical: 'https://galora.ai/'
   },
   '/top-stocks': {
@@ -364,7 +364,7 @@ const SEO_ROUTES = {
     canonical: 'https://galora.ai/top-stocks'
   },
   '/portfolio': {
-    title: 'My Portfolio & Tactical Vault | Galora AI Wealth OS',
+    title: 'My Portfolio & Tactical Vault | Galora AI Wealth Agent',
     description: 'Track your Core Protected holdings, Autonomous Tactical Vault, and #1 Top Pick compounding cycles with real-time P&L and GTT auto-exit rules on Galora AI.',
     canonical: 'https://galora.ai/portfolio'
   },
@@ -411,6 +411,9 @@ function RouteSeoManager() {
 
     const ogTitleEl = document.querySelector('meta[property="og:title"]');
     if (ogTitleEl) ogTitleEl.setAttribute('content', meta.title);
+
+    const twitterTitleEl = document.querySelector('meta[name="twitter:title"]');
+    if (twitterTitleEl) twitterTitleEl.setAttribute('content', meta.title);
 
     const ogDescEl = document.querySelector('meta[property="og:description"]');
     if (ogDescEl) ogDescEl.setAttribute('content', meta.description);
