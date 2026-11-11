@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { getQuotes, getMacroAllocationRecommendation, getTopAlgoPicks, getCloudPortfolio, syncCloudPortfolio } from '../services/api';
-import { useMarket } from './MarketContext';
+import { useMarket, isIndianTicker } from './MarketContext';
 import { useAuth } from './AuthContext';
 
 const PortfolioContext = createContext();

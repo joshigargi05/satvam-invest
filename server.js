@@ -112,6 +112,8 @@ const mockPrices = {
   COALINDIA: { price: 412.30, change: 4.50, changePct: 1.10 },
   JSWSTEEL: { price: 985.20, change: 11.40, changePct: 1.17 },
   'M&M': { price: 3067.70, change: 54.20, changePct: 1.80 },
+  'MM': { price: 3067.70, change: 54.20, changePct: 1.80 },
+  'M_M': { price: 3067.70, change: 54.20, changePct: 1.80 },
   'BAJAJ-AUTO': { price: 9640.00, change: 115.00, changePct: 1.21 },
   BAJAJFINSV: { price: 1890.40, change: 21.30, changePct: 1.14 },
   NESTLEIND: { price: 2280.50, change: 14.20, changePct: 0.63 },
@@ -447,6 +449,9 @@ const symbolAliases = {
   'FACEBOOK': 'META',
   'MICRON': 'MU',
   'NETFLIX': 'NFLX',
+  'MM': 'M&M',
+  'M_M': 'M&M',
+  'MAHINDRA': 'M&M',
   'GOLD': 'GC=F',
   'SILVER': 'SI=F',
   'CRUDE': 'CL=F',
@@ -608,7 +613,7 @@ app.get('/api/quotes', async (req, res) => {
   if (!symbols) return res.status(400).json({ error: 'Symbols are required' });
 
   try {
-    const symbolArray = symbols.split(',');
+    const symbolArray = String(symbols || '').split(',').map(s => s.trim()).filter(Boolean);
     const isIndiaBatch = market === 'INDIA' || symbolArray.some(s => indianTickers.has(s.trim().toUpperCase()));
     
     const quotesData = {};
@@ -634,11 +639,14 @@ app.get('/api/quotes', async (req, res) => {
           finalChangePct = 1.32;
         }
 
-        quotesData[rawSym] = {
+        const quotePayload = {
           price: finalPrice,
           change: finalChange,
           changePct: finalChangePct
         };
+        quotesData[rawSym] = quotePayload;
+        quotesData[cleanKey] = quotePayload;
+        if (sym && sym !== rawSym) quotesData[sym] = quotePayload;
       } catch (err) {
         console.error(`Failed to fetch quote for ${rawSym}:`, err.message);
       }

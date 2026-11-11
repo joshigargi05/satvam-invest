@@ -14,7 +14,7 @@ import {
   Legend
 } from 'recharts';
 import { getQuotes, getTopAlgoPicks, evaluateStocks, getAlgoRecommendations } from '../services/api';
-import { useMarket } from '../context/MarketContext';
+import { useMarket, isIndianTicker } from '../context/MarketContext';
 
 // Lucide Icons
 const Search = Lucide.Search || (() => '🔍');
@@ -73,6 +73,8 @@ const COMPANY_NAMES = {
   WIPRO: 'Wipro Limited',
   SUNPHARMA: 'Sun Pharma Ltd.',
   'M&M': 'Mahindra & Mahindra Ltd.',
+  MM: 'Mahindra & Mahindra Ltd.',
+  'M_M': 'Mahindra & Mahindra Ltd.',
   MEESHO: 'Meesho Inc. (E-Commerce)',
   SWIGGY: 'Swiggy Limited',
   ZOMATO: 'Zomato Limited',
@@ -86,6 +88,17 @@ const COMPANY_NAMES = {
 };
 
 const getCompanyName = (ticker) => COMPANY_NAMES[ticker] || `${ticker} Corp.`;
+
+// Robust input tokenizer: handles "TCS vs M&M vs RELIANCE", "TCS, M&M, RELIANCE", slashes, etc.
+const parseTickerInput = (raw) => {
+  if (!raw) return [];
+  return String(raw)
+    .replace(/\b(vs|v\/s|and)\b/gi, ',')
+    .replace(/[\/|]+/g, ',')
+    .split(/[,;\s]+/)
+    .map((t) => t.trim().toUpperCase())
+    .filter((t) => Boolean(t) && t !== 'VS' && t !== 'V/S' && t !== 'AND' && t !== '&');
+};
 
 // Theme color schemes for compared stocks (up to 3)
 const STOCK_THEMES = [
@@ -151,7 +164,14 @@ const tradeLibraryIndia = [
 export default function DeepQuantAgent() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { market, currency, getCurrency } = useMarket();
+  const { market, currency, getCurrency, isIndianTicker: contextIsIndianTicker } = useMarket();
+
+  const checkIsIndian = (ticker) => {
+    if (!ticker) return false;
+    if (typeof isIndianTicker === 'function') return isIndianTicker(ticker);
+    if (typeof contextIsIndianTicker === 'function') return contextIsIndianTicker(ticker);
+    return ticker.endsWith('.NS') || ticker.endsWith('.BO');
+  };
 
   // Active top-level mode tab: 'compare' | 'quant' | 'automated'
   const initialTab = searchParams.get('tab') === 'quant' 
@@ -216,11 +236,7 @@ export default function DeepQuantAgent() {
 
         const rawParam = searchParams.get('tickers') || searchParams.get('ticker');
         if (rawParam) {
-          const parts = rawParam
-            .split(/[,;\s]+/)
-            .map((s) => s.trim().toUpperCase())
-            .filter(Boolean)
-            .slice(0, 3);
+          const parts = parseTickerInput(rawParam).slice(0, 3);
           if (parts.length > 0) {
             setSelectedTickers(parts);
             handleAnalyze(parts, picks);
@@ -251,7 +267,7 @@ export default function DeepQuantAgent() {
     const raw = (tickerToAdd || inputTicker).trim().toUpperCase();
     if (!raw) return;
 
-    const tokens = raw.split(/[,;\s]+/).map((t) => t.trim().toUpperCase()).filter(Boolean);
+    const tokens = parseTickerInput(raw);
     let updated = [...selectedTickers];
 
     for (const t of tokens) {
@@ -294,7 +310,7 @@ export default function DeepQuantAgent() {
     const pendingText = inputTicker.trim().toUpperCase();
 
     if (!overrideTickers && pendingText) {
-      const tokens = pendingText.split(/[,;\s]+/).map((t) => t.trim().toUpperCase()).filter(Boolean);
+      const tokens = parseTickerInput(pendingText);
       for (const t of tokens) {
         if (!tickersToAnalyze.includes(t) && tickersToAnalyze.length < 3) {
           tickersToAnalyze.push(t);
@@ -362,119 +378,125 @@ export default function DeepQuantAgent() {
       if (current >= stages.length) {
         clearInterval(interval);
         setTimeout(() => {
-          setAnalyzing(false);
+          try {
+            setAnalyzing(false);
 
-          const isComparingIndianContext = market === 'INDIA' || tickersToAnalyze.some(t => isIndianTicker(t));
-          const computedResults = tickersToAnalyze.map((cleanTicker, idx) => {
-            const evalItem = evalMap[cleanTicker];
-            const isInd = isIndianTicker(cleanTicker) || (isComparingIndianContext && !cleanTicker.endsWith('.US'));
-            const assetCurrency = evalItem?.currency || (isInd ? '₹' : getCurrency(cleanTicker));
-            const quote = quotesMap[cleanTicker] || {};
+            const isComparingIndianContext = market === 'INDIA' || tickersToAnalyze.some(t => checkIsIndian(t));
+            const computedResults = tickersToAnalyze.map((cleanTicker, idx) => {
+              const evalItem = evalMap[cleanTicker];
+              const isInd = checkIsIndian(cleanTicker) || (isComparingIndianContext && !cleanTicker.endsWith('.US'));
+              const assetCurrency = evalItem?.currency || (isInd ? '₹' : getCurrency(cleanTicker));
+              const quote = quotesMap[cleanTicker] || {};
 
-            let currentPrice;
-            if (typeof evalItem?.currentPrice === 'number' && evalItem.currentPrice > 0) {
-              currentPrice = evalItem.currentPrice;
-            } else if (typeof quote.price === 'number') {
-              currentPrice = quote.price;
-            } else {
-              currentPrice = assetCurrency === '₹' ? (cleanTicker === 'MEESHO' ? 215.00 : 250.00) : 180.00;
-            }
+              let currentPrice;
+              if (typeof evalItem?.currentPrice === 'number' && evalItem.currentPrice > 0) {
+                currentPrice = evalItem.currentPrice;
+              } else if (typeof quote.price === 'number') {
+                currentPrice = quote.price;
+              } else {
+                currentPrice = assetCurrency === '₹' ? (cleanTicker === 'MEESHO' ? 215.00 : 250.00) : 180.00;
+              }
 
-            const liveChange = typeof quote.change === 'number' ? quote.change : (evalItem?.change || 0);
-            const liveChangePct = typeof quote.changePct === 'number' ? quote.changePct : (evalItem?.changePct || 0);
-            const safePrice = Number(currentPrice) || (assetCurrency === '₹' ? 215.00 : 180.00);
+              const liveChange = typeof quote.change === 'number' ? quote.change : (evalItem?.change || 0);
+              const liveChangePct = typeof quote.changePct === 'number' ? quote.changePct : (evalItem?.changePct || 0);
+              const safePrice = Number(currentPrice) || (assetCurrency === '₹' ? 215.00 : 180.00);
 
-            // Unified Algorithmic Target Price & Upside
-            let targetPrice;
-            let upsidePct;
+              // Unified Algorithmic Target Price & Upside
+              let targetPrice;
+              let upsidePct;
 
-            if (evalItem && typeof evalItem.targetPrice === 'number' && evalItem.targetPrice > 0) {
-              targetPrice = Number(evalItem.targetPrice);
-              upsidePct = Number(
-                evalItem.upsidePct !== undefined
-                  ? evalItem.upsidePct
-                  : (((targetPrice - safePrice) / safePrice) * 100).toFixed(1)
-              );
-            } else {
-              const finalScore = evalItem?.finalScore || 82;
-              upsidePct = Number(Math.max(8.5, (finalScore - 68) * 1.15).toFixed(1));
-              targetPrice = Number((safePrice * (1 + upsidePct / 100)).toFixed(2));
-            }
+              if (evalItem && typeof evalItem.targetPrice === 'number' && evalItem.targetPrice > 0) {
+                targetPrice = Number(evalItem.targetPrice);
+                upsidePct = Number(
+                  evalItem.upsidePct !== undefined
+                    ? evalItem.upsidePct
+                    : (((targetPrice - safePrice) / safePrice) * 100).toFixed(1)
+                );
+              } else {
+                const finalScore = evalItem?.finalScore || 82;
+                upsidePct = Number(Math.max(8.5, (finalScore - 68) * 1.15).toFixed(1));
+                targetPrice = Number((safePrice * (1 + upsidePct / 100)).toFixed(2));
+              }
 
-            const isBullish = upsidePct > 0;
-            const hash = cleanTicker.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-            const revGrowthNum = isBullish ? (12 + (hash % 22)) : -(3 + (hash % 7));
-            const revGrowth = `${revGrowthNum > 0 ? '+' : ''}${revGrowthNum}% YoY`;
-            const epsBeatAmount = (0.12 + (hash % 30) / 100).toFixed(2);
-            const epsChange = isBullish
-              ? `Beat by ${assetCurrency}${epsBeatAmount}`
-              : `Missed by ${assetCurrency}${(0.05 + (hash % 15) / 100).toFixed(2)}`;
+              const isBullish = upsidePct > 0;
+              const hash = cleanTicker.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+              const revGrowthNum = isBullish ? (12 + (hash % 22)) : -(3 + (hash % 7));
+              const revGrowth = `${revGrowthNum > 0 ? '+' : ''}${revGrowthNum}% YoY`;
+              const epsBeatAmount = (0.12 + (hash % 30) / 100).toFixed(2);
+              const epsChange = isBullish
+                ? `Beat by ${assetCurrency}${epsBeatAmount}`
+                : `Missed by ${assetCurrency}${(0.05 + (hash % 15) / 100).toFixed(2)}`;
 
-            const margins = isBullish ? 'Expanding (+180 bps)' : 'Contracting (-95 bps)';
-            const winProbability = evalItem?.probability
-              ? Math.round(Number(evalItem.probability))
-              : Math.min(96, Math.max(68, 75 + (isBullish ? 14 : -5) + (hash % 10)));
+              const margins = isBullish ? 'Expanding (+180 bps)' : 'Contracting (-95 bps)';
+              const winProbability = evalItem?.probability
+                ? Math.round(Number(evalItem.probability))
+                : Math.min(96, Math.max(68, 75 + (isBullish ? 14 : -5) + (hash % 10)));
 
-            const chartData = [
-              { month: 'Q-3', price: Number((safePrice * 0.88).toFixed(2)), predicted: null },
-              { month: 'Q-2', price: Number((safePrice * 0.93).toFixed(2)), predicted: null },
-              { month: 'Q-1', price: Number((safePrice * 0.97).toFixed(2)), predicted: null },
-              { month: 'Today', price: safePrice, predicted: safePrice },
-              { month: 'Target', price: null, predicted: targetPrice }
-            ];
+              const chartData = [
+                { month: 'Q-3', price: Number((safePrice * 0.88).toFixed(2)), predicted: null },
+                { month: 'Q-2', price: Number((safePrice * 0.93).toFixed(2)), predicted: null },
+                { month: 'Q-1', price: Number((safePrice * 0.97).toFixed(2)), predicted: null },
+                { month: 'Today', price: safePrice, predicted: safePrice },
+                { month: 'Target', price: null, predicted: targetPrice }
+              ];
 
-            const transcriptPoints = getCustomTranscriptPoints(cleanTicker, isBullish, assetCurrency);
-            const globalImpact = getCustomGlobalImpact(cleanTicker, isBullish);
+              const transcriptPoints = getCustomTranscriptPoints(cleanTicker, isBullish, assetCurrency);
+              const globalImpact = getCustomGlobalImpact(cleanTicker, isBullish);
 
-            const synthesis = evalItem?.explanation
-              ? `${evalItem.explanation} Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
-              : (isBullish
-                ? `Autonomous Quant Agent rates ${cleanTicker} with a high outperformance vector. Institutional demand across product verticals is accelerating with expanding operating margins. Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
-                : `Quant Agent flags elevated operational headwind for ${cleanTicker}. Recent management remarks highlight margin compression and delayed enterprise pipeline conversion. Algorithmic target of ${assetCurrency}${targetPrice} reflects downside risk.`);
+              const synthesis = evalItem?.explanation
+                ? `${evalItem.explanation} Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
+                : (isBullish
+                  ? `Autonomous Quant Agent rates ${cleanTicker} with a high outperformance vector. Institutional demand across product verticals is accelerating with expanding operating margins. Algorithmic target of ${assetCurrency}${targetPrice} offers a +${upsidePct}% upside runway.`
+                  : `Quant Agent flags elevated operational headwind for ${cleanTicker}. Recent management remarks highlight margin compression and delayed enterprise pipeline conversion. Algorithmic target of ${assetCurrency}${targetPrice} reflects downside risk.`);
 
-            return {
-              ticker: cleanTicker,
-              companyName: evalItem?.companyName || getCompanyName(cleanTicker),
-              currency: assetCurrency,
-              currentPrice: safePrice,
-              change: liveChange,
-              changePct: liveChangePct,
-              targetPrice,
-              upsidePct,
-              chartData,
-              winProbability,
-              algorithmConviction: evalItem?.layers?.agentSignal || (upsidePct > 15 ? 'Strong Buy' : 'High Conviction'),
-              finalScore: evalItem?.finalScore || 85,
-              layers: evalItem?.layers,
-              financials: {
-                revenue: revGrowth,
-                eps: epsChange,
-                margins
-              },
-              transcriptKeyPoints: transcriptPoints,
-              executiveSentiment: isBullish ? (88 + (hash % 9)) : (62 + (hash % 10)),
-              hedgingIndex: isBullish ? 'Low (Direct)' : 'Elevated (Hedged)',
-              globalImpact,
-              synthesis,
-              theme: STOCK_THEMES[idx % STOCK_THEMES.length]
-            };
-          });
+              return {
+                ticker: cleanTicker,
+                companyName: evalItem?.companyName || getCompanyName(cleanTicker),
+                currency: assetCurrency,
+                currentPrice: safePrice,
+                change: liveChange,
+                changePct: liveChangePct,
+                targetPrice,
+                upsidePct,
+                targets: evalItem?.targets,
+                chartData,
+                winProbability,
+                algorithmConviction: evalItem?.layers?.agentSignal || (upsidePct > 15 ? 'Strong Buy' : 'High Conviction'),
+                finalScore: evalItem?.finalScore || 85,
+                layers: evalItem?.layers,
+                financials: {
+                  revenue: revGrowth,
+                  eps: epsChange,
+                  margins
+                },
+                transcriptKeyPoints: transcriptPoints,
+                executiveSentiment: isBullish ? (88 + (hash % 9)) : (62 + (hash % 10)),
+                hedgingIndex: isBullish ? 'Low (Direct)' : 'Elevated (Hedged)',
+                globalImpact,
+                synthesis,
+                theme: STOCK_THEMES[idx % STOCK_THEMES.length]
+              };
+            });
 
-          let topPickIndex = 0;
-          let maxUpside = -999;
-          computedResults.forEach((r, i) => {
-            if (r.upsidePct > maxUpside) {
-              maxUpside = r.upsidePct;
-              topPickIndex = i;
-            }
-          });
-          computedResults.forEach((r, i) => {
-            r.isTopPick = i === topPickIndex && computedResults.length > 1;
-            r.rank = i + 1;
-          });
+            let topPickIndex = 0;
+            let maxUpside = -999;
+            computedResults.forEach((r, i) => {
+              if (r.upsidePct > maxUpside) {
+                maxUpside = r.upsidePct;
+                topPickIndex = i;
+              }
+            });
+            computedResults.forEach((r, i) => {
+              r.isTopPick = i === topPickIndex && computedResults.length > 1;
+              r.rank = i + 1;
+            });
 
-          setResults(computedResults);
-          setActiveTranscriptStock(computedResults[0]);
+            setResults(computedResults);
+            setActiveTranscriptStock(computedResults[0]);
+          } catch (compErr) {
+            console.error('Error computing quant comparison results:', compErr);
+            setAnalyzing(false);
+          }
         }, 600);
       }
     }, 1000);
@@ -512,6 +534,7 @@ export default function DeepQuantAgent() {
   ];
 
   const presetsIndia = [
+    { label: 'TCS vs M&M vs RELIANCE', tickers: ['TCS', 'M&M', 'RELIANCE'] },
     ...(top3PicksTickers.length > 0
       ? [{ label: `🏆 Top 3 Recommended (${top3PicksLabel})`, tickers: top3PicksTickers, isTop3: true }]
       : []),

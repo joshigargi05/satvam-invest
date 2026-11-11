@@ -24,7 +24,7 @@ export const getMarketNews = async () => {
 
 export const getPortfolioNews = async (symbols) => {
   try {
-    const response = await apiFetch(`/api/portfolio-news?symbols=${symbols}`);
+    const response = await apiFetch(`/api/portfolio-news?symbols=${encodeURIComponent(symbols)}`);
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -35,7 +35,7 @@ export const getPortfolioNews = async (symbols) => {
 
 export const getUpcomingEarnings = async (symbols) => {
   try {
-    const response = await apiFetch(`/api/upcoming-earnings?symbols=${symbols}`);
+    const response = await apiFetch(`/api/upcoming-earnings?symbols=${encodeURIComponent(symbols)}`);
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -47,7 +47,7 @@ export const getUpcomingEarnings = async (symbols) => {
 export const getQuotes = async (symbols, market = '') => {
   try {
     const marketParam = market ? `&market=${encodeURIComponent(market)}` : '';
-    const response = await apiFetch(`/api/quotes?symbols=${symbols}${marketParam}`);
+    const response = await apiFetch(`/api/quotes?symbols=${encodeURIComponent(symbols)}${marketParam}`);
     if (!response.ok) return {};
     return await response.json();
   } catch (error) {
