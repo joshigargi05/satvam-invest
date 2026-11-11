@@ -139,7 +139,8 @@ const mockPrices = {
   TRENT: { price: 3525.10, change: 69.20, changePct: 2.00 },
   MEESHO: { price: 215.00, change: 3.50, changePct: 1.65 },
   SWIGGY: { price: 412.50, change: 8.20, changePct: 2.03 },
-  ZOMATO: { price: 248.80, change: 4.60, changePct: 1.88 },
+  ETERNAL: { price: 363.10, change: 4.80, changePct: 1.34 },
+  ZOMATO: { price: 363.10, change: 4.80, changePct: 1.34 },
   PAYTM: { price: 785.40, change: 12.10, changePct: 1.56 },
   NYKAA: { price: 184.20, change: 2.40, changePct: 1.32 },
   JIOFIN: { price: 324.60, change: 4.80, changePct: 1.50 },
@@ -430,7 +431,7 @@ const indianTickers = new Set([
   'HINDALCO', 'CIPLA', 'DRREDDY', 'EICHERMOT', 'SBILIFE', 'HDFCLIFE', 'BPCL', 'BRITANNIA',
   'APOLLOHOSP', 'DIVISLAB', 'TATACONSUM', 'HEROMOTOCO', 'ASIANPAINT', 'INDUSINDBK', 'SHRIRAMFIN',
   'BEL', 'HAL', 'TRENT', 'GOLDBEES', 'SILVERBEES',
-  'MEESHO', 'SWIGGY', 'ZOMATO', 'PAYTM', 'NYKAA', 'JIOFIN', 'TATATECH', 'OLA', 'OLAELEC', 'ZEPTO', 'GROWW', 'ZERODHA'
+  'ETERNAL', 'MEESHO', 'SWIGGY', 'ZOMATO', 'PAYTM', 'NYKAA', 'JIOFIN', 'TATATECH', 'OLA', 'OLAELEC', 'ZEPTO', 'GROWW', 'ZERODHA'
 ]);
 
 const commodityFutures = new Set(['GC=F', 'SI=F', 'CL=F', 'BZ=F', 'HG=F', 'PL=F', 'NG=F', 'CRUDEOIL', 'NATGAS', 'COPPER']);
@@ -452,6 +453,8 @@ const symbolAliases = {
   'MM': 'M&M',
   'M_M': 'M&M',
   'MAHINDRA': 'M&M',
+  'ETERNAL': 'ETERNAL',
+  'ZOMATO': 'ETERNAL',
   'GOLD': 'GC=F',
   'SILVER': 'SI=F',
   'CRUDE': 'CL=F',
@@ -986,7 +989,8 @@ const algoStockCatalog = [
   { t: 'INDUSINDBK', n: 'IndusInd Bank', s: 'Private Banking', market: 'INDIA', alphaBoost: 8, keywords: ['INDUSINDBK'] },
   { t: 'MEESHO', n: 'Meesho Inc.', s: 'E-Commerce / Social Commerce', market: 'INDIA', alphaBoost: 12, keywords: ['MEESHO', 'ECOMMERCE', 'RETAIL'] },
   { t: 'SWIGGY', n: 'Swiggy Limited', s: 'Food Delivery & Quick Commerce', market: 'INDIA', alphaBoost: 12, keywords: ['SWIGGY', 'INSTAMART'] },
-  { t: 'ZOMATO', n: 'Zomato Limited', s: 'Food Delivery & Blinkit Quick Commerce', market: 'INDIA', alphaBoost: 13, keywords: ['ZOMATO', 'BLINKIT'] },
+  { t: 'ETERNAL', n: 'Eternal Limited (Zomato / Blinkit)', s: 'Food Delivery & Blinkit Quick Commerce', market: 'INDIA', alphaBoost: 13, keywords: ['ETERNAL', 'ZOMATO', 'BLINKIT', 'QUICK COMMERCE'] },
+  { t: 'ZOMATO', n: 'Eternal Limited (Zomato / Blinkit)', s: 'Food Delivery & Blinkit Quick Commerce', market: 'INDIA', alphaBoost: 13, keywords: ['ZOMATO', 'ETERNAL', 'BLINKIT'] },
   { t: 'PAYTM', n: 'One97 Communications', s: 'Digital Payments & Fintech', market: 'INDIA', alphaBoost: 11, keywords: ['PAYTM', 'ONE97'] },
   { t: 'NYKAA', n: 'FSN E-Commerce (Nykaa)', s: 'Beauty & Fashion E-Commerce', market: 'INDIA', alphaBoost: 10, keywords: ['NYKAA'] },
   { t: 'JIOFIN', n: 'Jio Financial Services', s: 'Digital NBFC & Wealth', market: 'INDIA', alphaBoost: 12, keywords: ['JIOFIN', 'JIO'] },
@@ -1010,6 +1014,8 @@ const stockThesisMap = {
   BEL: `Defense radar, electronic warfare, and missile electronics order inflows drive high-margin revenue compounding across our Nifty 50 quantitative screen.`,
   TRENT: `Zudio and Westside store network expansion continues to deliver industry-leading same-store sales growth and strong institutional momentum in Indian retail.`,
   'M&M': `Market-leading SUV order book and rural tractor recovery position Mahindra & Mahindra as a premier Nifty 50 earnings momentum leader.`,
+  ETERNAL: `Eternal Limited's multi-segment commerce ecosystem (Blinkit quick-commerce dominance, Zomato food delivery operating leverage, and Hyperpure B2B scale) creates strong multi-year compounding and market share leadership.`,
+  ZOMATO: `Eternal Limited's multi-segment commerce ecosystem (Blinkit quick-commerce dominance, Zomato food delivery operating leverage, and Hyperpure B2B scale) creates strong multi-year compounding and market share leadership.`,
   SBIN: `Robust credit growth, multi-year low gross NPA ratios, and attractive valuation multiples trigger strong buy signals across our factor and machine learning models.`,
   INFY: `Large deal wins in generative AI enterprise modernization and strong dividend/FCF payout yield support high multi-factor conviction.`,
   ICICIBANK: `Best-in-class net interest margins (NIM), granular retail deposit growth, and pristine asset quality make ICICI Bank a top private banking pick.`
@@ -1126,9 +1132,11 @@ setInterval(loadRealMLPredictions, 60 * 1000);
 // Shared 5-Module Ensemble + 4-Layer Institutional Quantitative Evaluator
 const computeStockAlgoEvaluation = (company, quote = {}, extraBoost = 0) => {
   const boost = (company.alphaBoost ?? 10) + extraBoost;
-  const isIndiaCompany = company.market === 'INDIA' || (typeof indianTickers !== 'undefined' && indianTickers.has(company.t));
+  const isIndiaCompany = company.market === 'INDIA' || (typeof indianTickers !== 'undefined' && indianTickers.has(company.t)) || company.t?.endsWith('.NS') || company.t?.endsWith('.BO');
   const fallbackPrice = isIndiaCompany ? (mockPrices[company.t]?.price || 245.00) : (mockPrices[company.t]?.price || 150.00);
-  const currentPrice = typeof quote.price === 'number' ? quote.price : fallbackPrice;
+  const currentPrice = (typeof quote.price === 'number' && quote.price > 0 && (quote.price !== 100.0 || mockPrices[company.t]?.price === 100.0))
+    ? quote.price
+    : (mockPrices[company.t]?.price || fallbackPrice);
   const liveChange = typeof quote.change === 'number' ? quote.change : (mockPrices[company.t]?.change || 0);
   const liveChangePct = typeof quote.changePct === 'number' ? quote.changePct : (mockPrices[company.t]?.changePct || 0);
 
@@ -1204,7 +1212,7 @@ const computeStockAlgoEvaluation = (company, quote = {}, extraBoost = 0) => {
 
   const upsidePct = Number(Math.max(8.5, (finalScore - 68) * 1.15).toFixed(1));
   const targetPrice = Number((currentPrice * (1 + upsidePct / 100)).toFixed(2));
-  const isIndia = company.market === 'INDIA' || indianTickers.has(company.t);
+  const isIndia = company.market === 'INDIA' || indianTickers.has(company.t) || company.t?.endsWith('.NS') || company.t?.endsWith('.BO');
   const isLiveMover = Boolean(company.isLiveMover || liveChangePct >= 2.2);
 
   // Dynamic 3-Horizon Algo Targets: Quarterly (3M), 6 Months, and 12 Months

@@ -75,9 +75,10 @@ const COMPANY_NAMES = {
   'M&M': 'Mahindra & Mahindra Ltd.',
   MM: 'Mahindra & Mahindra Ltd.',
   'M_M': 'Mahindra & Mahindra Ltd.',
+  ETERNAL: 'Eternal Limited (Zomato / Blinkit)',
   MEESHO: 'Meesho Inc. (E-Commerce)',
   SWIGGY: 'Swiggy Limited',
-  ZOMATO: 'Zomato Limited',
+  ZOMATO: 'Eternal Limited (Zomato / Blinkit)',
   PAYTM: 'One97 Communications (Paytm)',
   NYKAA: 'FSN E-Commerce (Nykaa)',
   JIOFIN: 'Jio Financial Services',
@@ -385,16 +386,30 @@ export default function DeepQuantAgent() {
             const computedResults = tickersToAnalyze.map((cleanTicker, idx) => {
               const evalItem = evalMap[cleanTicker];
               const isInd = checkIsIndian(cleanTicker) || (isComparingIndianContext && !cleanTicker.endsWith('.US'));
-              const assetCurrency = evalItem?.currency || (isInd ? '₹' : getCurrency(cleanTicker));
+              let assetCurrency = '₹';
+              if (cleanTicker.endsWith('.US')) {
+                assetCurrency = '$';
+              } else if (isInd || isComparingIndianContext) {
+                assetCurrency = '₹';
+              } else if (evalItem?.currency) {
+                assetCurrency = evalItem.currency;
+              } else {
+                assetCurrency = getCurrency(cleanTicker);
+              }
+
               const quote = quotesMap[cleanTicker] || {};
 
               let currentPrice;
-              if (typeof evalItem?.currentPrice === 'number' && evalItem.currentPrice > 0) {
+              if (typeof evalItem?.currentPrice === 'number' && evalItem.currentPrice > 0 && evalItem.currentPrice !== 100.0) {
                 currentPrice = evalItem.currentPrice;
-              } else if (typeof quote.price === 'number') {
+              } else if (typeof quote.price === 'number' && quote.price > 0 && quote.price !== 100.0) {
+                currentPrice = quote.price;
+              } else if (typeof evalItem?.currentPrice === 'number' && evalItem.currentPrice > 0) {
+                currentPrice = evalItem.currentPrice;
+              } else if (typeof quote.price === 'number' && quote.price > 0) {
                 currentPrice = quote.price;
               } else {
-                currentPrice = assetCurrency === '₹' ? (cleanTicker === 'MEESHO' ? 215.00 : 250.00) : 180.00;
+                currentPrice = assetCurrency === '₹' ? (cleanTicker === 'ETERNAL' ? 363.10 : cleanTicker === 'MEESHO' ? 215.00 : 250.00) : 180.00;
               }
 
               const liveChange = typeof quote.change === 'number' ? quote.change : (evalItem?.change || 0);
@@ -1624,6 +1639,16 @@ function getCustomTranscriptPoints(ticker, isBullish, currency) {
       'Management confirmed post-merger deposit accretion reached industry-leading quarterly milestones.',
       'Net Interest Margin (NIM) stabilized at 3.47% with strong retail loan disbursals across tier-2 and tier-3 cities.',
       'Gross NPA ratio improved 6 bps QoQ to 1.36%, reflecting best-in-class Indian banking underwriting standards.'
+    ],
+    ETERNAL: [
+      'Management highlighted Blinkit adjusted EBITDA breakeven run-rate and dark store network expansion across top 15 metros.',
+      'Food delivery gross order value (GOV) grew 26% YoY with expanding restaurant ad-monetization take rates.',
+      'Hyperpure B2B supply chain operations delivered over 40% annualized revenue growth.'
+    ],
+    ZOMATO: [
+      'Management highlighted Blinkit adjusted EBITDA breakeven run-rate and dark store network expansion across top 15 metros.',
+      'Food delivery gross order value (GOV) grew 26% YoY with expanding restaurant ad-monetization take rates.',
+      'Hyperpure B2B supply chain operations delivered over 40% annualized revenue growth.'
     ]
   };
 
@@ -1645,7 +1670,9 @@ function getCustomGlobalImpact(ticker, isBullish) {
     TSLA: 'Next-generation low-cost vehicle platform architecture and battery storage expansion in Australia and Europe serve as primary multi-year valuation anchors.',
     RELIANCE: 'India domestic consumption tailwinds, retail consolidation, and domestic digital payments infrastructure insulation shield Reliance from global crude volatility.',
     TCS: 'European and North American BFSI IT spending stabilization alongside enterprise AI modernization contracts provide multi-quarter earnings visibility.',
-    HDFCBANK: 'Indian credit growth outperformance, strong domestic consumption demand, and expanding retail branch networks provide multi-year EPS compounding visibility.'
+    HDFCBANK: 'Indian credit growth outperformance, strong domestic consumption demand, and expanding retail branch networks provide multi-year EPS compounding visibility.',
+    ETERNAL: 'Indian urban consumption tailwinds, rapid consumer adoption of 10-minute quick commerce, and expanding high-margin advertising revenue shield Eternal from broader cyclical slowdowns.',
+    ZOMATO: 'Indian urban consumption tailwinds, rapid consumer adoption of 10-minute quick commerce, and expanding high-margin advertising revenue shield Eternal from broader cyclical slowdowns.'
   };
 
   return custom[ticker] || (isBullish

@@ -12,7 +12,7 @@ const indianTickersSet = new Set([
   'DIVISLAB', 'TATACONSUM', 'HEROMOTOCO', 'ASIANPAINT', 'INDUSINDBK', 'SHRIRAMFIN',
   'BEL', 'HAL', 'TRENT',
   // Indian Tech, Consumer, Unlisted & Emerging Growth Leaders
-  'MEESHO', 'SWIGGY', 'ZOMATO', 'PAYTM', 'NYKAA', 'JIOFIN', 'TATATECH',
+  'ETERNAL', 'MEESHO', 'SWIGGY', 'ZOMATO', 'PAYTM', 'NYKAA', 'JIOFIN', 'TATATECH',
   'OLA', 'OLAELEC', 'ZEPTO', 'GROWW', 'ZERODHA', 'POLICYBZR', 'DELHIVERY',
   'CARTRADE', 'MAPMYINDIA', 'KALYANKJIL', 'SUZLON', 'IREDA', 'RVNL', 'IRFC',
   'NHPC', 'SJVN'
