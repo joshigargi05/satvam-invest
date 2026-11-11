@@ -9,6 +9,8 @@ const TrendingDown = Lucide.TrendingDown || (() => '📉');
 const RefreshCw = Lucide.RefreshCw || (() => '🔄');
 const Sparkles = Lucide.Sparkles || (() => '✨');
 const Zap = Lucide.Zap || (() => '⚡');
+const X = Lucide.X || (() => '✕');
+const ArrowRight = Lucide.ArrowRight || (() => '→');
 
 import { getQuotes, searchGlobalMarkets } from '../services/api';
 import { usePortfolio } from '../context/PortfolioContext';
@@ -143,6 +145,12 @@ const defaultStocksIndia = [
   { ticker: 'BRITANNIA', name: 'Britannia Industries', sector: 'Packaged Foods', assetType: 'stock' },
   { ticker: 'TATACONSUM', name: 'Tata Consumer Products', sector: 'Beverages & Foods', assetType: 'stock' },
   { ticker: 'ASIANPAINT', name: 'Asian Paints', sector: 'Consumer Paints', assetType: 'stock' },
+  { ticker: 'ETERNAL', name: 'Eternal Limited (Zomato / Blinkit)', sector: 'Food Delivery & Quick Commerce', assetType: 'stock' },
+  { ticker: 'PAYTM', name: 'One97 Communications (Paytm)', sector: 'Digital Payments', assetType: 'stock' },
+  { ticker: 'SWIGGY', name: 'Swiggy Limited', sector: 'Food Delivery & Quick Commerce', assetType: 'stock' },
+  { ticker: 'JIOFIN', name: 'Jio Financial Services', sector: 'Financial Services', assetType: 'stock' },
+  { ticker: 'TATATECH', name: 'Tata Technologies Ltd.', sector: 'EV Software & Engineering', assetType: 'stock' },
+  { ticker: 'TATAPOWER', name: 'Tata Power Company', sector: 'Power & Renewable', assetType: 'stock' },
 
   // Commodities & Metals
   { ticker: 'GOLDBEES', name: 'Nippon India Gold ETF', sector: 'Precious Metals', assetType: 'commodity', unit: 'units' },
@@ -152,22 +160,161 @@ const defaultStocksIndia = [
   { ticker: 'COPPER', name: 'MCX Copper', sector: 'Industrial Metals', assetType: 'commodity', unit: 'kg' }
 ];
 
+// Master searchable catalog across all US & Indian stocks + commodities
+const ALL_CATALOG_STOCKS = [
+  ...defaultStocksIndia.map(s => ({
+    ...s,
+    market: 'INDIA',
+    exchange: s.ticker.includes('=F') || ['GOLDBEES', 'SILVERBEES', 'CRUDEOIL', 'NATGAS', 'COPPER'].includes(s.ticker) ? 'MCX / NSE' : 'NSE'
+  })),
+  ...defaultStocksUS.map(s => ({
+    ...s,
+    market: 'US',
+    exchange: s.ticker.includes('=F') || ['GLD', 'SLV', 'USO'].includes(s.ticker)
+      ? 'COMEX / NYMEX'
+      : ['PLTR', 'ORCL', 'NOW', 'CRM', 'WMT', 'HD', 'JPM', 'GS', 'MS', 'BLK', 'BAC', 'V', 'MA', 'AXP', 'UNH', 'ISRG', 'ABBV', 'JNJ', 'MRK', 'TMO', 'IBM', 'GE', 'RTX', 'LMT', 'CAT', 'XOM', 'CVX', 'UBER', 'PG', 'KO', 'PEP', 'MCD', 'DIS', 'LLY', 'TSM'].includes(s.ticker)
+      ? 'NYSE'
+      : 'NASDAQ'
+  }))
+];
+
+// Comprehensive Company Name & Colloquial Search Aliases to Official Exchange Tickers
 const MARKET_ALIASES = {
+  // US Equities
   QUALCOMM: 'QCOM',
+  QCOM: 'QCOM',
   NETAPP: 'NTAP',
+  NTAP: 'NTAP',
+  PALOALTO: 'PANW',
+  PALO: 'PANW',
+  PANW: 'PANW',
   GOOGLE: 'GOOGL',
   ALPHABET: 'GOOGL',
+  GOOG: 'GOOGL',
+  GOOGL: 'GOOGL',
   APPLE: 'AAPL',
+  AAPL: 'AAPL',
   MICROSOFT: 'MSFT',
+  MSFT: 'MSFT',
   AMAZON: 'AMZN',
+  AMZN: 'AMZN',
   NVIDIA: 'NVDA',
+  NVDA: 'NVDA',
   TESLA: 'TSLA',
+  TSLA: 'TSLA',
   META: 'META',
   FACEBOOK: 'META',
+  BROADCOM: 'AVGO',
+  AVGO: 'AVGO',
+  MICRON: 'MU',
+  MU: 'MU',
+  AMD: 'AMD',
+  INTEL: 'INTC',
+  INTC: 'INTC',
+  NETFLIX: 'NFLX',
+  NFLX: 'NFLX',
+  PALANTIR: 'PLTR',
+  PLTR: 'PLTR',
+  ORACLE: 'ORCL',
+  ORCL: 'ORCL',
+  SERVICENOW: 'NOW',
+  NOW: 'NOW',
+  CROWDSTRIKE: 'CRWD',
+  CRWD: 'CRWD',
+  SALESFORCE: 'CRM',
+  CRM: 'CRM',
+  ADOBE: 'ADBE',
+  ADBE: 'ADBE',
+  COSTCO: 'COST',
+  COST: 'COST',
+  WALMART: 'WMT',
+  WMT: 'WMT',
+  JPMORGAN: 'JPM',
+  JPM: 'JPM',
+  GOLDMAN: 'GS',
+  GS: 'GS',
+  MORGANSTANLEY: 'MS',
+  MS: 'MS',
+  BLACKROCK: 'BLK',
+  BLK: 'BLK',
+  VISA: 'V',
+  V: 'V',
+  MASTERCARD: 'MA',
+  MA: 'MA',
+  PAYPAL: 'PYPL',
+  PYPL: 'PYPL',
+  UBER: 'UBER',
+  DISNEY: 'DIS',
+  DIS: 'DIS',
+  CISCO: 'CSCO',
+  CSCO: 'CSCO',
+  IBM: 'IBM',
+  LILLY: 'LLY',
+  ELILILLY: 'LLY',
+  LLY: 'LLY',
+  TSMC: 'TSM',
+  TSM: 'TSM',
+
+  // Indian Equities
+  RELIANCE: 'RELIANCE',
+  TCS: 'TCS',
+  TATAMOTORS: 'TATAMOTORS',
+  TATASTEEL: 'TATASTEEL',
+  TATATECH: 'TATATECH',
+  TATAPOWER: 'TATAPOWER',
+  INFOSYS: 'INFY',
+  INFY: 'INFY',
+  HDFC: 'HDFCBANK',
+  HDFCBANK: 'HDFCBANK',
+  ICICI: 'ICICIBANK',
+  ICICIBANK: 'ICICIBANK',
+  SBI: 'SBIN',
+  SBIN: 'SBIN',
+  AIRTEL: 'BHARTIARTL',
+  BHARTI: 'BHARTIARTL',
+  BHARTIARTL: 'BHARTIARTL',
   MAHINDRA: 'M&M',
+  'M&M': 'M&M',
+  MM: 'M&M',
+  M_M: 'M&M',
+  MARUTI: 'MARUTI',
+  SUZUKI: 'MARUTI',
+  LARSEN: 'LT',
+  'L&T': 'LT',
+  LT: 'LT',
+  HUL: 'HINDUNILVR',
+  HINDUNILVR: 'HINDUNILVR',
+  BAJAJ: 'BAJFINANCE',
+  BAJFINANCE: 'BAJFINANCE',
+  BAJAJAUTO: 'BAJAJ-AUTO',
+  'BAJAJ-AUTO': 'BAJAJ-AUTO',
+  ETERNAL: 'ETERNAL',
   ZOMATO: 'ETERNAL',
   BLINKIT: 'ETERNAL',
-  INFOSYS: 'INFY'
+  SWIGGY: 'SWIGGY',
+  MEESHO: 'MEESHO',
+  PAYTM: 'PAYTM',
+  NYKAA: 'NYKAA',
+  JIO: 'JIOFIN',
+  JIOFIN: 'JIOFIN',
+  TITAN: 'TITAN',
+  ADANI: 'ADANIENT',
+  ADANIENT: 'ADANIENT',
+  ADANIPORTS: 'ADANIPORTS',
+  WIPRO: 'WIPRO',
+  HAL: 'HAL',
+  BEL: 'BEL',
+  TRENT: 'TRENT',
+  SUNPHARMA: 'SUNPHARMA'
+};
+
+const resolveTicker = (token) => {
+  if (!token) return '';
+  const clean = String(token).trim().toUpperCase();
+  if (MARKET_ALIASES[clean]) return MARKET_ALIASES[clean];
+  const noSpace = clean.replace(/[\s\-_.]+/g, '');
+  if (MARKET_ALIASES[noSpace]) return MARKET_ALIASES[noSpace];
+  return clean;
 };
 
 export default function Markets() {
@@ -189,6 +336,7 @@ export default function Markets() {
   const [globalSearchResults, setGlobalSearchResults] = useState([]);
   const [searchingGlobal, setSearchingGlobal] = useState(false);
   const [crossMarketPrompt, setCrossMarketPrompt] = useState({ isOpen: false, asset: null, currentMarket: market });
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const tableRef = useRef(null);
 
   // Auto-scroll to results table whenever a search term is entered
@@ -280,12 +428,6 @@ export default function Markets() {
     const interval = setInterval(fetchLiveData, 3000);
     return () => clearInterval(interval);
   }, [allAvailableStocks]);
-
-  // Cross-market asset detection: check if global search returned an asset native to the OTHER market
-  const crossMarketAsset = React.useMemo(() => {
-    if (!searchTerm.trim() || searchTerm.trim().length < 2) return null;
-    return globalSearchResults.find(s => s.market && s.market !== market) || null;
-  }, [globalSearchResults, searchTerm, market]);
 
   const handleBuy = (asset) => {
     if (asset.market && asset.market !== market) {
@@ -381,36 +523,216 @@ export default function Markets() {
     }
   };
 
+  const handleSelectSuggestion = (item) => {
+    setSearchTerm(item.ticker);
+    setShowSuggestions(false);
+    if (item.market && item.market !== market) {
+      setCrossMarketPrompt({ isOpen: true, asset: item, currentMarket: market });
+    } else {
+      if (tableRef.current) {
+        tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
+  // Detected alias recommendation if input differs from official ticker
+  const detectedAlias = React.useMemo(() => {
+    const q = searchTerm.trim().toUpperCase();
+    if (!q || q.length < 2) return null;
+    const resolved = resolveTicker(q);
+    if (resolved && resolved !== q) {
+      const match = ALL_CATALOG_STOCKS.find((s) => s.ticker === resolved);
+      return {
+        query: searchTerm.trim(),
+        ticker: resolved,
+        name: match?.name || `${resolved} Corp.`,
+        market: match?.market || (['AAPL', 'MSFT', 'AMZN', 'NVDA', 'GOOGL', 'META', 'TSLA', 'QCOM', 'NTAP', 'NFLX', 'PANW', 'AVGO'].includes(resolved) ? 'US' : 'INDIA'),
+        exchange: match?.exchange || (match?.market === 'INDIA' ? 'NSE' : 'NASDAQ'),
+        sector: match?.sector || ''
+      };
+    }
+    return null;
+  }, [searchTerm]);
+
+  // Suggestions based on user input, matching ticker prefix, word prefix in name, or company aliases
+  const suggestions = React.useMemo(() => {
+    const raw = searchTerm.trim();
+    if (!raw || raw.length < 1) return [];
+    const q = raw.toUpperCase();
+    const resolvedDirect = resolveTicker(q);
+
+    // Merge candidates from loaded stocks (with live prices), global search results, and static catalogs
+    const candidatesMap = new Map();
+    stocks.forEach((s) => {
+      candidatesMap.set(s.ticker.toUpperCase(), { ...s, market: s.market || market });
+    });
+    globalSearchResults.forEach((s) => {
+      if (!candidatesMap.has(s.ticker.toUpperCase())) {
+        candidatesMap.set(s.ticker.toUpperCase(), s);
+      }
+    });
+    ALL_CATALOG_STOCKS.forEach((s) => {
+      if (!candidatesMap.has(s.ticker.toUpperCase())) {
+        candidatesMap.set(s.ticker.toUpperCase(), {
+          ...s,
+          price: s.market === 'INDIA' ? '₹...' : '$...',
+          change: '-',
+          up: true
+        });
+      }
+    });
+
+    const matches = Array.from(candidatesMap.values()).filter((item) => {
+      const t = item.ticker.toUpperCase();
+      const n = (item.name || '').toUpperCase();
+      const sec = (item.sector || '').toUpperCase();
+
+      // 1. Direct ticker or resolved alias match (e.g. "QCOM", "QUALCOMM", "M&M", "ETERNAL")
+      if (t === resolvedDirect || t === q) return true;
+
+      // 2. Ticker prefix match (e.g. typing "NE" matches "NETAPP", "NFLX" if ticker starts with NE)
+      if (t.startsWith(q)) return true;
+
+      // 3. Known aliases that start with the query (e.g. query "NE" matches alias "NETAPP" -> ticker "NTAP", "NETFLIX" -> "NFLX")
+      const aliasMatch = Object.entries(MARKET_ALIASES).some(
+        ([alias, ticker]) => ticker === t && alias.startsWith(q)
+      );
+      if (aliasMatch) return true;
+
+      // 4. Any distinct word in the company name starts with the query (e.g. "NetApp Inc." starts with "NE")
+      const words = n.split(/[\s(/)\-,.]+/).filter(Boolean);
+      if (words.some((w) => w.startsWith(q))) return true;
+
+      // 5. If query is 3 or more chars, allow substring match on company name or sector
+      if (q.length >= 3 && (n.includes(q) || sec.includes(q))) return true;
+
+      return false;
+    });
+
+    return matches
+      .sort((a, b) => {
+        const aT = a.ticker.toUpperCase();
+        const bT = b.ticker.toUpperCase();
+        const aExact = aT === resolvedDirect || aT === q;
+        const bExact = bT === resolvedDirect || bT === q;
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+
+        // Prefer stocks whose ticker starts with query
+        const aTickerPrefix = aT.startsWith(q);
+        const bTickerPrefix = bT.startsWith(q);
+        if (aTickerPrefix && !bTickerPrefix) return -1;
+        if (!aTickerPrefix && bTickerPrefix) return 1;
+
+        // Prefer active market
+        const aMarket = a.market === market;
+        const bMarket = b.market === market;
+        if (aMarket && !bMarket) return -1;
+        if (!aMarket && bMarket) return 1;
+
+        return (a.name || '').localeCompare(b.name || '');
+      })
+      .slice(0, 6);
+  }, [searchTerm, stocks, globalSearchResults, market]);
+
   const filteredStocks = React.useMemo(() => {
-    const localMatches = stocks.filter(item => {
-      // If not searching, only show assets native to the selected market tab
-      if (!searchTerm.trim() && item.isOtherMarket) return false;
+    const raw = searchTerm.trim();
+    if (!raw) {
+      return stocks.filter(item => {
+        if (item.isOtherMarket) return false;
+        if (selectedTab === 'STOCKS') return item.assetType === 'stock';
+        if (selectedTab === 'COMMODITIES') return item.assetType === 'commodity';
+        return true;
+      });
+    }
 
-      const queryClean = searchTerm.trim().toLowerCase();
-      const resolved = MARKET_ALIASES[searchTerm.trim().toUpperCase()]?.toLowerCase();
-      const matchesSearch = item.ticker.toLowerCase().includes(queryClean) || 
-                            item.name.toLowerCase().includes(queryClean) ||
-                            item.sector.toLowerCase().includes(queryClean) ||
-                            (resolved && item.ticker.toLowerCase() === resolved);
-      if (!matchesSearch) return false;
+    const q = raw.toUpperCase();
+    const resolved = resolveTicker(q);
 
+    // Merge current stocks + global search results + cross-market catalog matches
+    const poolMap = new Map();
+    stocks.forEach(s => poolMap.set(s.ticker.toUpperCase(), s));
+    globalSearchResults.forEach(s => {
+      if (!poolMap.has(s.ticker.toUpperCase())) poolMap.set(s.ticker.toUpperCase(), s);
+    });
+
+    // Also include matching stocks from the other market catalog if query matches
+    ALL_CATALOG_STOCKS.forEach(s => {
+      if (!poolMap.has(s.ticker.toUpperCase())) {
+        const t = s.ticker.toUpperCase();
+        const n = s.name.toUpperCase();
+        const words = n.split(/[\s(/)\-,.]+/).filter(Boolean);
+        const aliasMatch = Object.entries(MARKET_ALIASES).some(
+          ([alias, ticker]) => ticker === t && (alias === q || alias.startsWith(q))
+        );
+        const matches = t === resolved || t === q || t.startsWith(q) || aliasMatch || words.some(w => w.startsWith(q));
+        if (matches) {
+          poolMap.set(t, {
+            ...s,
+            price: s.market === 'INDIA' ? '₹...' : '$...',
+            change: '-',
+            up: true,
+            rawChange: 0,
+            currentPrice: 0,
+            isOtherMarket: s.market !== market
+          });
+        }
+      }
+    });
+
+    const matches = Array.from(poolMap.values()).filter(item => {
+      const t = item.ticker.toUpperCase();
+      const n = (item.name || '').toUpperCase();
+      const sec = (item.sector || '').toUpperCase();
+
+      // 1. Direct ticker or resolved alias match
+      if (t === resolved || t === q) return true;
+
+      // 2. Ticker prefix match
+      if (t.startsWith(q)) return true;
+
+      // 3. Known alias prefix match
+      const aliasMatch = Object.entries(MARKET_ALIASES).some(
+        ([alias, ticker]) => ticker === t && alias.startsWith(q)
+      );
+      if (aliasMatch) return true;
+
+      // 4. Any distinct word in the company name starts with query
+      const words = n.split(/[\s(/)\-,.]+/).filter(Boolean);
+      if (words.some(w => w.startsWith(q))) return true;
+
+      // 5. If query >= 3 chars, allow substring match on name or sector
+      if (q.length >= 3 && (n.includes(q) || sec.includes(q))) return true;
+
+      return false;
+    });
+
+    return matches.filter(item => {
       if (selectedTab === 'STOCKS') return item.assetType === 'stock';
       if (selectedTab === 'COMMODITIES') return item.assetType === 'commodity';
       return true;
+    }).sort((a, b) => {
+      const aT = a.ticker.toUpperCase();
+      const bT = b.ticker.toUpperCase();
+      const aExact = aT === resolved || aT === q;
+      const bExact = bT === resolved || bT === q;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+
+      const aMarket = a.market === market;
+      const bMarket = b.market === market;
+      if (aMarket && !bMarket) return -1;
+      if (!aMarket && bMarket) return 1;
+
+      return (a.name || '').localeCompare(b.name || '');
     });
+  }, [stocks, searchTerm, selectedTab, globalSearchResults, market]);
 
-    if (!searchTerm.trim()) {
-      return localMatches;
-    }
-
-    // When searching, append the live global search results from BSE/NSE/NYSE/NASDAQ
-    const globalMatches = globalSearchResults.filter(item => {
-      if (selectedTab === 'COMMODITIES') return item.assetType === 'commodity';
-      return true;
-    });
-
-    return [...localMatches, ...globalMatches];
-  }, [stocks, searchTerm, selectedTab, globalSearchResults]);
+  // Cross-market asset detection: check if filtered search or global search contains an asset native to the OTHER market
+  const crossMarketAsset = React.useMemo(() => {
+    if (!searchTerm.trim() || searchTerm.trim().length < 2) return null;
+    return filteredStocks.find(s => s.market && s.market !== market) || globalSearchResults.find(s => s.market && s.market !== market) || null;
+  }, [filteredStocks, globalSearchResults, searchTerm, market]);
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
@@ -443,30 +765,255 @@ export default function Markets() {
           <p className="text-muted text-sm">Trade equities, precious metals (Gold, Silver), and energy commodities (Crude Oil, Gas).</p>
         </div>
         
-        <div className="flex gap-3 w-full md:w-auto">
-          <div style={{ position: 'relative', flex: 1, width: '100%', minWidth: 0 }}>
-            <Search 
-              style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} 
-              className="text-muted" 
-              size={18} 
-            />
-            <input 
-              type="text" 
-              placeholder="Search All India/US stocks" 
-              className="chat-input w-full"
-              style={{ paddingLeft: '3rem', paddingRight: '1rem', paddingTop: '0.85rem', paddingBottom: '0.85rem', minHeight: '50px' }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && tableRef.current) {
-                  tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-            />
+        <div className="flex flex-col gap-2 w-full md:w-[480px] lg:w-[560px]">
+          <div className="flex gap-3 w-full">
+            <div style={{ position: 'relative', flex: 1, width: '100%', minWidth: 0 }}>
+              <Search 
+                style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} 
+                className="text-slate-400 pointer-events-none" 
+                size={18} 
+              />
+              <input 
+                type="text" 
+                placeholder="Search All India/US stocks" 
+                className="chat-input w-full font-mono uppercase tracking-wider"
+                style={{
+                  paddingLeft: '3rem',
+                  paddingRight: searchTerm ? '2.75rem' : '1rem',
+                  paddingTop: '0.85rem',
+                  paddingBottom: '0.85rem',
+                  minHeight: '52px',
+                  backgroundColor: 'rgba(2, 6, 23, 0.95)',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  fontSize: '0.95rem'
+                }}
+                value={searchTerm}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 250)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (showSuggestions && suggestions.length > 0) {
+                      handleSelectSuggestion(suggestions[0]);
+                    } else if (tableRef.current) {
+                      tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    setShowSuggestions(false);
+                  } else if (e.key === 'Escape') {
+                    setShowSuggestions(false);
+                  }
+                }}
+              />
+
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setShowSuggestions(false);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    padding: '0.35rem',
+                    color: '#94a3b8',
+                    borderRadius: '8px'
+                  }}
+                  className="hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  title="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+
+              {/* Auto-Suggest Recommendation Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div 
+                  className="animate-fade-in"
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    top: 'calc(100% + 8px)',
+                    backgroundColor: '#070b14',
+                    border: '1px solid rgba(139, 92, 246, 0.45)',
+                    borderRadius: '16px',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95), 0 0 30px rgba(139, 92, 246, 0.25)',
+                    zIndex: 1000,
+                    maxHeight: '380px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  <div 
+                    style={{ 
+                      backgroundColor: '#0f172a', 
+                      padding: '0.65rem 1.15rem', 
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <span className="flex items-center gap-2 text-purple-300 font-bold text-xs uppercase tracking-wider">
+                      <Sparkles size={13} className="text-purple-400" />
+                      <span>Matching Stocks ({suggestions.length})</span>
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      Click to View / Trade
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {suggestions.map((item, idx) => (
+                      <button
+                        key={`${item.ticker}-${item.market || idx}`}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSelectSuggestion(item);
+                        }}
+                        style={{
+                          backgroundColor: '#070b14',
+                          borderBottom: idx === suggestions.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.06)',
+                          padding: '0.85rem 1.25rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          textAlign: 'left',
+                          transition: 'all 0.15s ease',
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#181e36';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#070b14';
+                        }}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div 
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '10px',
+                              backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                              border: '1px solid rgba(139, 92, 246, 0.4)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontFamily: 'monospace',
+                              fontWeight: 800,
+                              fontSize: '0.85rem',
+                              color: '#c084fc',
+                              flexShrink: 0
+                            }}
+                          >
+                            {item.ticker.substring(0, 2)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>
+                                {item.ticker}
+                              </span>
+                              <span 
+                                style={{
+                                  fontSize: '0.7rem',
+                                  fontFamily: 'monospace',
+                                  padding: '2px 8px',
+                                  borderRadius: '6px',
+                                  fontWeight: 700,
+                                  border: item.market === 'INDIA' ? '1px solid rgba(249, 115, 22, 0.4)' : '1px solid rgba(59, 130, 246, 0.4)',
+                                  backgroundColor: item.market === 'INDIA' ? 'rgba(249, 115, 22, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                                  color: item.market === 'INDIA' ? '#fdba74' : '#93c5fd'
+                                }}
+                              >
+                                {item.exchange || (item.market === 'INDIA' ? 'NSE' : 'NASDAQ')}
+                              </span>
+                              {item.sector && (
+                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                  • {item.sector}
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 500, marginTop: '2px' }} className="truncate">
+                              {item.name}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0 ml-3">
+                          {item.price && item.price !== '...' && item.price !== 'Checking...' && (
+                            <div className="text-right">
+                              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff' }}>
+                                {item.price}
+                              </div>
+                              {item.change && item.change !== '-' && (
+                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: item.up ? '#34d399' : '#f87171' }}>
+                                  {item.change}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <div 
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              backgroundColor: item.market === market ? 'rgba(139, 92, 246, 0.25)' : 'rgba(59, 130, 246, 0.25)',
+                              border: item.market === market ? '1px solid rgba(139, 92, 246, 0.5)' : '1px solid rgba(59, 130, 246, 0.5)',
+                              color: item.market === market ? '#d8b4fe' : '#93c5fd',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {item.market === market ? 'View' : 'Switch & Trade'}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button className="btn btn-outline shrink-0" style={{ padding: '0.75rem', minHeight: '52px', borderRadius: '14px' }} onClick={fetchLiveData} title="Refresh live quotes">
+              <RefreshCw size={18} className={loading || searchingGlobal ? "animate-spin" : ""} />
+            </button>
           </div>
-          <button className="btn btn-outline shrink-0" style={{ padding: '0.75rem' }} onClick={fetchLiveData}>
-            <RefreshCw size={18} className={loading || searchingGlobal ? "animate-spin" : ""} />
-          </button>
+
+          {/* Smart Auto-Resolution Recommendation Pill */}
+          {detectedAlias && (
+            <div className="p-2.5 px-3.5 rounded-xl bg-purple-950/60 border border-purple-500/40 text-xs text-purple-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-lg shadow-purple-950/30 animate-fade-in">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-purple-400 font-bold flex items-center gap-1.5">
+                  <Sparkles size={14} className="animate-pulse" /> Auto-Detected Stock Symbol:
+                </span>
+                <span>
+                  &quot;<strong>{detectedAlias.query}</strong>&quot; maps to official exchange ticker <strong>{detectedAlias.ticker}</strong> ({detectedAlias.name})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  handleSelectSuggestion(detectedAlias);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shrink-0 transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1"
+              >
+                <span>View {detectedAlias.ticker}</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
