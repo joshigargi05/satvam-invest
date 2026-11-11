@@ -58,6 +58,7 @@ const defaultStocksUS = [
   { ticker: 'AMAT', name: 'Applied Materials', sector: 'Semiconductor Equip', assetType: 'stock' },
   { ticker: 'LRCX', name: 'Lam Research', sector: 'Semiconductor Equip', assetType: 'stock' },
   { ticker: 'QCOM', name: 'Qualcomm Inc.', sector: 'Semiconductors', assetType: 'stock' },
+  { ticker: 'NTAP', name: 'NetApp Inc.', sector: 'Cloud Storage & Data', assetType: 'stock' },
   { ticker: 'TXN', name: 'Texas Instruments', sector: 'Semiconductors', assetType: 'stock' },
   { ticker: 'INTC', name: 'Intel Corp.', sector: 'Semiconductors', assetType: 'stock' },
   { ticker: 'IBM', name: 'IBM Corp.', sector: 'Enterprise Cloud / AI', assetType: 'stock' },
@@ -150,6 +151,24 @@ const defaultStocksIndia = [
   { ticker: 'NATGAS', name: 'MCX Natural Gas', sector: 'Energy & Commodities', assetType: 'commodity', unit: 'mmbtu' },
   { ticker: 'COPPER', name: 'MCX Copper', sector: 'Industrial Metals', assetType: 'commodity', unit: 'kg' }
 ];
+
+const MARKET_ALIASES = {
+  QUALCOMM: 'QCOM',
+  NETAPP: 'NTAP',
+  GOOGLE: 'GOOGL',
+  ALPHABET: 'GOOGL',
+  APPLE: 'AAPL',
+  MICROSOFT: 'MSFT',
+  AMAZON: 'AMZN',
+  NVIDIA: 'NVDA',
+  TESLA: 'TSLA',
+  META: 'META',
+  FACEBOOK: 'META',
+  MAHINDRA: 'M&M',
+  ZOMATO: 'ETERNAL',
+  BLINKIT: 'ETERNAL',
+  INFOSYS: 'INFY'
+};
 
 export default function Markets() {
   const navigate = useNavigate();
@@ -367,9 +386,12 @@ export default function Markets() {
       // If not searching, only show assets native to the selected market tab
       if (!searchTerm.trim() && item.isOtherMarket) return false;
 
-      const matchesSearch = item.ticker.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            item.sector.toLowerCase().includes(searchTerm.toLowerCase());
+      const queryClean = searchTerm.trim().toLowerCase();
+      const resolved = MARKET_ALIASES[searchTerm.trim().toUpperCase()]?.toLowerCase();
+      const matchesSearch = item.ticker.toLowerCase().includes(queryClean) || 
+                            item.name.toLowerCase().includes(queryClean) ||
+                            item.sector.toLowerCase().includes(queryClean) ||
+                            (resolved && item.ticker.toLowerCase() === resolved);
       if (!matchesSearch) return false;
 
       if (selectedTab === 'STOCKS') return item.assetType === 'stock';

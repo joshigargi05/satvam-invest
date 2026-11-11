@@ -72,6 +72,8 @@ const COMPANY_NAMES = {
   ADANIPORTS: 'Adani Ports & SEZ',
   WIPRO: 'Wipro Limited',
   SUNPHARMA: 'Sun Pharma Ltd.',
+  QCOM: 'Qualcomm Incorporated',
+  NTAP: 'NetApp Inc.',
   'M&M': 'Mahindra & Mahindra Ltd.',
   MM: 'Mahindra & Mahindra Ltd.',
   'M_M': 'Mahindra & Mahindra Ltd.',
@@ -90,14 +92,215 @@ const COMPANY_NAMES = {
 
 const getCompanyName = (ticker) => COMPANY_NAMES[ticker] || `${ticker} Corp.`;
 
-// Robust input tokenizer: handles "TCS vs M&M vs RELIANCE", "TCS, M&M, RELIANCE", slashes, etc.
+// Comprehensive Company Name & Colloquial Search Aliases to Official Exchange Tickers
+const COMPANY_ALIASES = {
+  // US Equities
+  QUALCOMM: 'QCOM',
+  QCOM: 'QCOM',
+  NETAPP: 'NTAP',
+  NTAP: 'NTAP',
+  GOOGLE: 'GOOGL',
+  ALPHABET: 'GOOGL',
+  GOOG: 'GOOGL',
+  GOOGL: 'GOOGL',
+  APPLE: 'AAPL',
+  AAPL: 'AAPL',
+  MICROSOFT: 'MSFT',
+  MSFT: 'MSFT',
+  AMAZON: 'AMZN',
+  AMZN: 'AMZN',
+  NVIDIA: 'NVDA',
+  NVDA: 'NVDA',
+  TESLA: 'TSLA',
+  TSLA: 'TSLA',
+  META: 'META',
+  FACEBOOK: 'META',
+  BROADCOM: 'AVGO',
+  AVGO: 'AVGO',
+  MICRON: 'MU',
+  MU: 'MU',
+  AMD: 'AMD',
+  INTEL: 'INTC',
+  INTC: 'INTC',
+  NETFLIX: 'NFLX',
+  NFLX: 'NFLX',
+  PALANTIR: 'PLTR',
+  PLTR: 'PLTR',
+  ORACLE: 'ORCL',
+  ORCL: 'ORCL',
+  SERVICENOW: 'NOW',
+  NOW: 'NOW',
+  CROWDSTRIKE: 'CRWD',
+  CRWD: 'CRWD',
+  SALESFORCE: 'CRM',
+  CRM: 'CRM',
+  ADOBE: 'ADBE',
+  ADBE: 'ADBE',
+  COSTCO: 'COST',
+  COST: 'COST',
+  WALMART: 'WMT',
+  WMT: 'WMT',
+  JPMORGAN: 'JPM',
+  JPM: 'JPM',
+  GOLDMAN: 'GS',
+  GS: 'GS',
+  MORGANSTANLEY: 'MS',
+  MS: 'MS',
+  BLACKROCK: 'BLK',
+  BLK: 'BLK',
+  VISA: 'V',
+  V: 'V',
+  MASTERCARD: 'MA',
+  MA: 'MA',
+  PAYPAL: 'PYPL',
+  PYPL: 'PYPL',
+  UBER: 'UBER',
+  DISNEY: 'DIS',
+  DIS: 'DIS',
+  CISCO: 'CSCO',
+  CSCO: 'CSCO',
+  IBM: 'IBM',
+  LILLY: 'LLY',
+  ELILILLY: 'LLY',
+  LLY: 'LLY',
+  TSMC: 'TSM',
+  TSM: 'TSM',
+
+  // Indian Equities
+  RELIANCE: 'RELIANCE',
+  TCS: 'TCS',
+  TATAMOTORS: 'TATAMOTORS',
+  TATASTEEL: 'TATASTEEL',
+  TATATECH: 'TATATECH',
+  TATAPOWER: 'TATAPOWER',
+  INFOSYS: 'INFY',
+  INFY: 'INFY',
+  HDFC: 'HDFCBANK',
+  HDFCBANK: 'HDFCBANK',
+  ICICI: 'ICICIBANK',
+  ICICIBANK: 'ICICIBANK',
+  SBI: 'SBIN',
+  SBIN: 'SBIN',
+  AIRTEL: 'BHARTIARTL',
+  BHARTI: 'BHARTIARTL',
+  BHARTIARTL: 'BHARTIARTL',
+  MAHINDRA: 'M&M',
+  'M&M': 'M&M',
+  MM: 'M&M',
+  M_M: 'M&M',
+  MARUTI: 'MARUTI',
+  SUZUKI: 'MARUTI',
+  LARSEN: 'LT',
+  'L&T': 'LT',
+  LT: 'LT',
+  HUL: 'HINDUNILVR',
+  HINDUNILVR: 'HINDUNILVR',
+  BAJAJ: 'BAJFINANCE',
+  BAJFINANCE: 'BAJFINANCE',
+  BAJAJAUTO: 'BAJAJ-AUTO',
+  'BAJAJ-AUTO': 'BAJAJ-AUTO',
+  ETERNAL: 'ETERNAL',
+  ZOMATO: 'ETERNAL',
+  BLINKIT: 'ETERNAL',
+  SWIGGY: 'SWIGGY',
+  MEESHO: 'MEESHO',
+  PAYTM: 'PAYTM',
+  NYKAA: 'NYKAA',
+  JIO: 'JIOFIN',
+  JIOFIN: 'JIOFIN',
+  TITAN: 'TITAN',
+  ADANI: 'ADANIENT',
+  ADANIENT: 'ADANIENT',
+  ADANIPORTS: 'ADANIPORTS',
+  WIPRO: 'WIPRO',
+  HAL: 'HAL',
+  BEL: 'BEL',
+  TRENT: 'TRENT',
+  SUNPHARMA: 'SUNPHARMA'
+};
+
+const resolveTicker = (token) => {
+  if (!token) return '';
+  const clean = String(token).trim().toUpperCase();
+  if (COMPANY_ALIASES[clean]) return COMPANY_ALIASES[clean];
+  const noSpace = clean.replace(/[\s\-_.]+/g, '');
+  if (COMPANY_ALIASES[noSpace]) return COMPANY_ALIASES[noSpace];
+  return clean;
+};
+
+// Searchable Stock Catalog for Auto-Suggest Dropdown
+const SEARCHABLE_STOCKS = [
+  // US Tech & Leaders
+  { ticker: 'QCOM', name: 'Qualcomm Incorporated', market: 'US', exchange: 'NASDAQ', sector: 'Semiconductors / Mobile' },
+  { ticker: 'NTAP', name: 'NetApp Inc.', market: 'US', exchange: 'NASDAQ', sector: 'Cloud Storage & Data Infrastructure' },
+  { ticker: 'NVDA', name: 'NVIDIA Corporation', market: 'US', exchange: 'NASDAQ', sector: 'Semiconductors / AI' },
+  { ticker: 'GOOGL', name: 'Alphabet Inc. (Google)', market: 'US', exchange: 'NASDAQ', sector: 'Technology / AI' },
+  { ticker: 'MSFT', name: 'Microsoft Corporation', market: 'US', exchange: 'NASDAQ', sector: 'Cloud / Enterprise Software' },
+  { ticker: 'AAPL', name: 'Apple Inc.', market: 'US', exchange: 'NASDAQ', sector: 'Consumer Technology' },
+  { ticker: 'AMZN', name: 'Amazon.com Inc.', market: 'US', exchange: 'NASDAQ', sector: 'E-Commerce / Cloud' },
+  { ticker: 'META', name: 'Meta Platforms (Facebook)', market: 'US', exchange: 'NASDAQ', sector: 'Social Media / AI' },
+  { ticker: 'TSLA', name: 'Tesla Inc.', market: 'US', exchange: 'NASDAQ', sector: 'Automotive / AI' },
+  { ticker: 'AVGO', name: 'Broadcom Inc.', market: 'US', exchange: 'NASDAQ', sector: 'Semiconductors / AI' },
+  { ticker: 'MU', name: 'Micron Technology', market: 'US', exchange: 'NASDAQ', sector: 'Semiconductors / Memory' },
+  { ticker: 'AMD', name: 'Advanced Micro Devices', market: 'US', exchange: 'NASDAQ', sector: 'Semiconductors' },
+  { ticker: 'INTC', name: 'Intel Corporation', market: 'US', exchange: 'NASDAQ', sector: 'Semiconductors' },
+  { ticker: 'PLTR', name: 'Palantir Technologies', market: 'US', exchange: 'NYSE', sector: 'Enterprise AI' },
+  { ticker: 'ORCL', name: 'Oracle Corporation', market: 'US', exchange: 'NYSE', sector: 'Cloud Infrastructure' },
+  { ticker: 'NOW', name: 'ServiceNow Inc.', market: 'US', exchange: 'NYSE', sector: 'Enterprise Workflow AI' },
+  { ticker: 'CRWD', name: 'CrowdStrike Holdings', market: 'US', exchange: 'NASDAQ', sector: 'Cybersecurity' },
+  { ticker: 'PANW', name: 'Palo Alto Networks', market: 'US', exchange: 'NASDAQ', sector: 'Cybersecurity' },
+  { ticker: 'NFLX', name: 'Netflix Inc.', market: 'US', exchange: 'NASDAQ', sector: 'Streaming Media' },
+  { ticker: 'CRM', name: 'Salesforce Inc.', market: 'US', exchange: 'NYSE', sector: 'Enterprise Software' },
+  { ticker: 'ADBE', name: 'Adobe Inc.', market: 'US', exchange: 'NASDAQ', sector: 'Creative Software' },
+  { ticker: 'COST', name: 'Costco Wholesale', market: 'US', exchange: 'NASDAQ', sector: 'Consumer Retail' },
+  { ticker: 'WMT', name: 'Walmart Inc.', market: 'US', exchange: 'NYSE', sector: 'Consumer Retail' },
+  { ticker: 'JPM', name: 'JPMorgan Chase & Co.', market: 'US', exchange: 'NYSE', sector: 'Banking / Financials' },
+  { ticker: 'LLY', name: 'Eli Lilly & Co.', market: 'US', exchange: 'NYSE', sector: 'Biopharma' },
+  { ticker: 'TSM', name: 'Taiwan Semiconductor (TSMC)', market: 'US', exchange: 'NYSE', sector: 'Semiconductors' },
+  { ticker: 'UBER', name: 'Uber Technologies', market: 'US', exchange: 'NYSE', sector: 'Mobility / Tech' },
+  { ticker: 'DIS', name: 'The Walt Disney Company', market: 'US', exchange: 'NYSE', sector: 'Entertainment' },
+  { ticker: 'PYPL', name: 'PayPal Holdings', market: 'US', exchange: 'NASDAQ', sector: 'Digital Payments' },
+
+  // Indian NSE Leaders
+  { ticker: 'RELIANCE', name: 'Reliance Industries Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Energy / Conglomerate' },
+  { ticker: 'TCS', name: 'Tata Consultancy Services', market: 'INDIA', exchange: 'NSE', sector: 'IT Services' },
+  { ticker: 'HDFCBANK', name: 'HDFC Bank Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Private Banking' },
+  { ticker: 'INFY', name: 'Infosys Limited', market: 'INDIA', exchange: 'NSE', sector: 'IT Services' },
+  { ticker: 'ICICIBANK', name: 'ICICI Bank Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Private Banking' },
+  { ticker: 'SBIN', name: 'State Bank of India', market: 'INDIA', exchange: 'NSE', sector: 'PSU Banking' },
+  { ticker: 'BHARTIARTL', name: 'Bharti Airtel (Airtel)', market: 'INDIA', exchange: 'NSE', sector: 'Telecom / 5G' },
+  { ticker: 'M&M', name: 'Mahindra & Mahindra Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Automotive / SUVs' },
+  { ticker: 'TATAMOTORS', name: 'Tata Motors Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Automotive / EV' },
+  { ticker: 'MARUTI', name: 'Maruti Suzuki India', market: 'INDIA', exchange: 'NSE', sector: 'Automotive' },
+  { ticker: 'LT', name: 'Larsen & Toubro (L&T)', market: 'INDIA', exchange: 'NSE', sector: 'Engineering & Infra' },
+  { ticker: 'ITC', name: 'ITC Limited', market: 'INDIA', exchange: 'NSE', sector: 'FMCG / Consumer' },
+  { ticker: 'HINDUNILVR', name: 'Hindustan Unilever (HUL)', market: 'INDIA', exchange: 'NSE', sector: 'FMCG / Consumer' },
+  { ticker: 'BAJFINANCE', name: 'Bajaj Finance Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Consumer NBFC' },
+  { ticker: 'BAJAJ-AUTO', name: 'Bajaj Auto Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Two-Wheelers' },
+  { ticker: 'ETERNAL', name: 'Eternal Limited (Zomato / Blinkit)', market: 'INDIA', exchange: 'NSE', sector: 'Food Delivery & Quick Commerce' },
+  { ticker: 'SWIGGY', name: 'Swiggy Limited', market: 'INDIA', exchange: 'NSE', sector: 'Food Delivery & Quick Commerce' },
+  { ticker: 'MEESHO', name: 'Meesho Inc.', market: 'INDIA', exchange: 'NSE', sector: 'E-Commerce' },
+  { ticker: 'PAYTM', name: 'One97 Communications (Paytm)', market: 'INDIA', exchange: 'NSE', sector: 'Digital Payments' },
+  { ticker: 'NYKAA', name: 'FSN E-Commerce (Nykaa)', market: 'INDIA', exchange: 'NSE', sector: 'Beauty E-Commerce' },
+  { ticker: 'JIOFIN', name: 'Jio Financial Services', market: 'INDIA', exchange: 'NSE', sector: 'Financial Services' },
+  { ticker: 'TATATECH', name: 'Tata Technologies Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'EV Software & Engineering' },
+  { ticker: 'HAL', name: 'Hindustan Aeronautics Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Aerospace & Defense' },
+  { ticker: 'BEL', name: 'Bharat Electronics Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Defense Electronics' },
+  { ticker: 'TRENT', name: 'Trent Ltd. (Zudio / Westside)', market: 'INDIA', exchange: 'NSE', sector: 'Retail & Fashion' },
+  { ticker: 'TITAN', name: 'Titan Company (Tanishq)', market: 'INDIA', exchange: 'NSE', sector: 'Luxury & Jewellery' },
+  { ticker: 'ADANIENT', name: 'Adani Enterprises Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Infra & Incubator' },
+  { ticker: 'SUNPHARMA', name: 'Sun Pharmaceutical Ltd.', market: 'INDIA', exchange: 'NSE', sector: 'Pharma' },
+  { ticker: 'WIPRO', name: 'Wipro Limited', market: 'INDIA', exchange: 'NSE', sector: 'IT Services' }
+];
+
+// Robust input tokenizer: handles "TCS vs M&M vs RELIANCE", "Qualcomm vs NetApp", company names, slashes, etc.
 const parseTickerInput = (raw) => {
   if (!raw) return [];
   return String(raw)
     .replace(/\b(vs|v\/s|and)\b/gi, ',')
     .replace(/[\/|]+/g, ',')
     .split(/[,;\s]+/)
-    .map((t) => t.trim().toUpperCase())
+    .map((t) => resolveTicker(t))
     .filter((t) => Boolean(t) && t !== 'VS' && t !== 'V/S' && t !== 'AND' && t !== '&');
 };
 
@@ -216,7 +419,62 @@ export default function DeepQuantAgent() {
   const [selectedTickers, setSelectedTickers] = useState([]);
   const [inputTicker, setInputTicker] = useState('');
   const [inputError, setInputError] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [topPicksData, setTopPicksData] = useState(null);
+
+  // Suggestions based on user input, matching ticker, name, or colloquial company alias
+  const suggestions = useMemo(() => {
+    const raw = inputTicker.trim();
+    if (!raw || selectedTickers.length >= 3) return [];
+    const q = raw.toUpperCase();
+    const resolvedDirect = resolveTicker(q);
+
+    const matches = SEARCHABLE_STOCKS.filter((stock) => {
+      if (selectedTickers.includes(stock.ticker)) return false;
+      const t = stock.ticker.toUpperCase();
+      const n = stock.name.toUpperCase();
+      return (
+        t === resolvedDirect ||
+        t.startsWith(q) ||
+        t.includes(q) ||
+        n.includes(q) ||
+        (COMPANY_ALIASES[q] && COMPANY_ALIASES[q] === t)
+      );
+    });
+
+    return matches
+      .sort((a, b) => {
+        const aIsExact = a.ticker === resolvedDirect || a.ticker === q;
+        const bIsExact = b.ticker === resolvedDirect || b.ticker === q;
+        if (aIsExact && !bIsExact) return -1;
+        if (!aIsExact && bIsExact) return 1;
+
+        const aMarket = a.market === market;
+        const bMarket = b.market === market;
+        if (aMarket && !bMarket) return -1;
+        if (!aMarket && bMarket) return 1;
+
+        return a.name.localeCompare(b.name);
+      })
+      .slice(0, 5);
+  }, [inputTicker, selectedTickers, market]);
+
+  // Detected alias recommendation if input differs from official ticker
+  const detectedAlias = useMemo(() => {
+    const q = inputTicker.trim().toUpperCase();
+    if (!q || q.length < 2) return null;
+    const resolved = resolveTicker(q);
+    if (resolved && resolved !== q && !selectedTickers.includes(resolved)) {
+      const match = SEARCHABLE_STOCKS.find((s) => s.ticker === resolved);
+      return {
+        query: inputTicker.trim(),
+        ticker: resolved,
+        name: match?.name || getCompanyName(resolved),
+        market: match?.market || (checkIsIndian(resolved) ? 'INDIA' : 'US')
+      };
+    }
+    return null;
+  }, [inputTicker, selectedTickers]);
 
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -540,6 +798,7 @@ export default function DeepQuantAgent() {
   const top3PicksLabel = top3PicksTickers.length > 0 ? top3PicksTickers.join(' vs ') : 'Top 3 Picks';
 
   const presetsUS = [
+    { label: 'QCOM vs NTAP vs NVDA', tickers: ['QCOM', 'NTAP', 'NVDA'] },
     ...(top3PicksTickers.length > 0
       ? [{ label: `🏆 Top 3 Recommended (${top3PicksLabel})`, tickers: top3PicksTickers, isTop3: true }]
       : []),
@@ -568,8 +827,10 @@ export default function DeepQuantAgent() {
   const [quantResults, setQuantResults] = useState(null);
 
   const handleRunQuantScan = async (searchQuery) => {
-    const q = (typeof searchQuery === 'string' ? searchQuery : quantQuery).trim();
-    if (!q) return;
+    const rawQ = (typeof searchQuery === 'string' ? searchQuery : quantQuery).trim();
+    if (!rawQ) return;
+    const resolved = resolveTicker(rawQ);
+    const q = (resolved && resolved !== rawQ.toUpperCase()) ? resolved : rawQ;
     setQuantLoading(true);
     try {
       const data = await getAlgoRecommendations(q);
@@ -865,25 +1126,91 @@ export default function DeepQuantAgent() {
                   placeholder={
                     selectedTickers.length >= 3
                       ? 'Max 3 stocks reached. Click "Compare Side-by-Side" or remove a stock.'
-                      : `Enter ticker (e.g. ${market === 'INDIA' ? 'RELIANCE, TCS, HDFCBANK' : 'NVDA, MSFT, AAPL'})`
+                      : `Enter stock name or ticker (e.g. Qualcomm, NetApp, TCS, M&M, RELIANCE)`
                   }
                   value={inputTicker}
-                  onChange={(e) => setInputTicker(e.target.value.toUpperCase())}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 250)}
+                  onChange={(e) => {
+                    setInputTicker(e.target.value.toUpperCase());
+                    setShowSuggestions(true);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
+                      setShowSuggestions(false);
                       if (selectedTickers.length < 3 && inputTicker.trim()) handleAddTicker();
                       else handleAnalyze();
+                    } else if (e.key === 'Escape') {
+                      setShowSuggestions(false);
                     }
                   }}
                   disabled={analyzing || selectedTickers.length >= 3}
                 />
+
+                {/* Auto-Suggest Recommendation Dropdown */}
+                {showSuggestions && suggestions.length > 0 && selectedTickers.length < 3 && (
+                  <div 
+                    className="absolute left-0 right-0 top-full mt-2 rounded-2xl bg-slate-950/95 border border-purple-500/40 shadow-2xl backdrop-blur-xl z-50 overflow-hidden divide-y divide-white/5 animate-fade-in"
+                    style={{ maxHeight: '280px', overflowY: 'auto' }}
+                  >
+                    <div className="px-3.5 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-900/90 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-purple-300">
+                        <Sparkles size={12} className="text-purple-400" /> Recommended Matching Stocks
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-mono">Click to Add (Auto-Detect)</span>
+                    </div>
+                    {suggestions.map((item) => (
+                      <button
+                        key={item.ticker}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleAddTicker(item.ticker);
+                          setInputTicker('');
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full px-4 py-2.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors group cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-purple-950/60 border border-purple-500/30 flex items-center justify-center font-mono font-black text-xs text-purple-200 group-hover:scale-105 transition-transform">
+                            {item.ticker.substring(0, 2)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-white group-hover:text-purple-300 text-sm">
+                                {item.ticker}
+                              </span>
+                              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border font-semibold ${
+                                item.market === 'INDIA' 
+                                  ? 'bg-orange-500/15 text-orange-300 border-orange-500/30' 
+                                  : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                              }`}>
+                                {item.exchange || (item.market === 'INDIA' ? 'NSE' : 'NASDAQ')}
+                              </span>
+                            </div>
+                            <span className="text-xs text-slate-300 truncate max-w-[220px] sm:max-w-xs block">
+                              {item.name}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-purple-400 font-bold group-hover:text-purple-300 group-hover:translate-x-0.5 transition-all">
+                          <Plus size={14} />
+                          <span>Add Stock</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
                 <button
                   type="button"
-                  onClick={() => handleAddTicker()}
+                  onClick={() => {
+                    handleAddTicker();
+                    setShowSuggestions(false);
+                  }}
                   disabled={analyzing || selectedTickers.length >= 3 || !inputTicker.trim()}
                   className={`flex-1 sm:flex-initial px-4 sm:px-5 py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all border shrink-0 ${
                     inputTicker.trim() && selectedTickers.length < 3
@@ -924,6 +1251,32 @@ export default function DeepQuantAgent() {
                 </button>
               </div>
             </div>
+
+            {/* Smart Auto-Resolution Recommendation Pill */}
+            {detectedAlias && selectedTickers.length < 3 && (
+              <div className="mt-3 p-2.5 px-3.5 rounded-xl bg-purple-950/60 border border-purple-500/40 text-xs text-purple-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-lg shadow-purple-950/30 animate-fade-in">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-purple-400 font-bold flex items-center gap-1.5">
+                    <Sparkles size={14} className="animate-pulse" /> Auto-Detected Stock Symbol:
+                  </span>
+                  <span>
+                    &quot;<strong>{detectedAlias.query}</strong>&quot; maps to official exchange ticker <strong>{detectedAlias.ticker}</strong> ({detectedAlias.name})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleAddTicker(detectedAlias.ticker);
+                    setInputTicker('');
+                    setShowSuggestions(false);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shrink-0 transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1"
+                >
+                  <Plus size={13} />
+                  <span>Add {detectedAlias.ticker} to Deck</span>
+                </button>
+              </div>
+            )}
 
             {inputError && (
               <div className="mt-3 text-xs text-amber-400 flex items-center gap-1.5 font-medium animate-fade-in">
@@ -1649,6 +2002,16 @@ function getCustomTranscriptPoints(ticker, isBullish, currency) {
       'Management highlighted Blinkit adjusted EBITDA breakeven run-rate and dark store network expansion across top 15 metros.',
       'Food delivery gross order value (GOV) grew 26% YoY with expanding restaurant ad-monetization take rates.',
       'Hyperpure B2B supply chain operations delivered over 40% annualized revenue growth.'
+    ],
+    QCOM: [
+      'CEO Cristiano Amon confirmed Snapdragon X Elite processor design wins across all premier PC OEMs (Dell, HP, Lenovo, Microsoft, Samsung).',
+      'Automotive design-win order pipeline expanded to over $45 billion driven by Snapdragon Digital Chassis adoption.',
+      'Handset chip revenue grew double-digits YoY anchored on premium tier Android and 5G flagship momentum in global markets.'
+    ],
+    NTAP: [
+      'CEO George Kurian highlighted all-flash array (AFA) revenue reaching record annualized run rates, up 17% YoY.',
+      'Public Cloud First-Party storage services across AWS, Azure, and Google Cloud expanded high-margin ARR visibility.',
+      'Operating margins expanded 210 bps YoY to 30.2%, generating strong free cash flow conversion.'
     ]
   };
 
@@ -1672,7 +2035,9 @@ function getCustomGlobalImpact(ticker, isBullish) {
     TCS: 'European and North American BFSI IT spending stabilization alongside enterprise AI modernization contracts provide multi-quarter earnings visibility.',
     HDFCBANK: 'Indian credit growth outperformance, strong domestic consumption demand, and expanding retail branch networks provide multi-year EPS compounding visibility.',
     ETERNAL: 'Indian urban consumption tailwinds, rapid consumer adoption of 10-minute quick commerce, and expanding high-margin advertising revenue shield Eternal from broader cyclical slowdowns.',
-    ZOMATO: 'Indian urban consumption tailwinds, rapid consumer adoption of 10-minute quick commerce, and expanding high-margin advertising revenue shield Eternal from broader cyclical slowdowns.'
+    ZOMATO: 'Indian urban consumption tailwinds, rapid consumer adoption of 10-minute quick commerce, and expanding high-margin advertising revenue shield Eternal from broader cyclical slowdowns.',
+    QCOM: 'Edge AI inference proliferation across mobile smartphones, automotive autonomy, and AI PCs provides multi-year revenue diversification beyond traditional telecom cycles.',
+    NTAP: 'Enterprise hybrid cloud data architecture consolidation and unstructured data storage demand for LLM training pipelines anchor sustained cash-flow growth.'
   };
 
   return custom[ticker] || (isBullish

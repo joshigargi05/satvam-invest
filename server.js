@@ -74,6 +74,9 @@ const mockPrices = {
   CSCO: { price: 62.80, change: 0.45, changePct: 0.72 },
   IBM: { price: 248.90, change: 3.10, changePct: 1.26 },
   QCOM: { price: 176.40, change: 2.60, changePct: 1.50 },
+  QUALCOMM: { price: 176.40, change: 2.60, changePct: 1.50 },
+  NTAP: { price: 175.99, change: -0.08, changePct: -0.05 },
+  NETAPP: { price: 175.99, change: -0.08, changePct: -0.05 },
   TXN: { price: 204.50, change: 1.80, changePct: 0.89 },
   AMAT: { price: 194.20, change: 3.50, changePct: 1.84 },
   LRCX: { price: 88.60, change: 1.40, changePct: 1.61 },
@@ -453,6 +456,35 @@ const symbolAliases = {
   'MM': 'M&M',
   'M_M': 'M&M',
   'MAHINDRA': 'M&M',
+  'QUALCOMM': 'QCOM',
+  'QCOM': 'QCOM',
+  'NETAPP': 'NTAP',
+  'NTAP': 'NTAP',
+  'BROADCOM': 'AVGO',
+  'ORACLE': 'ORCL',
+  'COSTCO': 'COST',
+  'WALMART': 'WMT',
+  'PALANTIR': 'PLTR',
+  'SERVICENOW': 'NOW',
+  'CROWDSTRIKE': 'CRWD',
+  'SALESFORCE': 'CRM',
+  'ADOBE': 'ADBE',
+  'INTEL': 'INTC',
+  'CISCO': 'CSCO',
+  'DISNEY': 'DIS',
+  'PAYPAL': 'PYPL',
+  'JPMORGAN': 'JPM',
+  'INFOSYS': 'INFY',
+  'HDFC': 'HDFCBANK',
+  'ICICI': 'ICICIBANK',
+  'SBI': 'SBIN',
+  'AIRTEL': 'BHARTIARTL',
+  'BHARTI': 'BHARTIARTL',
+  'SUZUKI': 'MARUTI',
+  'LARSEN': 'LT',
+  'L&T': 'LT',
+  'HUL': 'HINDUNILVR',
+  'BAJAJ': 'BAJFINANCE',
   'ETERNAL': 'ETERNAL',
   'ZOMATO': 'ETERNAL',
   'GOLD': 'GC=F',
@@ -901,6 +933,7 @@ const algoStockCatalog = [
   { t: 'JPM', n: 'JPMorgan Chase', s: 'Financials / Banking', market: 'US', alphaBoost: 10, keywords: ['JPM', 'JPMORGAN', 'BANK', 'FINANCE', 'FINANCIALS'] },
   { t: 'LRCX', n: 'Lam Research', s: 'Semiconductor Equipment', market: 'US', alphaBoost: 10, keywords: ['LRCX', 'LAM RESEARCH'] },
   { t: 'QCOM', n: 'Qualcomm Inc.', s: 'Semiconductors / Mobile', market: 'US', alphaBoost: 10, keywords: ['QCOM', 'QUALCOMM'] },
+  { t: 'NTAP', n: 'NetApp Inc.', s: 'Cloud Storage & Data Infrastructure', market: 'US', alphaBoost: 10, keywords: ['NTAP', 'NETAPP', 'STORAGE', 'CLOUD'] },
   { t: 'RTX', n: 'RTX Corp.', s: 'Aerospace & Defense', market: 'US', alphaBoost: 10, keywords: ['RTX', 'RAYTHEON', 'DEFENSE'] },
   { t: 'LMT', n: 'Lockheed Martin', s: 'Aerospace & Defense', market: 'US', alphaBoost: 10, keywords: ['LMT', 'LOCKHEED'] },
   { t: 'CAT', n: 'Caterpillar Inc.', s: 'Heavy Industrials', market: 'US', alphaBoost: 10, keywords: ['CAT', 'CATERPILLAR'] },
@@ -1006,6 +1039,8 @@ const stockThesisMap = {
   MSFT: `Azure AI enterprise adoption and Copilot seat monetization anchor Microsoft's recurring cloud cash flows, supported by low volatility and strong institutional accumulation.`,
   META: `Llama AI ad-ranking optimization is driving higher impression yields and Reels monetization while capital efficiency keeps free cash flow yield near top-decile levels.`,
   AMZN: `AWS re-acceleration combined with North American retail fulfillment automation is driving record operating income growth and institutional call-option accumulation.`,
+  QCOM: `Qualcomm's Snapdragon X Elite AI PC processor adoption, 5G premium handset silicon momentum, and automotive digital cockpit pipeline expansion position QCOM for accelerated multi-quarter revenue diversification.`,
+  NTAP: `NetApp's intelligent data infrastructure, all-flash storage arrays, and hybrid cloud storage partnerships with hyperscalers (AWS, Azure, Google Cloud) drive recurring subscription ARR growth and strong free cash flow yield.`,
   RELIANCE: `Reliance's energy-to-telecom conglomerate moat provides both crude refining margin protection and Jio 5G / retail cash-flow compounding, making it our top Indian institutional anchor.`,
   TCS: `Global enterprise AI systems integration deals and industry-leading operating margins position TCS as a defensive and high-ROCE compounder in Indian IT.`,
   TATAMOTORS: `JLR luxury margin expansion and domestic EV leadership drive strong earnings upgrades, supported by bullish breakouts above institutional VWAP levels.`,
@@ -1541,20 +1576,21 @@ app.get('/api/evaluate-stocks', async (req, res) => {
     const isIndiaBatchContext = reqMarket === 'INDIA' || (hasIndianCompanion && !symbols.every(s => !indianTickers.has(s)));
 
     const results = symbols.map(sym => {
-      let company = algoStockCatalog.find(c => c.t === sym);
+      const resolvedSym = symbolAliases[sym] || sym;
+      let company = algoStockCatalog.find(c => c.t === resolvedSym || c.t === sym);
       if (!company) {
-        const isIndia = sym.endsWith('.NS') || sym.endsWith('.BO') || indianTickers.has(sym) || isIndiaBatchContext;
+        const isIndia = sym.endsWith('.NS') || sym.endsWith('.BO') || indianTickers.has(resolvedSym) || indianTickers.has(sym) || isIndiaBatchContext;
         company = {
-          t: sym,
+          t: resolvedSym,
           n: `${sym} Ltd.`,
           s: isIndia ? 'Indian Enterprise' : 'US Technology / Growth',
           market: isIndia ? 'INDIA' : 'US',
           alphaBoost: 10,
-          keywords: [sym]
+          keywords: [sym, resolvedSym]
         };
       }
-      const formattedSym = formatSymbol(sym);
-      const quote = liveQuoteMap[sym] || liveQuoteMap[formattedSym] || {};
+      const formattedSym = formatSymbol(resolvedSym);
+      const quote = liveQuoteMap[resolvedSym] || liveQuoteMap[sym] || liveQuoteMap[formattedSym] || {};
       return computeStockAlgoEvaluation(company, quote, 0);
     });
 
