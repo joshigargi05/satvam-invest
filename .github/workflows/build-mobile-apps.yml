@@ -5,12 +5,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'android/**'
-      - 'ios/**'
-      - 'store-assets/**'
-      - 'capacitor.config.json'
-      - '.github/workflows/build-mobile-apps.yml'
 
 jobs:
   build-android:
@@ -110,6 +104,7 @@ jobs:
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
