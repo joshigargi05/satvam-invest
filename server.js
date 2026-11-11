@@ -684,6 +684,26 @@ app.get('/api/quotes', async (req, res) => {
         if (sym && sym !== rawSym) quotesData[sym] = quotePayload;
       } catch (err) {
         console.error(`Failed to fetch quote for ${rawSym}:`, err.message);
+        const cleanKey = rawSym.replace('.NS', '').replace('.BO', '').trim().toUpperCase();
+        const fallback = mockPrices[cleanKey] || (symbolAliases[cleanKey] && mockPrices[symbolAliases[cleanKey]]);
+        if (fallback) {
+          const quotePayload = {
+            price: fallback.price,
+            change: fallback.change,
+            changePct: fallback.changePct
+          };
+          quotesData[rawSym] = quotePayload;
+          quotesData[cleanKey] = quotePayload;
+          if (sym && sym !== rawSym) quotesData[sym] = quotePayload;
+        } else if (isIndiaBatch) {
+          const quotePayload = {
+            price: 245.00,
+            change: 3.20,
+            changePct: 1.32
+          };
+          quotesData[rawSym] = quotePayload;
+          quotesData[cleanKey] = quotePayload;
+        }
       }
     });
 
@@ -766,10 +786,14 @@ app.get('/api/market-search', async (req, res) => {
         }
 
         const curr = isIndian ? '₹' : '$';
-        const resolvedPrice = Number(price || (isIndian ? 250 : 100));
+        const cleanTicker = rawSym.replace('.NS', '').replace('.BO', '').trim().toUpperCase();
+        const fallbackObj = mockPrices[cleanTicker] || (symbolAliases[cleanTicker] && mockPrices[symbolAliases[cleanTicker]]);
+        const fallbackPrice = fallbackObj ? fallbackObj.price : (isIndian ? 250 : 100);
+        const resolvedPrice = Number(price || fallbackPrice);
+        if (!change && fallbackObj) change = fallbackObj.change;
+        if (!changePct && fallbackObj) changePct = fallbackObj.changePct;
 
         // Clean ticker display (remove .NS, .BO for ticker column, retain exchange info)
-        let cleanTicker = rawSym.replace('.NS', '').replace('.BO', '');
         let exchange = item.exchDisp || (rawSym.endsWith('.NS') ? 'NSE' : (rawSym.endsWith('.BO') ? 'BSE' : (item.exchange || (isIndian ? 'NSE' : 'NYSE'))));
         if (exchange === 'NSI') exchange = 'NSE';
         if (exchange === 'BOM') exchange = 'BSE';

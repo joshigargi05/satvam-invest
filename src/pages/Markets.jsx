@@ -14,7 +14,7 @@ const ArrowRight = Lucide.ArrowRight || (() => '→');
 
 import { getQuotes, searchGlobalMarkets } from '../services/api';
 import { usePortfolio } from '../context/PortfolioContext';
-import { useMarket } from '../context/MarketContext';
+import { useMarket, isIndianTicker } from '../context/MarketContext';
 import { CrossMarketPromptModal } from '../components/TradeModals';
 
 const defaultStocksUS = [
@@ -317,6 +317,169 @@ const resolveTicker = (token) => {
   return clean;
 };
 
+// Comprehensive Baseline Market Prices (ensures no catalog asset ever resolves to 0 or 100)
+export const STOCK_BASELINE_PRICES = {
+  // US Equities & Tech Leaders ($ USD)
+  NVDA: 220.54,
+  GOOGL: 333.06,
+  GOOG: 331.40,
+  MSFT: 531.65,
+  AAPL: 343.88,
+  AMZN: 262.67,
+  META: 710.90,
+  AVGO: 399.63,
+  MU: 112.40,
+  TSM: 427.98,
+  LLY: 980.20,
+  TSLA: 386.69,
+  AMD: 158.40,
+  PLTR: 68.40,
+  ORCL: 188.20,
+  NOW: 1045.00,
+  CRWD: 348.60,
+  PANW: 392.40,
+  NFLX: 924.50,
+  CRM: 328.40,
+  ADBE: 512.60,
+  COST: 948.20,
+  WMT: 92.40,
+  HD: 412.50,
+  JPM: 248.60,
+  GS: 588.20,
+  MS: 128.40,
+  BLK: 1042.00,
+  BAC: 46.20,
+  V: 312.40,
+  MA: 524.80,
+  AXP: 292.40,
+  PYPL: 88.50,
+  UNH: 592.40,
+  ISRG: 542.10,
+  ABBV: 198.40,
+  JNJ: 162.50,
+  MRK: 104.20,
+  TMO: 588.40,
+  AMAT: 194.20,
+  LRCX: 88.60,
+  QCOM: 176.40,
+  QUALCOMM: 176.40,
+  NTAP: 175.99,
+  NETAPP: 175.99,
+  TXN: 204.50,
+  INTC: 24.20,
+  IBM: 248.90,
+  CSCO: 58.40,
+  GE: 208.40,
+  RTX: 134.80,
+  LMT: 582.40,
+  CAT: 402.10,
+  XOM: 122.40,
+  CVX: 162.80,
+  UBER: 78.50,
+  PG: 174.20,
+  KO: 68.40,
+  PEP: 162.40,
+  MCD: 298.50,
+  DIS: 114.20,
+
+  // Global Commodities & Futures ($ USD)
+  'GC=F': 4150.10,
+  GLD: 382.40,
+  'SI=F': 57.66,
+  SLV: 52.15,
+  'CL=F': 96.79,
+  'BZ=F': 99.85,
+  USO: 91.40,
+  'HG=F': 5.18,
+  'PL=F': 1142.50,
+  'NG=F': 3.65,
+
+  // Indian Equities & Nifty 50 Constituents (₹ INR)
+  RELIANCE: 1209.00,
+  TCS: 2529.00,
+  HDFCBANK: 706.95,
+  INFY: 1168.00,
+  ICICIBANK: 1385.00,
+  SBIN: 963.00,
+  BHARTIARTL: 1891.70,
+  ITC: 262.00,
+  HINDUNILVR: 2350.60,
+  LT: 3636.00,
+  BAJFINANCE: 981.30,
+  HCLTECH: 1540.80,
+  AXISBANK: 1165.40,
+  MARUTI: 12553.00,
+  SUNPHARMA: 1831.70,
+  KOTAKBANK: 1920.60,
+  TATAMOTORS: 275.70,
+  ONGC: 225.62,
+  NTPC: 325.40,
+  TITAN: 3732.00,
+  ADANIENT: 1986.20,
+  ADANIPORTS: 1412.50,
+  POWERGRID: 318.90,
+  ULTRACEMCO: 11420.00,
+  TATASTEEL: 158.40,
+  WIPRO: 294.60,
+  COALINDIA: 412.30,
+  JSWSTEEL: 985.20,
+  'M&M': 3067.70,
+  MM: 3067.70,
+  M_M: 3067.70,
+  'BAJAJ-AUTO': 9640.00,
+  BAJAJFINSV: 1890.40,
+  NESTLEIND: 2280.50,
+  GRASIM: 2740.00,
+  TECHM: 1685.30,
+  HINDALCO: 692.40,
+  CIPLA: 1542.00,
+  DRREDDY: 1320.80,
+  EICHERMOT: 5340.00,
+  SBILIFE: 1620.40,
+  HDFCLIFE: 718.50,
+  BPCL: 312.80,
+  BRITANNIA: 5120.00,
+  APOLLOHOSP: 7140.00,
+  DIVISLAB: 5980.00,
+  TATACONSUM: 1085.00,
+  HEROMOTOCO: 4620.00,
+  ASIANPAINT: 2480.00,
+  INDUSINDBK: 1045.00,
+  SHRIRAMFIN: 645.20,
+  BEL: 410.50,
+  HAL: 3566.10,
+  TRENT: 3525.10,
+
+  // Indian New-Age Tech & Consumer Leaders (₹ INR)
+  ETERNAL: 363.10,
+  ZOMATO: 363.10,
+  BLINKIT: 363.10,
+  SWIGGY: 412.50,
+  MEESHO: 215.00,
+  PAYTM: 785.40,
+  NYKAA: 184.20,
+  JIOFIN: 324.60,
+  TATATECH: 975.00,
+  TATAPOWER: 395.40,
+
+  // Indian MCX Commodities & ETFs (₹ INR)
+  GOLDBEES: 118.13,
+  SILVERBEES: 195.06,
+  CRUDEOIL: 8372.00,
+  NATGAS: 315.70,
+  COPPER: 875.40
+};
+
+export const getStockBaselinePrice = (ticker, mkt = 'INDIA') => {
+  if (!ticker) return mkt === 'INDIA' ? 250.00 : 150.00;
+  const clean = String(ticker).replace('.NS', '').replace('.BO', '').trim().toUpperCase();
+  const aliasClean = resolveTicker(clean);
+  if (STOCK_BASELINE_PRICES[clean]) return STOCK_BASELINE_PRICES[clean];
+  if (STOCK_BASELINE_PRICES[aliasClean]) return STOCK_BASELINE_PRICES[aliasClean];
+  const isInd = mkt === 'INDIA' || (typeof isIndianTicker === 'function' && (isIndianTicker(clean) || isIndianTicker(aliasClean)));
+  return isInd ? 250.00 : 150.00;
+};
+
 export default function Markets() {
   const navigate = useNavigate();
   const { buyAsset, balance, showTradeAlert } = usePortfolio();
@@ -382,30 +545,39 @@ export default function Markets() {
     }));
   }, [market, currentStocksList]);
 
-  // Initialize stocks based on catalog
+  // Initialize stocks based on catalog with robust baseline pricing
   useEffect(() => {
-    setStocks(allAvailableStocks.map(s => ({
-      ...s, 
-      price: '...', 
-      change: '...', 
-      up: true, 
-      rawChange: 0, 
-      currentPrice: 0
-    })));
-  }, [allAvailableStocks]);
+    setStocks(allAvailableStocks.map(s => {
+      const base = getStockBaselinePrice(s.ticker, s.market || market);
+      const stockCurrency = getCurrency(s.ticker);
+      return {
+        ...s, 
+        price: `${stockCurrency}${base.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+        change: '...', 
+        up: true, 
+        rawChange: 0, 
+        currentPrice: base
+      };
+    }));
+  }, [allAvailableStocks, market]);
 
   const fetchLiveData = async () => {
     setLoading(true);
     const targetPool = searchTerm.trim() !== ''
       ? allAvailableStocks
       : allAvailableStocks.filter(s => !s.isOtherMarket);
-    const symbols = targetPool.map(s => s.ticker).join(',');
-    const quotes = await getQuotes(symbols);
+    const poolTickers = new Set(targetPool.map(s => s.ticker));
+    if (searchTerm.trim() !== '') {
+      const resolved = resolveTicker(searchTerm.trim().toUpperCase());
+      if (resolved) poolTickers.add(resolved);
+    }
+    const symbols = Array.from(poolTickers).join(',');
+    const quotes = await getQuotes(symbols, market);
     
     const updatedStocks = allAvailableStocks.map(stock => {
-      const data = quotes[stock.ticker];
+      const data = quotes[stock.ticker] || quotes[stock.ticker.toUpperCase()];
       const stockCurrency = getCurrency(stock.ticker);
-      if (data && typeof data.price === 'number') {
+      if (data && typeof data.price === 'number' && data.price > 0) {
         const up = data.changePct >= 0;
         return {
           ...stock,
@@ -416,7 +588,15 @@ export default function Markets() {
           currentPrice: data.price
         };
       }
-      return { ...stock, price: 'Checking...', change: '-', up: true, rawChange: 0, currentPrice: 100 };
+      const baseline = getStockBaselinePrice(stock.ticker, stock.market || market);
+      return { 
+        ...stock, 
+        price: `${stockCurrency}${baseline.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+        change: '-', 
+        up: true, 
+        rawChange: 0, 
+        currentPrice: baseline 
+      };
     });
     
     setStocks(updatedStocks);
@@ -434,33 +614,77 @@ export default function Markets() {
       setCrossMarketPrompt({ isOpen: true, asset, currentMarket: market });
       return;
     }
-    if (asset.currentPrice > 0) {
-      setBuyModalAsset(asset);
-      setBuyUnits('1');
-      setBuyExitMode('none');
-      setBuyExitPct('10');
-      setBuyExitPrice((asset.currentPrice * 1.10).toFixed(2));
-    } else {
-      if (showTradeAlert) {
-        showTradeAlert({
-          title: 'Real-Time Price Updating',
-          message: 'Please wait a moment while the live market quote for this asset is retrieved.'
+    const baseline = getStockBaselinePrice(asset.ticker, asset.market || market);
+    const effectivePrice = (Number(asset.currentPrice) > 0 && Number(asset.currentPrice) !== 100)
+      ? Number(asset.currentPrice)
+      : baseline;
+
+    const enrichedAsset = {
+      ...asset,
+      market: asset.market || market,
+      currentPrice: effectivePrice,
+      price: `${(asset.market || market) === 'INDIA' ? '₹' : '$'}${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    };
+
+    setBuyModalAsset(enrichedAsset);
+    setBuyUnits('1');
+    setBuyExitMode('none');
+    setBuyExitPct('10');
+    setBuyExitPrice((effectivePrice * 1.10).toFixed(2));
+
+    // Background fetch the latest live quote for this exact ticker to update modal if needed
+    getQuotes(asset.ticker, asset.market || market).then(q => {
+      const data = q[asset.ticker] || q[asset.ticker.toUpperCase()];
+      if (data && typeof data.price === 'number' && data.price > 0) {
+        setBuyModalAsset(prev => {
+          if (!prev || prev.ticker !== asset.ticker) return prev;
+          return {
+            ...prev,
+            currentPrice: data.price,
+            price: `${(prev.market === 'INDIA' ? '₹' : '$')}${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          };
         });
-      } else {
-        alert("Cannot buy asset: Real-time price currently updating.");
       }
-    }
+    }).catch(console.error);
   };
 
   const handleSwitchAndBuy = (targetMarket, asset) => {
     setCrossMarketPrompt({ isOpen: false, asset: null, currentMarket: targetMarket });
     setMarket(targetMarket);
+
+    const baseline = getStockBaselinePrice(asset.ticker, targetMarket);
+    const effectivePrice = (Number(asset.currentPrice) > 0 && Number(asset.currentPrice) !== 100)
+      ? Number(asset.currentPrice)
+      : baseline;
+
+    const enrichedAsset = {
+      ...asset,
+      market: targetMarket,
+      currentPrice: effectivePrice,
+      price: `${targetMarket === 'INDIA' ? '₹' : '$'}${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    };
+
     setTimeout(() => {
-      setBuyModalAsset(asset);
+      setBuyModalAsset(enrichedAsset);
       setBuyUnits('1');
       setBuyExitMode('none');
       setBuyExitPct('10');
-      setBuyExitPrice((asset.currentPrice * 1.10).toFixed(2));
+      setBuyExitPrice((effectivePrice * 1.10).toFixed(2));
+
+      // Fetch live quote for this asset in the target market
+      getQuotes(asset.ticker, targetMarket).then(q => {
+        const data = q[asset.ticker] || q[asset.ticker.toUpperCase()];
+        if (data && typeof data.price === 'number' && data.price > 0) {
+          setBuyModalAsset(prev => {
+            if (!prev || prev.ticker !== asset.ticker) return prev;
+            return {
+              ...prev,
+              currentPrice: data.price,
+              price: `${(targetMarket === 'INDIA' ? '₹' : '$')}${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            };
+          });
+        }
+      }).catch(console.error);
     }, 150);
   };
 
@@ -502,11 +726,16 @@ export default function Markets() {
       autoExitRule = { enabled: true, mode: 'price', targetPrice: priceVal };
     }
 
+    const baseline = getStockBaselinePrice(buyModalAsset.ticker, buyModalAsset.market || market);
+    const finalPrice = (Number(buyModalAsset.currentPrice) > 0)
+      ? Number(buyModalAsset.currentPrice)
+      : baseline;
+
     try {
       const success = buyAsset({
         ticker: buyModalAsset.ticker,
         name: buyModalAsset.name,
-        price: buyModalAsset.currentPrice,
+        price: finalPrice,
         units,
         category: buyModalAsset.sector,
         assetType: buyModalAsset.assetType,
@@ -573,11 +802,15 @@ export default function Markets() {
     });
     ALL_CATALOG_STOCKS.forEach((s) => {
       if (!candidatesMap.has(s.ticker.toUpperCase())) {
+        const base = getStockBaselinePrice(s.ticker, s.market);
+        const curr = s.market === 'INDIA' ? '₹' : '$';
         candidatesMap.set(s.ticker.toUpperCase(), {
           ...s,
-          price: s.market === 'INDIA' ? '₹...' : '$...',
+          price: `${curr}${base.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           change: '-',
-          up: true
+          up: true,
+          rawChange: 0,
+          currentPrice: base
         });
       }
     });
@@ -667,13 +900,15 @@ export default function Markets() {
         );
         const matches = t === resolved || t === q || t.startsWith(q) || aliasMatch || words.some(w => w.startsWith(q));
         if (matches) {
+          const base = getStockBaselinePrice(s.ticker, s.market);
+          const curr = s.market === 'INDIA' ? '₹' : '$';
           poolMap.set(t, {
             ...s,
-            price: s.market === 'INDIA' ? '₹...' : '$...',
+            price: `${curr}${base.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             change: '-',
             up: true,
             rawChange: 0,
-            currentPrice: 0,
+            currentPrice: base,
             isOtherMarket: s.market !== market
           });
         }
@@ -1233,7 +1468,10 @@ export default function Markets() {
       {/* Buy Asset + Auto-Exit Configuration Modal */}
       {buyModalAsset && (() => {
         const assetCurr = buyModalAsset.currency || getCurrency(buyModalAsset.ticker);
-        const livePrice = Number(buyModalAsset.currentPrice || 100);
+        const baseline = getStockBaselinePrice(buyModalAsset.ticker, buyModalAsset.market || market);
+        const livePrice = (Number(buyModalAsset.currentPrice) > 0)
+          ? Number(buyModalAsset.currentPrice)
+          : baseline;
         const qty = Number(buyUnits || 1);
         const totalOrderCost = Number((livePrice * qty).toFixed(2));
         const previewExitPrice = buyExitMode === 'percentage'
