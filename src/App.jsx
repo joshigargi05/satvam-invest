@@ -168,7 +168,7 @@ function Navigation() {
           <GaloraLogo size={30} />
           <div>
             <h1 className="text-gradient font-bold" style={{ fontSize: '1.1rem', margin: 0, lineHeight: 1.1 }}>Galora AI</h1>
-            <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>AI-Powered Wealth Generation</span>
+            <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>Smart Wealth &amp; Investing</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -219,7 +219,7 @@ function Navigation() {
             <h1 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>Galora AI</h1>
           </div>
           <span className="brand-subtitle" style={{ fontSize: '0.68rem', color: 'var(--text-muted)', letterSpacing: '0.03em', fontWeight: '500' }}>
-            AI-Powered Wealth Generation
+            Smart Wealth &amp; Investing
           </span>
         </div>
         
@@ -353,8 +353,8 @@ function SimulatorBanner() {
 
 const SEO_ROUTES = {
   '/': {
-    title: 'Galora AI | AI-Powered Quantitative Stock Picks & Wealth Agent',
-    description: 'Galora AI (galora.ai) delivers daily Top 3 AI-ranked stocks for Indian and US markets with 6-Month & 12-Month algorithmic price targets and autonomous portfolio intelligence.',
+    title: 'Galora AI: Smart Wealth & Investing | AI-Powered Quantitative Stock Picks',
+    description: 'AI-powered quantitative equity intelligence, real-time US & Indian market Investing.',
     canonical: 'https://galora.ai/'
   },
   '/top-stocks': {
