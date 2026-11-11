@@ -2893,14 +2893,96 @@ app.get('/privacy', (req, res) => {
 </html>`);
 });
 
-// GCP Cloud Run Production Static Serving (Serves built Vite SPA from dist/)
+// GCP Cloud Run Production Static Serving with Dynamic SEO & Sitelinks Meta Injection
 const distDir = path.join(process.cwd(), 'dist');
 const distIndexHtml = path.join(distDir, 'index.html');
+
+const ROUTE_SEO_META = {
+  '/': {
+    title: 'Galora AI | AI-Powered Quantitative Stock Picks & Wealth Agent',
+    description: 'Galora AI (galora.ai) delivers daily Top 3 AI-ranked stocks for Indian and US markets with 6-Month & 12-Month algorithmic price targets and autonomous portfolio intelligence.',
+    canonical: 'https://galora.ai/'
+  },
+  '/top-stocks': {
+    title: 'Top 3 Stocks | Daily High-Conviction AI Recommendations | Galora AI',
+    description: 'Daily institutional quantitative AI stock recommendations for India and US markets with 6-month & 12-month algorithmic targets.',
+    canonical: 'https://galora.ai/top-stocks'
+  },
+  '/markets': {
+    title: 'Live Markets | Real-Time BSE, NSE, NYSE & NASDAQ Equities | Galora AI',
+    description: 'Real-time BSE, NSE, NYSE & NASDAQ stock quotes, commodities, gold, silver, and oil with 1-click execution on Galora AI.',
+    canonical: 'https://galora.ai/markets'
+  },
+  '/macro-agent': {
+    title: 'Global Macro Agent | Geopolitical Radar & Autonomous Rotation | Galora AI',
+    description: 'Autonomous geopolitical radar and tactical portfolio rotation engine across equities, precious metals, and energy hedges.',
+    canonical: 'https://galora.ai/macro-agent'
+  },
+  '/deep-analysis': {
+    title: 'Quant Agent | 4-Layer Quantitative Matrix & Derivatives PCR | Galora AI',
+    description: 'Deep 4-layer quantitative stock analysis combining Macro Regime, Derivatives PCR/OI, Technical Momentum, and Fundamental Earnings.',
+    canonical: 'https://galora.ai/deep-analysis'
+  },
+  '/copilot': {
+    title: 'AI Copilot | Financial Research & Fundamental Charts | Galora AI',
+    description: 'Financial research copilot with interactive multi-year revenue, profit, cash flow charts, and valuation analysis.',
+    canonical: 'https://galora.ai/copilot'
+  },
+  '/portfolio': {
+    title: 'Portfolio Dashboard | Core Holdings & Tactical Vault | Galora AI',
+    description: 'Track your Core Holdings, Autonomous Tactical Vault, and compounding cycles with real-time P&L and auto-exit protection on Galora AI.',
+    canonical: 'https://galora.ai/portfolio'
+  },
+  '/profile': {
+    title: 'Security Enclave & Investor Settings | Galora AI',
+    description: 'Manage your Galora AI investor profile, biometric security passkeys, 4-digit trading PIN, and Cloud SQL synchronization.',
+    canonical: 'https://galora.ai/profile'
+  }
+};
+
+let cachedDistHtml = null;
+let cachedDistHtmlMtime = 0;
+
+const getSeoInjectedHtml = (reqPath) => {
+  if (!fs.existsSync(distIndexHtml)) return null;
+  try {
+    const stats = fs.statSync(distIndexHtml);
+    if (!cachedDistHtml || stats.mtimeMs !== cachedDistHtmlMtime) {
+      cachedDistHtml = fs.readFileSync(distIndexHtml, 'utf8');
+      cachedDistHtmlMtime = stats.mtimeMs;
+    }
+
+    const cleanPath = (reqPath || '/').split('?')[0].replace(/\/$/, '') || '/';
+    const meta = ROUTE_SEO_META[cleanPath] || ROUTE_SEO_META['/'];
+    if (!meta) return cachedDistHtml;
+
+    let html = cachedDistHtml;
+    html = html.replace(/<title>.*?<\/title>/i, `<title>${meta.title}</title>`);
+    html = html.replace(/<meta\s+name="description"\s+content=".*?"\s*\/?>/i, `<meta name="description" content="${meta.description}" />`);
+    html = html.replace(/<link\s+rel="canonical"\s+id="canonical-link"\s+href=".*?"\s*\/?>/i, `<link rel="canonical" id="canonical-link" href="${meta.canonical}" />`);
+    html = html.replace(/<meta\s+property="og:title"\s+content=".*?"\s*\/?>/i, `<meta property="og:title" content="${meta.title}" />`);
+    html = html.replace(/<meta\s+property="og:description"\s+content=".*?"\s*\/?>/i, `<meta property="og:description" content="${meta.description}" />`);
+    html = html.replace(/<meta\s+property="og:url"\s+content=".*?"\s*\/?>/i, `<meta property="og:url" content="${meta.canonical}" />`);
+    html = html.replace(/<meta\s+name="twitter:title"\s+content=".*?"\s*\/?>/i, `<meta name="twitter:title" content="${meta.title}" />`);
+    html = html.replace(/<meta\s+name="twitter:description"\s+content=".*?"\s*\/?>/i, `<meta name="twitter:description" content="${meta.description}" />`);
+
+    return html;
+  } catch (err) {
+    console.error('Error generating SEO-injected HTML:', err);
+    return null;
+  }
+};
+
 if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true') {
   if (fs.existsSync(distDir)) {
     app.use(express.static(distDir));
     app.use((req, res, next) => {
       if (req.method === 'GET' && !req.path.startsWith('/api') && fs.existsSync(distIndexHtml)) {
+        const injected = getSeoInjectedHtml(req.path);
+        if (injected) {
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          return res.send(injected);
+        }
         return res.sendFile(distIndexHtml);
       }
       return next();

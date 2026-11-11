@@ -430,7 +430,7 @@ export default function Markets() {
             />
             <input 
               type="text" 
-              placeholder="Search all Indian (BSE/NSE) & US (NYSE/NASDAQ) stocks, gold, oil..." 
+              placeholder="Search All India/US stocks" 
               className="chat-input w-full"
               style={{ paddingLeft: '3rem', paddingRight: '1rem', paddingTop: '0.85rem', paddingBottom: '0.85rem', minHeight: '50px' }}
               value={searchTerm}

@@ -93,6 +93,7 @@
             "@type": "Organization",
             "@id": "https://galora.ai/#organization",
             "name": "Galora AI",
+            "alternateName": ["galora.ai", "Galora Wealth AI", "Galora", "Galore AI"],
             "url": "https://galora.ai/",
             "logo": {
               "@type": "ImageObject",
@@ -108,8 +109,159 @@
             "@id": "https://galora.ai/#website",
             "url": "https://galora.ai/",
             "name": "Galora AI",
+            "alternateName": ["galora.ai", "Galora Wealth AI", "Galora", "Galore AI"],
             "publisher": { "@id": "https://galora.ai/#organization" },
-            "inLanguage": "en"
+            "inLanguage": "en",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://galora.ai/markets?search={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            },
+            "hasPart": [
+              {
+                "@type": "WebPage",
+                "@id": "https://galora.ai/top-stocks#webpage",
+                "url": "https://galora.ai/top-stocks",
+                "name": "Top 3 Stocks",
+                "description": "Daily high-conviction quantitative AI stock recommendations for India and US markets with 6-month & 12-month algorithmic targets."
+              },
+              {
+                "@type": "WebPage",
+                "@id": "https://galora.ai/markets#webpage",
+                "url": "https://galora.ai/markets",
+                "name": "Live Markets",
+                "description": "Real-time BSE, NSE, NYSE & NASDAQ stock quotes, commodities, gold, silver, and oil with 1-click execution."
+              },
+              {
+                "@type": "WebPage",
+                "@id": "https://galora.ai/deep-analysis#webpage",
+                "url": "https://galora.ai/deep-analysis",
+                "name": "Quant Agent",
+                "description": "Deep 4-layer quantitative stock analysis combining Macro Regime, Derivatives PCR/OI, Technical Momentum, and Fundamental Earnings."
+              },
+              {
+                "@type": "WebPage",
+                "@id": "https://galora.ai/macro-agent#webpage",
+                "url": "https://galora.ai/macro-agent",
+                "name": "Global Macro Agent",
+                "description": "Autonomous geopolitical radar and tactical portfolio rotation engine across equities, precious metals, and energy hedges."
+              },
+              {
+                "@type": "WebPage",
+                "@id": "https://galora.ai/copilot#webpage",
+                "url": "https://galora.ai/copilot",
+                "name": "AI Copilot",
+                "description": "Financial research copilot with interactive multi-year revenue, profit, cash flow charts, and valuation analysis."
+              },
+              {
+                "@type": "WebPage",
+                "@id": "https://galora.ai/portfolio#webpage",
+                "url": "https://galora.ai/portfolio",
+                "name": "My Portfolio",
+                "description": "Track your Core Holdings, Autonomous Tactical Vault, and compounding cycles with real-time P&L and auto-exit protection."
+              }
+            ]
+          },
+          {
+            "@type": "ItemList",
+            "@id": "https://galora.ai/#sitelinks",
+            "name": "Galora AI Key Navigation & Sitelinks",
+            "description": "Direct sitelinks to Galora AI's quantitative investment tools, daily Top 3 AI stock picks, live global markets, and autonomous macro agents.",
+            "itemListElement": [
+              {
+                "@type": "SiteNavigationElement",
+                "position": 1,
+                "name": "Top 3 Stocks",
+                "description": "Daily high-conviction quantitative AI stock recommendations for India and US markets with 6-month & 12-month algorithmic targets.",
+                "url": "https://galora.ai/top-stocks"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 2,
+                "name": "Live Markets",
+                "description": "Real-time BSE, NSE, NYSE & NASDAQ stock quotes, commodities, gold, silver, and oil with 1-click execution.",
+                "url": "https://galora.ai/markets"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 3,
+                "name": "Quant Agent",
+                "description": "Deep 4-layer quantitative stock analysis combining Macro Regime, Derivatives PCR/OI, Technical Momentum, and Fundamental Earnings.",
+                "url": "https://galora.ai/deep-analysis"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 4,
+                "name": "Global Macro Agent",
+                "description": "Autonomous geopolitical radar and tactical portfolio rotation engine across equities, precious metals, and energy hedges.",
+                "url": "https://galora.ai/macro-agent"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 5,
+                "name": "AI Copilot",
+                "description": "Financial research copilot with interactive multi-year revenue, profit, cash flow charts, and valuation analysis.",
+                "url": "https://galora.ai/copilot"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 6,
+                "name": "My Portfolio",
+                "description": "Track your Core Holdings, Autonomous Tactical Vault, and compounding cycles with real-time P&L and auto-exit protection.",
+                "url": "https://galora.ai/portfolio"
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://galora.ai/#breadcrumbs",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://galora.ai/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Top 3 Stocks",
+                "item": "https://galora.ai/top-stocks"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Live Markets",
+                "item": "https://galora.ai/markets"
+              },
+              {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Quant Agent",
+                "item": "https://galora.ai/deep-analysis"
+              },
+              {
+                "@type": "ListItem",
+                "position": 5,
+                "name": "Global Macro Agent",
+                "item": "https://galora.ai/macro-agent"
+              },
+              {
+                "@type": "ListItem",
+                "position": 6,
+                "name": "AI Copilot",
+                "item": "https://galora.ai/copilot"
+              },
+              {
+                "@type": "ListItem",
+                "position": 7,
+                "name": "My Portfolio",
+                "item": "https://galora.ai/portfolio"
+              }
+            ]
           },
           {
             "@type": "SoftwareApplication",
@@ -165,21 +317,55 @@
         <h1>Galora AI — AI-Powered Quantitative Stock Picks &amp; Wealth Generation Platform</h1>
         <p>
           Galora AI (<a href="https://galora.ai/">https://galora.ai</a>) delivers real-time quantitative stock analysis,
-          Top 3 daily high-conviction stock picks, dynamic Quarterly / 6-Month / 12-Month price targets, and autonomous
+          Top 3 daily high-conviction stock picks, dynamic 6-Month and 12-Month algorithmic price targets, and autonomous
           portfolio rebalancing across Indian (NSE/BSE NIFTY 50) and US (NYSE/NASDAQ) markets.
         </p>
-        <nav aria-label="Primary Navigation">
+        <nav aria-label="Galora AI Primary Sitelinks">
+          <h2>Key Features &amp; Sitelinks</h2>
           <ul>
-            <li><a href="https://galora.ai/top-stocks">Top 3 Recommended Stocks to Buy (India &amp; US)</a></li>
-            <li><a href="https://galora.ai/portfolio">My Portfolio &amp; Tactical Vault</a></li>
-            <li><a href="https://galora.ai/markets">Live Global Markets &amp; Commodities</a></li>
-            <li><a href="https://galora.ai/macro-agent">Global Macro Agent &amp; Autonomous Rotation</a></li>
-            <li><a href="https://galora.ai/deep-analysis">Quant Agent &amp; Deep Machine Learning Analysis</a></li>
-            <li><a href="https://galora.ai/copilot">Galora AI Financial Research Copilot</a></li>
+            <li>
+              <a href="https://galora.ai/top-stocks"><strong>Top 3 Stocks</strong></a>
+              <p>Daily high-conviction quantitative AI stock recommendations for India and US markets with 6-month &amp; 12-month algorithmic targets.</p>
+            </li>
+            <li>
+              <a href="https://galora.ai/markets"><strong>Live Markets</strong></a>
+              <p>Real-time BSE, NSE, NYSE &amp; NASDAQ stock quotes, commodities, gold, silver, and oil with 1-click execution.</p>
+            </li>
+            <li>
+              <a href="https://galora.ai/deep-analysis"><strong>Quant Agent</strong></a>
+              <p>Deep 4-layer quantitative stock analysis combining Macro Regime, Derivatives PCR/OI, Technical Momentum, and Fundamental Earnings.</p>
+            </li>
+            <li>
+              <a href="https://galora.ai/macro-agent"><strong>Global Macro Agent</strong></a>
+              <p>Autonomous geopolitical radar and tactical portfolio rotation engine across equities, precious metals, and energy hedges.</p>
+            </li>
+            <li>
+              <a href="https://galora.ai/copilot"><strong>AI Copilot</strong></a>
+              <p>Financial research copilot with interactive multi-year revenue, profit, cash flow charts, and valuation analysis.</p>
+            </li>
+            <li>
+              <a href="https://galora.ai/portfolio"><strong>My Portfolio</strong></a>
+              <p>Track your Core Holdings, Autonomous Tactical Vault, and compounding cycles with real-time P&amp;L and auto-exit protection.</p>
+            </li>
           </ul>
         </nav>
       </main>
     </noscript>
+
+    <!-- Semantic Crawler-Accessible Sitelinks Directory for Googlebot -->
+    <footer id="galora-sitelinks-directory" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;" aria-label="Galora AI Directory">
+      <nav aria-label="Google Sitelinks Directory">
+        <h2>Galora AI Sitelinks</h2>
+        <ul>
+          <li><a href="https://galora.ai/top-stocks">Top 3 Stocks</a> — Daily high-conviction quantitative AI stock recommendations for India and US markets with 6-month &amp; 12-month algorithmic targets.</li>
+          <li><a href="https://galora.ai/markets">Live Markets</a> — Real-time BSE, NSE, NYSE &amp; NASDAQ stock quotes, commodities, gold, silver, and oil with 1-click execution.</li>
+          <li><a href="https://galora.ai/deep-analysis">Quant Agent</a> — Deep 4-layer quantitative stock analysis combining Macro Regime, Derivatives PCR/OI, Technical Momentum, and Fundamental Earnings.</li>
+          <li><a href="https://galora.ai/macro-agent">Global Macro Agent</a> — Autonomous geopolitical radar and tactical portfolio rotation engine across equities, precious metals, and energy hedges.</li>
+          <li><a href="https://galora.ai/copilot">AI Copilot</a> — Financial research copilot with interactive multi-year revenue, profit, cash flow charts, and valuation analysis.</li>
+          <li><a href="https://galora.ai/portfolio">Portfolio Dashboard</a> — Track your Core Holdings, Autonomous Tactical Vault, and compounding cycles with real-time P&amp;L and auto-exit protection.</li>
+        </ul>
+      </nav>
+    </footer>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

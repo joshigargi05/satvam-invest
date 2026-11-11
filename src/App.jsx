@@ -354,42 +354,42 @@ function SimulatorBanner() {
 const SEO_ROUTES = {
   '/': {
     title: 'Galora AI | AI-Powered Quantitative Stock Picks & Wealth Agent',
-    description: 'Discover daily Top 3 AI-ranked stocks for Indian (NSE/BSE NIFTY 50) and US (NYSE/NASDAQ) markets with 6-Month and 12-Month algorithmic price targets.',
+    description: 'Galora AI (galora.ai) delivers daily Top 3 AI-ranked stocks for Indian and US markets with 6-Month & 12-Month algorithmic price targets and autonomous portfolio intelligence.',
     canonical: 'https://galora.ai/'
   },
   '/top-stocks': {
-    title: 'Top 3 AI Stock Picks Today | Galora AI Quantitative Engine',
-    description: 'High-conviction Top 3 stock picks powered by Galora AI 5-module ensemble and 23-feature predictive machine learning engine across India and US markets.',
+    title: 'Top 3 Stocks | Daily High-Conviction AI Recommendations | Galora AI',
+    description: 'Daily institutional quantitative AI stock recommendations for India and US markets with 6-month & 12-month algorithmic targets.',
     canonical: 'https://galora.ai/top-stocks'
   },
   '/portfolio': {
-    title: 'My Portfolio & Tactical Vault | Galora AI Wealth Agent',
-    description: 'Track your Core Protected holdings, Autonomous Tactical Vault, and #1 Top Pick compounding cycles with real-time P&L and GTT auto-exit rules on Galora AI.',
+    title: 'Portfolio Dashboard | Core Holdings & Tactical Vault | Galora AI',
+    description: 'Track your Core Holdings, Autonomous Tactical Vault, and compounding cycles with real-time P&L and auto-exit protection on Galora AI.',
     canonical: 'https://galora.ai/portfolio'
   },
   '/markets': {
-    title: 'Live Global Markets, Stocks & Commodities | Galora AI',
-    description: 'Real-time NIFTY 50, S&P 500, NASDAQ equities, Gold, Silver, and Crude Oil prices with instant AI conviction ratings on Galora AI.',
+    title: 'Live Markets | Real-Time BSE, NSE, NYSE & NASDAQ Equities | Galora AI',
+    description: 'Real-time BSE, NSE, NYSE & NASDAQ stock quotes, commodities, gold, silver, and oil with 1-click execution on Galora AI.',
     canonical: 'https://galora.ai/markets'
   },
   '/macro-agent': {
-    title: 'Global Macro Radar & Autonomous Portfolio Agent | Galora AI',
-    description: 'Autonomous geopolitical & macro intelligence radar that rotates capital across top conviction equities, precious metals, and energy hedges.',
+    title: 'Global Macro Agent | Geopolitical Radar & Autonomous Rotation | Galora AI',
+    description: 'Autonomous geopolitical radar and tactical portfolio rotation engine across equities, precious metals, and energy hedges.',
     canonical: 'https://galora.ai/macro-agent'
   },
   '/deep-analysis': {
-    title: 'Quant Agent & Deep Stock Analysis | Galora AI',
-    description: 'Institutional 4-layer quantitative stock analysis combining Macro Regime, Derivatives OI/PCR, Technical Momentum, and Fundamental Earnings.',
+    title: 'Quant Agent | 4-Layer Quantitative Matrix & Derivatives PCR | Galora AI',
+    description: 'Deep 4-layer quantitative stock analysis combining Macro Regime, Derivatives PCR/OI, Technical Momentum, and Fundamental Earnings.',
     canonical: 'https://galora.ai/deep-analysis'
   },
   '/copilot': {
-    title: 'Galora AI Copilot | Financial Research & Fundamental Charts',
-    description: 'Ask Galora AI Copilot to analyze any US or Indian stock with live multi-year revenue, profit, cash flow charts, and institutional investment theses.',
+    title: 'AI Copilot | Financial Research & Fundamental Charts | Galora AI',
+    description: 'Financial research copilot with interactive multi-year revenue, profit, cash flow charts, and valuation analysis.',
     canonical: 'https://galora.ai/copilot'
   },
   '/profile': {
-    title: 'Investor Security Enclave & Multi-Device Sync | Galora AI',
-    description: 'Manage your Galora AI investor profile, biometric passkeys, 4-digit trading PIN, and Cloud SQL portfolio synchronization.',
+    title: 'Security Enclave & Investor Settings | Galora AI',
+    description: 'Manage your Galora AI investor profile, biometric security passkeys, 4-digit trading PIN, and Cloud SQL synchronization.',
     canonical: 'https://galora.ai/profile'
   }
 };
