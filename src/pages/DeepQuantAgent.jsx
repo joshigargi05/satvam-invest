@@ -99,6 +99,9 @@ const COMPANY_ALIASES = {
   QCOM: 'QCOM',
   NETAPP: 'NTAP',
   NTAP: 'NTAP',
+  PALOALTO: 'PANW',
+  PALO: 'PANW',
+  PANW: 'PANW',
   GOOGLE: 'GOOGL',
   ALPHABET: 'GOOGL',
   GOOG: 'GOOGL',
@@ -422,33 +425,57 @@ export default function DeepQuantAgent() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [topPicksData, setTopPicksData] = useState(null);
 
-  // Suggestions based on user input, matching ticker, name, or colloquial company alias
+  // Suggestions based on user input, matching ticker prefix, word prefix in name, or company aliases
   const suggestions = useMemo(() => {
     const raw = inputTicker.trim();
     if (!raw || selectedTickers.length >= 3) return [];
     const q = raw.toUpperCase();
     const resolvedDirect = resolveTicker(q);
 
+    // Exact or prefix matches only to prevent false positives like "ne" matching "One97"
     const matches = SEARCHABLE_STOCKS.filter((stock) => {
       if (selectedTickers.includes(stock.ticker)) return false;
       const t = stock.ticker.toUpperCase();
       const n = stock.name.toUpperCase();
-      return (
-        t === resolvedDirect ||
-        t.startsWith(q) ||
-        t.includes(q) ||
-        n.includes(q) ||
-        (COMPANY_ALIASES[q] && COMPANY_ALIASES[q] === t)
+
+      // 1. Direct ticker or resolved alias match (e.g. "QCOM", "QUALCOMM", "M&M", "ETERNAL")
+      if (t === resolvedDirect || t === q) return true;
+
+      // 2. Ticker prefix match (e.g. typing "NE" matches "NETAPP", "NFLX" if ticker starts with NE)
+      if (t.startsWith(q)) return true;
+
+      // 3. Known aliases that start with the query (e.g. query "NE" matches alias "NETAPP" -> ticker "NTAP", "NETFLIX" -> "NFLX")
+      const aliasMatch = Object.entries(COMPANY_ALIASES).some(
+        ([alias, ticker]) => ticker === t && alias.startsWith(q)
       );
+      if (aliasMatch) return true;
+
+      // 4. Any distinct word in the company name starts with the query (e.g. "NetApp Inc." starts with "NE")
+      const words = n.split(/[\s(/)\-,.]+/).filter(Boolean);
+      if (words.some((w) => w.startsWith(q))) return true;
+
+      // 5. If query is 3 or more chars, allow substring match on company name
+      if (q.length >= 3 && n.includes(q)) return true;
+
+      return false;
     });
 
     return matches
       .sort((a, b) => {
-        const aIsExact = a.ticker === resolvedDirect || a.ticker === q;
-        const bIsExact = b.ticker === resolvedDirect || b.ticker === q;
-        if (aIsExact && !bIsExact) return -1;
-        if (!aIsExact && bIsExact) return 1;
+        const aT = a.ticker.toUpperCase();
+        const bT = b.ticker.toUpperCase();
+        const aExact = aT === resolvedDirect || aT === q;
+        const bExact = bT === resolvedDirect || bT === q;
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
 
+        // Prefer stocks whose ticker starts with query
+        const aTickerPrefix = aT.startsWith(q);
+        const bTickerPrefix = bT.startsWith(q);
+        if (aTickerPrefix && !bTickerPrefix) return -1;
+        if (!aTickerPrefix && bTickerPrefix) return 1;
+
+        // Prefer active market
         const aMarket = a.market === market;
         const bMarket = b.market === market;
         if (aMarket && !bMarket) return -1;
@@ -456,7 +483,7 @@ export default function DeepQuantAgent() {
 
         return a.name.localeCompare(b.name);
       })
-      .slice(0, 5);
+      .slice(0, 6);
   }, [inputTicker, selectedTickers, market]);
 
   // Detected alias recommendation if input differs from official ticker
@@ -1086,81 +1113,186 @@ export default function DeepQuantAgent() {
             )}
 
             {/* Input Bar & Actions */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div 
-                className="relative flex-1 flex items-center rounded-xl bg-slate-950/80 border border-white/10 focus-within:border-purple-500/70 transition-colors"
-                style={{
-                  minHeight: '54px',
-                  backgroundColor: 'rgba(2, 6, 23, 0.85)',
-                  borderRadius: '14px',
-                  border: '1px solid rgba(255, 255, 255, 0.12)'
-                }}
-              >
-                <Search 
-                  size={20}
-                  className="text-slate-400 pointer-events-none" 
+            <div className="relative">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div 
+                  className="flex-1 flex items-center rounded-xl focus-within:border-purple-500/70 transition-colors"
+                  style={{
+                    minHeight: '56px',
+                    backgroundColor: 'rgba(2, 6, 23, 0.95)',
+                    borderRadius: '14px',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    position: 'relative'
+                  }}
+                >
+                  <Search 
+                    size={20}
+                    className="text-slate-400 pointer-events-none" 
+                    style={{
+                      position: 'absolute',
+                      left: '1.25rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#94a3b8'
+                    }}
+                  />
+                  <input
+                    type="text"
+                    className="w-full bg-transparent text-white outline-none font-mono uppercase tracking-wider"
+                    style={{
+                      width: '100%',
+                      paddingLeft: '3.6rem',
+                      paddingRight: inputTicker ? '3rem' : '1.25rem',
+                      paddingTop: '1rem',
+                      paddingBottom: '1rem',
+                      fontSize: '1rem',
+                      lineHeight: '1.5',
+                      border: 'none',
+                      outline: 'none',
+                      background: 'transparent',
+                      color: '#ffffff'
+                    }}
+                    placeholder={
+                      selectedTickers.length >= 3
+                        ? 'Max 3 stocks reached. Click "Compare Side-by-Side" or remove a stock.'
+                        : `Enter stock name or ticker (e.g. Qualcomm, NetApp, TCS, M&M, RELIANCE)`
+                    }
+                    value={inputTicker}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 250)}
+                    onChange={(e) => {
+                      setInputTicker(e.target.value.toUpperCase());
+                      setShowSuggestions(true);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (showSuggestions && suggestions.length > 0) {
+                          handleAddTicker(suggestions[0].ticker);
+                        } else if (selectedTickers.length < 3 && inputTicker.trim()) {
+                          handleAddTicker();
+                        } else {
+                          handleAnalyze();
+                        }
+                        setShowSuggestions(false);
+                      } else if (e.key === 'Escape') {
+                        setShowSuggestions(false);
+                      }
+                    }}
+                    disabled={analyzing || selectedTickers.length >= 3}
+                  />
+
+                  {inputTicker && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInputTicker('');
+                        setShowSuggestions(false);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        right: '0.75rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        padding: '0.4rem',
+                        color: '#94a3b8',
+                        borderRadius: '8px'
+                      }}
+                      className="hover:text-white hover:bg-white/10 transition-colors"
+                      title="Clear search"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleAddTicker();
+                      setShowSuggestions(false);
+                    }}
+                    disabled={analyzing || selectedTickers.length >= 3 || !inputTicker.trim()}
+                    className={`flex-1 sm:flex-initial px-4 sm:px-5 py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all border shrink-0 ${
+                      inputTicker.trim() && selectedTickers.length < 3
+                        ? 'bg-purple-600/30 hover:bg-purple-600 text-purple-200 hover:text-white border-purple-500/50 shadow-md shadow-purple-500/20 cursor-pointer'
+                        : 'bg-slate-900/60 text-slate-500 border-white/5 cursor-not-allowed opacity-60'
+                    }`}
+                    style={{ minHeight: '56px', borderRadius: '14px' }}
+                  >
+                    <Plus size={16} />
+                    <span>Add Stock</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAnalyze()}
+                    disabled={analyzing || (selectedTickers.length === 0 && !inputTicker.trim())}
+                    className={`flex-1 sm:flex-initial px-4 sm:px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shrink-0 ${
+                      analyzing || (selectedTickers.length === 0 && !inputTicker.trim())
+                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                        : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-500/25 cursor-pointer transform hover:-translate-y-0.5'
+                    }`}
+                    style={{
+                      minHeight: '56px',
+                      borderRadius: '14px',
+                      background: analyzing || (selectedTickers.length === 0 && !inputTicker.trim())
+                        ? undefined
+                        : 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)'
+                    }}
+                  >
+                    <Cpu size={16} />
+                    <span>
+                      {analyzing
+                        ? 'Processing...'
+                        : selectedTickers.length > 1
+                        ? `Compare (${selectedTickers.length}) Side-by-Side`
+                        : 'Deploy Agent'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Auto-Suggest Recommendation Dropdown */}
+              {showSuggestions && suggestions.length > 0 && selectedTickers.length < 3 && (
+                <div 
+                  className="animate-fade-in"
                   style={{
                     position: 'absolute',
-                    left: '1.25rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: '#94a3b8'
+                    left: 0,
+                    right: 0,
+                    top: 'calc(100% + 8px)',
+                    backgroundColor: '#070b14',
+                    border: '1px solid rgba(139, 92, 246, 0.45)',
+                    borderRadius: '16px',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95), 0 0 30px rgba(139, 92, 246, 0.25)',
+                    zIndex: 1000,
+                    maxHeight: '360px',
+                    overflowY: 'auto'
                   }}
-                />
-                <input
-                  type="text"
-                  className="w-full bg-transparent text-white outline-none font-mono uppercase tracking-wider"
-                  style={{
-                    width: '100%',
-                    paddingLeft: '3.6rem',
-                    paddingRight: '1.25rem',
-                    paddingTop: '0.95rem',
-                    paddingBottom: '0.95rem',
-                    fontSize: '1rem',
-                    lineHeight: '1.5',
-                    border: 'none',
-                    outline: 'none',
-                    background: 'transparent',
-                    color: '#ffffff'
-                  }}
-                  placeholder={
-                    selectedTickers.length >= 3
-                      ? 'Max 3 stocks reached. Click "Compare Side-by-Side" or remove a stock.'
-                      : `Enter stock name or ticker (e.g. Qualcomm, NetApp, TCS, M&M, RELIANCE)`
-                  }
-                  value={inputTicker}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 250)}
-                  onChange={(e) => {
-                    setInputTicker(e.target.value.toUpperCase());
-                    setShowSuggestions(true);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      setShowSuggestions(false);
-                      if (selectedTickers.length < 3 && inputTicker.trim()) handleAddTicker();
-                      else handleAnalyze();
-                    } else if (e.key === 'Escape') {
-                      setShowSuggestions(false);
-                    }
-                  }}
-                  disabled={analyzing || selectedTickers.length >= 3}
-                />
-
-                {/* Auto-Suggest Recommendation Dropdown */}
-                {showSuggestions && suggestions.length > 0 && selectedTickers.length < 3 && (
+                >
                   <div 
-                    className="absolute left-0 right-0 top-full mt-2 rounded-2xl bg-slate-950/95 border border-purple-500/40 shadow-2xl backdrop-blur-xl z-50 overflow-hidden divide-y divide-white/5 animate-fade-in"
-                    style={{ maxHeight: '280px', overflowY: 'auto' }}
+                    style={{ 
+                      backgroundColor: '#0f172a', 
+                      padding: '0.65rem 1.15rem', 
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
                   >
-                    <div className="px-3.5 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-900/90 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-purple-300">
-                        <Sparkles size={12} className="text-purple-400" /> Recommended Matching Stocks
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono">Click to Add (Auto-Detect)</span>
-                    </div>
-                    {suggestions.map((item) => (
+                    <span className="flex items-center gap-2 text-purple-300 font-bold text-xs uppercase tracking-wider">
+                      <Sparkles size={13} className="text-purple-400" />
+                      <span>Recommended Matching Stocks ({suggestions.length})</span>
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      Click to Add or press Enter
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {suggestions.map((item, idx) => (
                       <button
                         key={item.ticker}
                         type="button"
@@ -1170,86 +1302,101 @@ export default function DeepQuantAgent() {
                           setInputTicker('');
                           setShowSuggestions(false);
                         }}
-                        className="w-full px-4 py-2.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors group cursor-pointer"
+                        style={{
+                          backgroundColor: '#070b14',
+                          borderBottom: idx === suggestions.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.06)',
+                          padding: '0.85rem 1.25rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          textAlign: 'left',
+                          transition: 'all 0.15s ease',
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#181e36';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#070b14';
+                        }}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-purple-950/60 border border-purple-500/30 flex items-center justify-center font-mono font-black text-xs text-purple-200 group-hover:scale-105 transition-transform">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div 
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '10px',
+                              backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                              border: '1px solid rgba(139, 92, 246, 0.4)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontFamily: 'monospace',
+                              fontWeight: 800,
+                              fontSize: '0.85rem',
+                              color: '#c084fc',
+                              flexShrink: 0
+                            }}
+                          >
                             {item.ticker.substring(0, 2)}
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-bold text-white group-hover:text-purple-300 text-sm">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>
                                 {item.ticker}
                               </span>
-                              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border font-semibold ${
-                                item.market === 'INDIA' 
-                                  ? 'bg-orange-500/15 text-orange-300 border-orange-500/30' 
-                                  : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
-                              }`}>
+                              <span 
+                                style={{
+                                  fontSize: '0.7rem',
+                                  fontFamily: 'monospace',
+                                  padding: '2px 8px',
+                                  borderRadius: '6px',
+                                  fontWeight: 700,
+                                  border: item.market === 'INDIA' ? '1px solid rgba(249, 115, 22, 0.4)' : '1px solid rgba(59, 130, 246, 0.4)',
+                                  backgroundColor: item.market === 'INDIA' ? 'rgba(249, 115, 22, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                                  color: item.market === 'INDIA' ? '#fdba74' : '#93c5fd'
+                                }}
+                              >
                                 {item.exchange || (item.market === 'INDIA' ? 'NSE' : 'NASDAQ')}
                               </span>
+                              {item.sector && (
+                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                  • {item.sector}
+                                </span>
+                              )}
                             </div>
-                            <span className="text-xs text-slate-300 truncate max-w-[220px] sm:max-w-xs block">
+                            <div style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 500, marginTop: '2px' }} className="truncate">
                               {item.name}
-                            </span>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-purple-400 font-bold group-hover:text-purple-300 group-hover:translate-x-0.5 transition-all">
+
+                        <div 
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            borderRadius: '10px',
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            border: '1px solid rgba(139, 92, 246, 0.4)',
+                            color: '#d8b4fe',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
+                            marginLeft: '1rem'
+                          }}
+                        >
                           <Plus size={14} />
-                          <span>Add Stock</span>
+                          <span>Add to Deck</span>
                         </div>
                       </button>
                     ))}
                   </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleAddTicker();
-                    setShowSuggestions(false);
-                  }}
-                  disabled={analyzing || selectedTickers.length >= 3 || !inputTicker.trim()}
-                  className={`flex-1 sm:flex-initial px-4 sm:px-5 py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all border shrink-0 ${
-                    inputTicker.trim() && selectedTickers.length < 3
-                      ? 'bg-purple-600/30 hover:bg-purple-600 text-purple-200 hover:text-white border-purple-500/50 shadow-md shadow-purple-500/20 cursor-pointer'
-                      : 'bg-slate-900/60 text-slate-500 border-white/5 cursor-not-allowed opacity-60'
-                  }`}
-                  style={{ minHeight: '54px', borderRadius: '14px' }}
-                >
-                  <Plus size={16} />
-                  <span>Add Stock</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleAnalyze()}
-                  disabled={analyzing || (selectedTickers.length === 0 && !inputTicker.trim())}
-                  className={`flex-1 sm:flex-initial px-4 sm:px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shrink-0 ${
-                    analyzing || (selectedTickers.length === 0 && !inputTicker.trim())
-                      ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
-                      : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-500/25 cursor-pointer transform hover:-translate-y-0.5'
-                  }`}
-                  style={{
-                    minHeight: '54px',
-                    borderRadius: '14px',
-                    background: analyzing || (selectedTickers.length === 0 && !inputTicker.trim())
-                      ? undefined
-                      : 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)'
-                  }}
-                >
-                  <Cpu size={16} />
-                  <span>
-                    {analyzing
-                      ? 'Processing...'
-                      : selectedTickers.length > 1
-                      ? `Compare (${selectedTickers.length}) Side-by-Side`
-                      : 'Deploy Agent'}
-                  </span>
-                </button>
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Smart Auto-Resolution Recommendation Pill */}
