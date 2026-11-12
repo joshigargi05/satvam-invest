@@ -419,39 +419,43 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
                   </div>
 
                   {/* Live Price, 24h Change, and Algo Target Price */}
-                  <div className="p-3 rounded-xl bg-slate-950/70 border border-white/10 mb-4 grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">Live Market Price</span>
-                      <div className="flex items-baseline gap-2 mt-0.5">
-                        <span className="text-lg font-black text-white font-mono">
-                          {stockCurr}{Number(stock.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                        <span className={`text-xs font-bold flex items-center ${isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
-                          {isUp ? <TrendingUp size={12} className="mr-0.5" /> : <TrendingDown size={12} className="mr-0.5" />}
-                          {isUp ? '+' : ''}{Number(stock.changePct || 0).toFixed(2)}%
-                        </span>
-                      </div>
-                    </div>
+                  {(() => {
+                    const targetInfo = getStockTargetInfo(stock);
+                    const targetLabel = String(targetInfo.label || '12M').replace(' Months', 'M');
+                    return (
+                      <div className="p-3 rounded-xl bg-slate-950/70 border border-white/10 mb-4">
+                        {/* Synchronized Row 1: Headers aligned on the exact same row */}
+                        <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+                          <span className="truncate">Live Market Price</span>
+                          <span className="text-right shrink-0">Algo Target ({targetLabel})</span>
+                        </div>
 
-                    {(() => {
-                      const targetInfo = getStockTargetInfo(stock);
-                      return (
-                        <div className="text-right border-l border-white/10 pl-2">
-                          <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                            Algo Target ({targetInfo.label})
-                          </span>
-                          <div className="flex items-baseline justify-end gap-1.5 mt-0.5">
-                            <span className="text-sm font-bold text-emerald-300 font-mono">
+                        {/* Synchronized Row 2: Live Price & Target Price strictly aligned on the same horizontal baseline */}
+                        <div className="flex items-baseline justify-between gap-2">
+                          {/* Live Market Price & 24h Change */}
+                          <div className="flex items-baseline gap-1.5 shrink-0">
+                            <span className="text-base sm:text-lg font-black text-white font-mono tracking-tight">
+                              {stockCurr}{Number(stock.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                            <span className={`text-[11px] sm:text-xs font-bold flex items-center ${isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {isUp ? <TrendingUp size={12} className="mr-0.5" /> : <TrendingDown size={12} className="mr-0.5" />}
+                              {isUp ? '+' : ''}{Number(stock.changePct || 0).toFixed(2)}%
+                            </span>
+                          </div>
+
+                          {/* Algo Target Price & Upside Percentage */}
+                          <div className="flex items-baseline justify-end gap-1.5 text-right">
+                            <span className="text-base sm:text-lg font-black text-emerald-300 font-mono tracking-tight">
                               {stockCurr}{Number(targetInfo.targetPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
-                            <span className="text-[11px] font-extrabold text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded font-mono">
+                            <span className="text-[10px] sm:text-[11px] font-extrabold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded font-mono shrink-0">
                               +{targetInfo.upsidePct}%
                             </span>
                           </div>
                         </div>
-                      );
-                    })()}
-                  </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Proprietary AI Conviction & Allocation Summary */}
                   <div className="p-3 rounded-xl bg-slate-900/90 border border-white/5 mb-4 space-y-2 text-[11px]">
