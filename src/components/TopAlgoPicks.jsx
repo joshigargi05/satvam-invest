@@ -36,6 +36,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
   const [picksData, setPicksData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [capTier, setCapTier] = useState('mega'); // 'mega' (Mega cap - default) | 'large' (Large cap)
   const [tradeModalStock, setTradeModalStock] = useState(null);
   const [tradeShares, setTradeShares] = useState(1);
   const [tradeBucket, setTradeBucket] = useState('core'); // 'core' | 'agent_vault'
@@ -43,7 +44,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
   const [tradeCustomExitPrice, setTradeCustomExitPrice] = useState('');
   const [purchaseToast, setPurchaseToast] = useState('');
 
-  // 1) Dynamic Dropdown for Algo Stock Target: 'sixMonths' | 'twelveMonths'
+  // 1) Target Horizon Timeframe for Algo Stock Target: 'quarterly' | 'sixMonths' | 'twelveMonths'
   const [targetTimeframe, setTargetTimeframe] = useState('twelveMonths');
 
   // 2) Target Milestones History & Celebration Modal State
@@ -53,12 +54,22 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
   const [simulatingCelebration, setSimulatingCelebration] = useState(false);
 
   const getStockTargetInfo = (stock, timeframe = targetTimeframe) => {
-    const cleanTimeframe = timeframe === 'sixMonths' ? 'sixMonths' : 'twelveMonths';
+    const cleanTimeframe = timeframe === 'quarterly' ? 'quarterly' : (timeframe === 'sixMonths' ? 'sixMonths' : 'twelveMonths');
     if (stock?.targets && stock.targets[cleanTimeframe]) {
       return stock.targets[cleanTimeframe];
     }
     const baseUpside = Number(stock?.upsidePct || 15);
     const currentPrice = Number(stock?.currentPrice || 100);
+    if (cleanTimeframe === 'quarterly') {
+      const uPct = Number((baseUpside * 0.32).toFixed(1));
+      return {
+        key: 'quarterly',
+        timeframe: 'Quarterly',
+        label: 'Quarter',
+        upsidePct: uPct,
+        targetPrice: Number((currentPrice * (1 + uPct / 100)).toFixed(2))
+      };
+    }
     if (cleanTimeframe === 'sixMonths') {
       const uPct = Number((baseUpside * 0.58).toFixed(1));
       return {
@@ -107,7 +118,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
     if (isManualRefresh) setRefreshing(true);
     else if (!picksData) setLoading(true);
 
-    const data = await getTopAlgoPicks(market, isManualRefresh);
+    const data = await getTopAlgoPicks(market, isManualRefresh, '', capTier);
     if (data) {
       setPicksData(data);
     }
@@ -124,10 +135,34 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
       fetchMilestones();
     }, 60000);
     return () => clearInterval(interval);
-  }, [market]);
+  }, [market, capTier]);
 
   const activeTop3 = React.useMemo(() => {
     if (!picksData) return [];
+
+    if (capTier === 'large') {
+      if (market === 'INDIA' && Array.isArray(picksData.largeCapIndiaTopPicks) && picksData.largeCapIndiaTopPicks.length > 0) {
+        return picksData.largeCapIndiaTopPicks;
+      }
+      if (market === 'US' && Array.isArray(picksData.largeCapUsTopPicks) && picksData.largeCapUsTopPicks.length > 0) {
+        return picksData.largeCapUsTopPicks;
+      }
+      if (Array.isArray(picksData.largeCapTopPicks) && picksData.largeCapTopPicks.length > 0) {
+        return picksData.largeCapTopPicks;
+      }
+    } else {
+      // Default: 'mega' (Mega cap)
+      if (market === 'INDIA' && Array.isArray(picksData.megaCapIndiaTopPicks) && picksData.megaCapIndiaTopPicks.length > 0) {
+        return picksData.megaCapIndiaTopPicks;
+      }
+      if (market === 'US' && Array.isArray(picksData.megaCapUsTopPicks) && picksData.megaCapUsTopPicks.length > 0) {
+        return picksData.megaCapUsTopPicks;
+      }
+      if (Array.isArray(picksData.megaCapTopPicks) && picksData.megaCapTopPicks.length > 0) {
+        return picksData.megaCapTopPicks;
+      }
+    }
+
     if (market === 'INDIA' && Array.isArray(picksData.indiaTopPicks)) {
       return picksData.indiaTopPicks;
     }
@@ -135,7 +170,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
       return picksData.usTopPicks;
     }
     return picksData.topPicks || [];
-  }, [picksData, market]);
+  }, [picksData, market, capTier]);
 
   const handleConfirmPurchase = (e) => {
     e.preventDefault();
@@ -243,9 +278,9 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
                 ⚡ Proprietary AI Intelligence
               </span>
               <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 font-mono">
-                {market === 'US'
-                  ? `🇺🇸 Scanning Top Institutional US Leaders`
-                  : `🇮🇳 Scanning All 52 NIFTY 50 Leaders`}
+                {capTier === 'mega'
+                  ? (market === 'US' ? '🇺🇸 22 Mega Cap US Leaders' : '🇮🇳 14 Mega Cap Indian Leaders')
+                  : (market === 'US' ? '🇺🇸 36 High-Growth US Large Caps' : '🇮🇳 46 High-Growth Indian Large Caps')}
               </span>
               {picksData?.universeStats && (
                 <span className="text-[10px] text-amber-300/90 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono">
@@ -256,7 +291,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
               )}
             </div>
             <h2 className="text-xl font-bold text-white mt-1 flex items-center gap-2">
-              Top 3 Recommended Stocks to Buy ({market === 'US' ? 'US Stocks' : 'IND Stocks'})
+              Top 3 Recommended Stocks to Buy ({capTier === 'mega' ? 'Mega Cap' : 'Large Cap'} • {market === 'US' ? 'US Stocks' : 'IND Stocks'})
             </h2>
             <p className="text-xs text-slate-300 mt-0.5 max-w-3xl">
               High-conviction recommendations powered by <strong>Galora AI&apos;s Proprietary Intelligence Engine</strong>.
@@ -266,61 +301,93 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
 
         {/* Market Switcher & Controls */}
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end">
-          {/* High-Visibility IND Top 3 (Orange) / US Top 3 (Blue) Market Switcher */}
-          <div className="grid grid-cols-2 sm:flex items-center bg-slate-900/95 p-1.5 rounded-2xl border border-white/20 shadow-xl gap-2 w-full sm:w-auto">
+          {/* Cap Tier Tabs: Mega cap (36) in Blue vs Large cap (82) in Green */}
+          <div className="grid grid-cols-2 sm:flex items-center bg-slate-900/95 p-1.5 rounded-2xl border border-white/20 shadow-xl gap-1.5 w-full sm:w-auto">
             <button
               type="button"
-              onClick={() => setMarket('INDIA')}
-              className={`px-4 py-2 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                market === 'INDIA'
-                  ? 'bg-gradient-to-r from-orange-500 via-orange-600 to-amber-600 text-white shadow-lg shadow-orange-500/50 border-2 border-orange-300 ring-2 ring-orange-400/40 scale-[1.02]'
-                  : 'bg-slate-800/80 text-slate-300 border border-white/15 hover:bg-slate-700 hover:text-white'
+              onClick={() => setCapTier('mega')}
+              className={`px-3.5 py-2 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                capTier === 'mega'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 border-2 border-blue-300 ring-2 ring-blue-400/40 scale-[1.02]'
+                  : 'bg-slate-800/80 text-slate-300 border border-white/15 hover:bg-slate-700 hover:text-white hover:border-blue-400/40'
               }`}
             >
-              {market === 'INDIA' && <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>}
-              <span>🇮🇳 ₹ IND Top 3</span>
+              <span>🏛️ Mega cap</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white/20">36</span>
             </button>
             <button
               type="button"
-              onClick={() => setMarket('US')}
-              className={`px-4 py-2 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                market === 'US'
-                  ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/50 border-2 border-blue-300 ring-2 ring-blue-400/40 scale-[1.02]'
-                  : 'bg-slate-800/80 text-slate-300 border border-white/15 hover:bg-slate-700 hover:text-white'
+              onClick={() => setCapTier('large')}
+              className={`px-3.5 py-2 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                capTier === 'large'
+                  ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg shadow-emerald-500/50 border-2 border-emerald-300 ring-2 ring-emerald-400/40 scale-[1.02]'
+                  : 'bg-slate-800/80 text-slate-300 border border-white/15 hover:bg-slate-700 hover:text-white hover:border-emerald-400/40'
               }`}
             >
-              {market === 'US' && <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>}
-              <span>🇺🇸 $ US Top 3</span>
+              <span>🚀 Large cap</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white/20">82</span>
             </button>
           </div>
 
-          {/* Secondary Controls Row: Elegant Target Dropdown, Recalculate, Quant Agent */}
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            {/* Elegant Target Horizon Dropdown */}
-            <div className="flex items-center gap-2 bg-slate-900/95 px-3 py-1.5 rounded-xl border border-emerald-500/40 shadow-inner">
-              <div className="flex items-center gap-1.5 text-emerald-400 font-extrabold text-xs">
-                <Target size={14} className="text-emerald-400 shrink-0" />
-                <span className="uppercase tracking-wider text-[11px] text-emerald-300 font-bold">Target:</span>
-              </div>
-              <div className="relative inline-flex items-center">
-                <select
-                  value={targetTimeframe}
-                  onChange={(e) => setTargetTimeframe(e.target.value)}
-                  className="appearance-none bg-slate-800/90 hover:bg-slate-800 text-emerald-300 font-black pl-2.5 pr-7 py-1 rounded-lg border border-emerald-400/40 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer text-xs sm:text-sm transition-all"
-                  style={{ minWidth: '110px' }}
-                  title="Select dynamic target price timeframe (6 Months or 12 Months)"
-                >
-                  <option value="sixMonths" className="bg-slate-900 text-white font-bold">6 Months</option>
-                  <option value="twelveMonths" className="bg-slate-900 text-white font-bold">12 Months</option>
-                </select>
-                <ChevronDown size={13} className="absolute right-2 pointer-events-none text-emerald-400" />
-              </div>
+          {/* Static Market Indicator */}
+          <div className="flex items-center gap-2 bg-slate-900/95 px-3 py-2 rounded-xl border border-white/15 shadow-inner">
+            <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${market === 'INDIA' ? 'bg-orange-400' : 'bg-blue-400'}`}></span>
+            <span className="text-xs sm:text-sm font-bold text-slate-200">
+              {market === 'INDIA' ? '🇮🇳 ₹ IND Stocks' : '🇺🇸 $ US Stocks'}
+            </span>
+          </div>
+
+          {/* Target Horizon Buttons: Quarter, 6 Months, 12 Months (Adaptive Grid for Mobile, Flex for Tablet/Web) */}
+          <div className="grid grid-cols-3 sm:flex items-center bg-slate-900/95 p-1 rounded-xl border border-emerald-500/40 shadow-inner gap-1 w-full sm:w-auto">
+            <div className="hidden sm:flex items-center gap-1.5 px-2 text-emerald-400 font-extrabold text-xs shrink-0">
+              <Target size={14} className="text-emerald-400 shrink-0" />
+              <span className="uppercase tracking-wider text-[11px] text-emerald-300 font-bold">Target:</span>
             </div>
+            <button
+              type="button"
+              onClick={() => setTargetTimeframe('quarterly')}
+              className={`w-full sm:w-auto text-center px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                targetTimeframe === 'quarterly'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/40 border border-emerald-300/80 scale-[1.02]'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+              }`}
+              title="Target price for Quarter (3M)"
+            >
+              Quarter
+            </button>
+            <button
+              type="button"
+              onClick={() => setTargetTimeframe('sixMonths')}
+              className={`w-full sm:w-auto text-center px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                targetTimeframe === 'sixMonths'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/40 border border-emerald-300/80 scale-[1.02]'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+              }`}
+              title="Target price for 6 Months"
+            >
+              6 Months
+            </button>
+            <button
+              type="button"
+              onClick={() => setTargetTimeframe('twelveMonths')}
+              className={`w-full sm:w-auto text-center px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                targetTimeframe === 'twelveMonths'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/40 border border-emerald-300/80 scale-[1.02]'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+              }`}
+              title="Target price for 12 Months"
+            >
+              12 Months
+            </button>
+          </div>
+
+          {/* Action Buttons: Recalculate & Quant Agent */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
 
             <button
               onClick={() => fetchPicks(true)}
               disabled={refreshing}
-              className="btn btn-outline py-1.5 px-2.5 text-[11px] sm:text-xs flex items-center gap-1.5 hover:border-blue-400"
+              className="btn btn-outline flex-1 sm:flex-initial py-2 sm:py-1.5 px-3 sm:px-2.5 text-xs flex items-center justify-center gap-1.5 hover:border-blue-400"
               title="Refresh live quotes and recalculate top stock recommendations"
             >
               <RefreshCw size={13} className={refreshing ? 'animate-spin text-blue-400' : ''} />
@@ -329,7 +396,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
 
             <button
               onClick={() => navigate('/deep-analysis?tab=quant')}
-              className="btn btn-outline py-1.5 px-2.5 text-[11px] sm:text-xs flex items-center gap-1.5 border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
+              className="btn btn-outline flex-1 sm:flex-initial py-2 sm:py-1.5 px-3 sm:px-2.5 text-xs flex items-center justify-center gap-1.5 border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
             >
               <Cpu size={13} />
               <span>Quant Agent</span>
@@ -353,9 +420,9 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
 
       {/* Loading Skeleton */}
       {loading && activeTop3.length === 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="p-5 rounded-2xl bg-slate-900/70 border border-white/10 animate-pulse h-80 flex flex-col justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+          {[1, 2, 3].map((n, idx) => (
+            <div key={n} className={`p-5 rounded-2xl bg-slate-900/70 border border-white/10 animate-pulse h-80 flex flex-col justify-between ${idx === 2 ? 'md:col-span-2 lg:col-span-1' : ''}`}>
               <div className="h-6 bg-slate-800 rounded w-1/2" />
               <div className="h-12 bg-slate-800 rounded w-3/4" />
               <div className="h-24 bg-slate-800 rounded w-full" />
@@ -364,9 +431,9 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
           ))}
         </div>
       ) : (
-        /* Top 3 Recommended Stocks Grid */
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {activeTop3.map((stock) => {
+        /* Top 3 Recommended Stocks Grid (1 Col Mobile, 2 Col Tablet, 3 Col Web/Desktop) */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+          {activeTop3.map((stock, idx) => {
             const style = getRankStyles(stock.rank);
             const isUp = (stock.changePct || 0) >= 0;
             const stockCurr = stock.currency || (market === 'INDIA' ? '₹' : '$');
@@ -374,7 +441,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
             return (
               <div
                 key={stock.ticker}
-                className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between shadow-xl ${style.border} ${style.bg}`}
+                className={`p-4 sm:p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between shadow-xl ${style.border} ${style.bg} ${idx === 2 ? 'md:col-span-2 lg:col-span-1' : ''}`}
               >
                 <div>
                   {/* Top Row: Rank Badge + Strong Buy Badge */}
@@ -421,7 +488,7 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
                   {/* Live Price, 24h Change, and Algo Target Price */}
                   {(() => {
                     const targetInfo = getStockTargetInfo(stock);
-                    const targetLabel = String(targetInfo.label || '12M').replace(' Months', 'M');
+                    const targetLabel = targetInfo.key === 'quarterly' ? 'Quarter' : String(targetInfo.label || '12M').replace(' Months', 'M');
                     return (
                       <div className="p-3 rounded-xl bg-slate-950/70 border border-white/10 mb-4">
                         {/* Synchronized Row 1: Headers aligned on the exact same row */}
@@ -513,8 +580,8 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
 
       {/* Instant Trade Execution Modal for Top Pick */}
       {tradeModalStock && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="glass-panel max-w-md w-full p-6 rounded-2xl border border-emerald-500/40 shadow-2xl bg-slate-900">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+          <div className="glass-panel max-w-md w-full max-h-[92vh] overflow-y-auto overscroll-contain p-4 sm:p-6 rounded-2xl border border-emerald-500/40 shadow-2xl bg-slate-900">
             <div className="flex justify-between items-start mb-4 pb-3 border-b border-white/10">
               <div>
                 <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">

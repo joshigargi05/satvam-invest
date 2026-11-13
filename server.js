@@ -1377,25 +1377,38 @@ const computeStockAlgoEvaluation = (company, quote = {}, extraBoost = 0) => {
   };
 };
 
+// Full 36 Institutional Mega Cap Stocks (22 US + 14 Indian)
+const MEGA_CAP_TICKERS = new Set([
+  // 22 US Mega Cap Stocks
+  'NVDA', 'AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'LLY', 'ORCL',
+  'AMD', 'PLTR', 'JPM', 'GS', 'V', 'MA', 'XOM', 'CVX', 'WMT', 'HD', 'PG', 'ISRG',
+  // 14 Indian Mega Cap Stocks
+  'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK', 'BHARTIARTL', 'SBIN', 'LT',
+  'ITC', 'TITAN', 'HAL', 'BEL', 'TRENT', 'M&M'
+]);
+
 // Stabilized Investment Horizon Cache & Hysteresis Engine
 // Prevents rapid ranking churn so investors have stable recommendations to execute upon.
 // Recommendation ranking is held steady for a 15-minute investment window, while live prices/quotes remain real-time.
 const TOP_PICKS_STABILITY_TTL = 15 * 60 * 1000; // 15-minute stable recommendation window
 const topPicksStabilityCache = {
-  US: {
-    timestamp: 0,
-    rankedTickers: [], // e.g. ['AMZN', 'NVDA', 'MSFT']
-    evaluatedItems: []
-  },
-  INDIA: {
-    timestamp: 0,
-    rankedTickers: [], // e.g. ['HDFCBANK', 'TCS', 'RELIANCE']
-    evaluatedItems: []
-  }
+  US: { timestamp: 0, rankedTickers: [], evaluatedItems: [] },
+  INDIA: { timestamp: 0, rankedTickers: [], evaluatedItems: [] },
+  US_MEGA: { timestamp: 0, rankedTickers: [], evaluatedItems: [] },
+  US_LARGE: { timestamp: 0, rankedTickers: [], evaluatedItems: [] },
+  INDIA_MEGA: { timestamp: 0, rankedTickers: [], evaluatedItems: [] },
+  INDIA_LARGE: { timestamp: 0, rankedTickers: [], evaluatedItems: [] }
 };
 
-const evaluateAndRankTop3 = (market, candidates, liveQuoteMap, forceRecalculate = false, rotateAfterTicker = '') => {
-  const cache = topPicksStabilityCache[market];
+const evaluateAndRankTop3 = (cacheKey, market, candidates, liveQuoteMap, forceRecalculate = false, rotateAfterTicker = '') => {
+  if (!topPicksStabilityCache[cacheKey]) {
+    topPicksStabilityCache[cacheKey] = {
+      timestamp: 0,
+      rankedTickers: [],
+      evaluatedItems: []
+    };
+  }
+  const cache = topPicksStabilityCache[cacheKey];
   const now = Date.now();
   const isMarketOpen = market === 'INDIA' ? isIndianMarketOpen() : isUSMarketOpen();
   const rotatedList = String(rotateAfterTicker || '')
@@ -1478,7 +1491,7 @@ const evaluateAndRankTop3 = (market, candidates, liveQuoteMap, forceRecalculate 
   }));
 
   // Store in stability cache
-  topPicksStabilityCache[market] = {
+  topPicksStabilityCache[cacheKey] = {
     timestamp: now,
     rankedTickers: top3.map(p => p.ticker),
     evaluatedItems: top3
@@ -1491,14 +1504,23 @@ const evaluateAndRankTop3 = (market, candidates, liveQuoteMap, forceRecalculate 
 };
 
 // Top 3 Stock Recommendations Endpoint (Curated High-Conviction Universe + Stabilized 15-Min Horizon)
+// Supports two distinct market capitalization tiers: "mega" (previous 36 stocks) and "large" (newly modeled 82 stocks)
 app.get('/api/algo-top-picks', async (req, res) => {
   const requestedMarket = (req.query.market || 'US').toUpperCase();
   const forceRefresh = req.query.forceRefresh === 'true';
   const rotateAfterTicker = String(req.query.rotateAfterTicker || '').trim().toUpperCase();
+  const requestedCapTier = String(req.query.capTier || 'mega').toLowerCase() === 'large' ? 'large' : 'mega';
 
   try {
     const baseUsCandidates = algoStockCatalog.filter(s => s.market === 'US');
     const indiaCandidates = algoStockCatalog.filter(s => s.market === 'INDIA');
+
+    // Split candidate sets into Mega Cap (36 stocks: 22 US + 14 Indian) and Large Cap (82 stocks: 36 US + 46 Indian)
+    const usMegaCandidates = baseUsCandidates.filter(s => MEGA_CAP_TICKERS.has(s.t));
+    const usLargeCandidates = baseUsCandidates.filter(s => !MEGA_CAP_TICKERS.has(s.t));
+
+    const indiaMegaCandidates = indiaCandidates.filter(s => MEGA_CAP_TICKERS.has(s.t));
+    const indiaLargeCandidates = indiaCandidates.filter(s => !MEGA_CAP_TICKERS.has(s.t));
 
     // Fast path when rotating #1 stock: skip slow screener call and use cached quotes when available
     const liveMovers = rotateAfterTicker ? [] : await fetchLiveMarketMovers();
@@ -1529,16 +1551,37 @@ app.get('/api/algo-top-picks', async (req, res) => {
       liveQuoteMap = await getBatchQuotes(allSymbols, 20);
     }
 
-    const usResult = evaluateAndRankTop3(
+    // Evaluate Mega Cap top 3 recommendations
+    const usMegaResult = evaluateAndRankTop3(
+      'US_MEGA',
       'US',
-      baseUsCandidates,
+      usMegaCandidates,
       liveQuoteMap,
       forceRefresh && requestedMarket === 'US',
       requestedMarket === 'US' ? rotateAfterTicker : ''
     );
-    const indiaResult = evaluateAndRankTop3(
+    const indiaMegaResult = evaluateAndRankTop3(
+      'INDIA_MEGA',
       'INDIA',
-      indiaCandidates,
+      indiaMegaCandidates,
+      liveQuoteMap,
+      forceRefresh && requestedMarket === 'INDIA',
+      requestedMarket === 'INDIA' ? rotateAfterTicker : ''
+    );
+
+    // Evaluate Large Cap top 3 recommendations
+    const usLargeResult = evaluateAndRankTop3(
+      'US_LARGE',
+      'US',
+      usLargeCandidates,
+      liveQuoteMap,
+      forceRefresh && requestedMarket === 'US',
+      requestedMarket === 'US' ? rotateAfterTicker : ''
+    );
+    const indiaLargeResult = evaluateAndRankTop3(
+      'INDIA_LARGE',
+      'INDIA',
+      indiaLargeCandidates,
       liveQuoteMap,
       forceRefresh && requestedMarket === 'INDIA',
       requestedMarket === 'INDIA' ? rotateAfterTicker : ''
@@ -1549,27 +1592,45 @@ app.get('/api/algo-top-picks', async (req, res) => {
       return q && Math.abs(q.changePct || 0) >= 1.5;
     }).length;
 
-    const usTopPicks = usResult.picks;
-    const indiaTopPicks = indiaResult.picks;
+    // Active picks correspond to requested category tab (Mega Cap is default)
+    const activeTopPicks = requestedCapTier === 'large'
+      ? (requestedMarket === 'INDIA' ? indiaLargeResult.picks : usLargeResult.picks)
+      : (requestedMarket === 'INDIA' ? indiaMegaResult.picks : usMegaResult.picks);
+
+    const activeResult = requestedCapTier === 'large'
+      ? (requestedMarket === 'INDIA' ? indiaLargeResult : usLargeResult)
+      : (requestedMarket === 'INDIA' ? indiaMegaResult : usMegaResult);
 
     res.json({
       market: requestedMarket,
-      updatedAt: new Date(requestedMarket === 'INDIA' ? indiaResult.lastCalculatedAt : usResult.lastCalculatedAt).toISOString(),
+      capTier: requestedCapTier,
+      updatedAt: new Date(activeResult.lastCalculatedAt).toISOString(),
       lastRefreshedAt: new Date().toISOString(),
-      isStabilizedCache: requestedMarket === 'INDIA' ? indiaResult.isStabilizedCache : usResult.isStabilizedCache,
+      isStabilizedCache: activeResult.isStabilizedCache,
       stabilityWindowMinutes: 15,
       algorithmName: 'Galora AI Proprietary Intelligence Engine',
       universeStats: {
         usScannedCount: baseUsCandidates.length,
         indiaScannedCount: indiaCandidates.length,
-        usLiveMoversCount: liveMovers.length,
-        indiaLiveMoversCount: indiaMoversCount,
+        usMegaCount: usMegaCandidates.length,
+        usLargeCount: usLargeCandidates.length,
+        indiaMegaCount: indiaMegaCandidates.length,
+        indiaLargeCount: indiaLargeCandidates.length,
         totalUniverseCount: baseUsCandidates.length + indiaCandidates.length,
         mlEngineCoverage: Object.keys(realXgbPredictions).length
       },
-      topPicks: requestedMarket === 'INDIA' ? indiaTopPicks : usTopPicks,
-      usTopPicks,
-      indiaTopPicks
+      topPicks: activeTopPicks,
+      // Dedicated Tab Payloads for Active Market
+      megaCapTopPicks: requestedMarket === 'INDIA' ? indiaMegaResult.picks : usMegaResult.picks,
+      largeCapTopPicks: requestedMarket === 'INDIA' ? indiaLargeResult.picks : usLargeResult.picks,
+      // Full Cross-Market Category Payloads
+      megaCapUsTopPicks: usMegaResult.picks,
+      megaCapIndiaTopPicks: indiaMegaResult.picks,
+      largeCapUsTopPicks: usLargeResult.picks,
+      largeCapIndiaTopPicks: indiaLargeResult.picks,
+      // Backwards Compatibility fields
+      usTopPicks: requestedCapTier === 'large' ? usLargeResult.picks : usMegaResult.picks,
+      indiaTopPicks: requestedCapTier === 'large' ? indiaLargeResult.picks : indiaMegaResult.picks
     });
 
     checkAndTriggerTargetAchievements(liveQuoteMap).catch(() => {});

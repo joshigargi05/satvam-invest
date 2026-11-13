@@ -47,9 +47,9 @@ export function TradeResultModal({ modalState, onClose }) {
   const isBuy = action === 'BUY';
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div 
-        className={`relative w-full max-w-md rounded-2xl p-6 text-white shadow-2xl border ${
+        className={`relative w-full max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-2xl p-4 sm:p-6 text-white shadow-2xl border ${
           !isSuccess
             ? 'bg-slate-900/95 border-amber-500/50 shadow-amber-500/20'
             : isBuy
@@ -231,8 +231,8 @@ export function SellPositionModal({ modalState, onClose, onConfirmSell }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-md rounded-2xl p-6 text-white shadow-2xl border border-rose-500/40 bg-slate-900/95 shadow-rose-500/15">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-2xl p-4 sm:p-6 text-white shadow-2xl border border-rose-500/40 bg-slate-900/95 shadow-rose-500/15">
         {/* Close Button */}
         <button
           type="button"

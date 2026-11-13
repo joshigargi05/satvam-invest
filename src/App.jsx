@@ -162,8 +162,8 @@ function Navigation() {
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="md-hidden flex justify-between items-center p-3.5 bg-black/50 border-b border-white/5">
+      {/* Mobile Header (Native-like sticky app bar with glassmorphism blur) */}
+      <div className="md-hidden sticky top-0 z-40 flex justify-between items-center p-3.5 bg-slate-950/90 backdrop-blur-md border-b border-white/10 shadow-lg">
         <div className="flex items-center gap-2.5">
           <GaloraLogo size={30} />
           <div>

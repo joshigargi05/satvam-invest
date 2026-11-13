@@ -98,10 +98,11 @@ export const getAlgoRecommendations = async (query) => {
   }
 };
 
-export const getTopAlgoPicks = async (market = 'US', forceRefresh = false, rotateAfterTicker = '') => {
+export const getTopAlgoPicks = async (market = 'US', forceRefresh = false, rotateAfterTicker = '', capTier = 'mega') => {
   try {
     const rotateParam = rotateAfterTicker ? `&rotateAfterTicker=${encodeURIComponent(rotateAfterTicker)}` : '';
-    const url = `/api/algo-top-picks?market=${market}${forceRefresh ? '&forceRefresh=true' : ''}${rotateParam}`;
+    const capParam = capTier ? `&capTier=${encodeURIComponent(capTier)}` : '';
+    const url = `/api/algo-top-picks?market=${market}${forceRefresh ? '&forceRefresh=true' : ''}${rotateParam}${capParam}`;
     const response = await apiFetch(url);
     if (!response.ok) return null;
     return await response.json();

@@ -13,6 +13,46 @@ MODEL_PATH = os.path.join(os.path.dirname(__file__), 'xgb_alpha_model.json')
 META_PATH = os.path.join(os.path.dirname(__file__), 'model_metadata.json')
 OUTPUT_BATCH_PATH = os.path.join(os.path.dirname(__file__), 'latest_predictions.json')
 
+# Full Institutional Universe Catalog (118 Equities)
+US_TICKERS = [
+    'NVDA', 'GOOGL', 'MU', 'AVGO', 'MSFT', 'META', 'AMZN', 'TSM', 'LLY', 'PLTR',
+    'ORCL', 'NOW', 'CRWD', 'PANW', 'AAPL', 'AMD', 'COST', 'GE', 'AMAT', 'ISRG',
+    'CRM', 'NFLX', 'JPM', 'LRCX', 'QCOM', 'NTAP', 'RTX', 'LMT', 'CAT', 'GS',
+    'MS', 'BLK', 'V', 'MA', 'AXP', 'XOM', 'TSLA', 'ABBV', 'IBM', 'CVX',
+    'UBER', 'UNH', 'WMT', 'HD', 'BAC', 'TMO', 'ADBE', 'TXN', 'PG', 'JNJ',
+    'MRK', 'KO', 'PEP', 'MCD', 'CSCO', 'PYPL', 'INTC', 'DIS'
+]
+
+INDIAN_TICKERS = [
+    'RELIANCE', 'TCS', 'TATAMOTORS', 'LT', 'HAL', 'BEL', 'TRENT', 'INFY', 'SBIN', 'ICICIBANK',
+    'M&M', 'SUNPHARMA', 'BHARTIARTL', 'HDFCBANK', 'BAJFINANCE', 'HCLTECH', 'MARUTI', 'NTPC',
+    'TITAN', 'ADANIPORTS', 'BAJAJ-AUTO', 'ITC', 'AXISBANK', 'KOTAKBANK', 'ADANIENT', 'POWERGRID',
+    'ULTRACEMCO', 'COALINDIA', 'CIPLA', 'APOLLOHOSP', 'EICHERMOT', 'DIVISLAB', 'ONGC',
+    'HINDUNILVR', 'TATASTEEL', 'JSWSTEEL', 'HINDALCO', 'GRASIM', 'TECHM', 'WIPRO',
+    'BAJAJFINSV', 'NESTLEIND', 'DRREDDY', 'SBILIFE', 'HDFCLIFE', 'BPCL', 'BRITANNIA',
+    'TATACONSUM', 'HEROMOTOCO', 'SHRIRAMFIN', 'ASIANPAINT', 'INDUSINDBK', 'MEESHO', 'SWIGGY',
+    'ETERNAL', 'ZOMATO', 'PAYTM', 'NYKAA', 'JIOFIN', 'TATATECH'
+]
+
+FULL_CATALOG = US_TICKERS + INDIAN_TICKERS
+
+TICKER_MAP = {
+    'TATAMOTORS': 'TMPV.NS',
+    'ZOMATO': 'ETERNAL.NS',
+}
+
+INDIAN_SET = set(INDIAN_TICKERS)
+
+def get_yf_ticker(sym):
+    clean = sym.strip().upper()
+    if clean in TICKER_MAP:
+        return TICKER_MAP[clean]
+    if clean.endswith('.NS') or clean.endswith('.BO'):
+        return clean
+    if clean in INDIAN_SET:
+        return f"{clean}.NS"
+    return clean
+
 def load_model_and_meta():
     if not os.path.exists(MODEL_PATH):
         raise FileNotFoundError(f"Model not found at {MODEL_PATH}. Run train_xgboost.py first.")
@@ -27,28 +67,33 @@ def load_model_and_meta():
             
     return model, meta
 
-def predict_single_symbol(symbol, model, meta):
+def predict_single_symbol(symbol, model, meta, df=None):
     clean_sym = symbol.strip().upper()
-    is_india = clean_sym.endswith('.NS') or clean_sym in [
-        'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK', 'BHARTIARTL',
-        'SBIN', 'LT', 'ITC', 'HINDUNILVR', 'BAJFINANCE', 'TATAMOTORS',
-        'MARUTI', 'SUNPHARMA', 'AXISBANK', 'KOTAKBANK', 'TITAN', 'ADANIENT',
-        'ADANIPORTS', 'POWERGRID', 'NTPC', 'ULTRACEMCO', 'TATASTEEL',
-        'WIPRO', 'HAL', 'BEL', 'TRENT', 'M&M'
-    ]
-
-    yf_ticker = f"{clean_sym}.NS" if is_india and not clean_sym.endswith('.NS') else clean_sym
+    is_india = clean_sym.endswith('.NS') or clean_sym in INDIAN_SET or clean_sym in ['ZOMATO', 'TATAMOTORS']
+    yf_ticker = get_yf_ticker(clean_sym)
     
     try:
-        df = yf.download(yf_ticker, period='1y', interval='1d', progress=False)
-        if df.empty or len(df) < 60:
+        if df is None:
+            df = yf.download(yf_ticker, period='1y', interval='1d', progress=False)
+
+        if df is None or df.empty or len(df) < 15:
             return None
         
         # Flatten MultiIndex columns if present
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
-        feat_df = compute_features(df)
+        # Ensure required columns exist
+        req_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+        if not all(col in df.columns for col in req_cols):
+            return None
+
+        # Clean NaNs in OHLCV
+        clean_df = df[req_cols].dropna().copy()
+        if len(clean_df) < 15:
+            return None
+
+        feat_df = compute_features(clean_df)
         last_row = feat_df.iloc[-1]
         
         feature_vector = pd.DataFrame([last_row[FEATURE_COLS]])
@@ -56,8 +101,7 @@ def predict_single_symbol(symbol, model, meta):
         # Raw probability of outperforming benchmark
         prob = float(model.predict_proba(feature_vector)[0][1])
         
-        # Scale probability to 0-100 XGBoost Score
-        # Probabilities typically range from ~0.25 to ~0.75, so normalize to 50-98 range
+        # Scale probability to 0-100 XGBoost Score (normalized to 50-98 range)
         scaled_score = min(98.5, max(42.0, 50.0 + (prob - 0.35) * 110.0))
         win_prob = round(scaled_score * 0.92, 1)
 
@@ -67,7 +111,7 @@ def predict_single_symbol(symbol, model, meta):
         
         contributions = []
         for col in FEATURE_COLS:
-            val = float(last_row[col])
+            val = float(last_row[col]) if pd.notnull(last_row[col]) else 0.0
             mean = feature_stats.get(col, {}).get('mean', 0.0)
             std = feature_stats.get(col, {}).get('std', 1.0)
             z_score = (val - mean) / (std or 1.0)
@@ -88,8 +132,8 @@ def predict_single_symbol(symbol, model, meta):
         rsi_val = int(round(float(last_row['rsi_14']) * 100))
         vwap_dev = round(float(last_row['vwap_ratio']) * 100, 2)
         vol_20 = round(float(last_row['volatility_20d']) * 100, 1)
-        current_price = float(df['Close'].iloc[-1])
-        change_pct = float(df['Close'].pct_change().iloc[-1] * 100)
+        current_price = float(clean_df['Close'].iloc[-1])
+        change_pct = float((clean_df['Close'].pct_change().iloc[-1] if len(clean_df) > 1 else 0.0) * 100)
 
         return {
             "symbol": clean_sym,
@@ -111,18 +155,55 @@ def predict_single_symbol(symbol, model, meta):
     except Exception as e:
         return {"symbol": clean_sym, "error": str(e)}
 
-def batch_predict(symbols, model, meta):
+def batch_predict(symbols=None, model=None, meta=None):
+    if symbols is None:
+        symbols = FULL_CATALOG
+
+    if model is None or meta is None:
+        model, meta = load_model_and_meta()
+
     print(f"Batch evaluating {len(symbols)} tickers with real XGBoost model...")
+
+    # Pre-fetch all mapped yfinance symbols in a single high-speed bulk download
+    yf_symbol_map = {sym: get_yf_ticker(sym) for sym in symbols}
+    unique_yf = list(set(yf_symbol_map.values()))
+
+    print(f"Downloading historical candles for {len(unique_yf)} unique market tickers...")
+    try:
+        bulk_raw = yf.download(unique_yf, period='1y', interval='1d', progress=False, group_by='ticker')
+    except Exception as e:
+        print(f"Bulk download failed ({e}), falling back to iterative download...")
+        bulk_raw = None
+
     results = {}
+    success_count = 0
+
     for sym in symbols:
-        pred = predict_single_symbol(sym, model, meta)
+        yf_sym = yf_symbol_map[sym]
+        sub_df = None
+
+        if bulk_raw is not None and isinstance(bulk_raw.columns, pd.MultiIndex):
+            try:
+                if yf_sym in bulk_raw.columns.levels[0]:
+                    sub_df = bulk_raw[yf_sym].dropna().copy()
+            except Exception:
+                sub_df = None
+
+        pred = predict_single_symbol(sym, model, meta, df=sub_df)
         if pred and "xgboostScore" in pred:
             results[sym] = pred
-            print(f"  [{pred['market']}] {sym:<10} Score: {pred['xgboostScore']}% | Win Prob: {pred['winProbability']}%")
+            success_count += 1
+            print(f"  [{pred['market']:<5}] {sym:<12} Score: {pred['xgboostScore']:<4}% | Win Prob: {pred['winProbability']:<4}% | Top Driver: {pred['topFeatureDrivers'][0]['feature']} ({pred['topFeatureDrivers'][0]['impact']})")
+        else:
+            err = pred.get('error', 'insufficient candles') if pred else 'no data'
+            print(f"  [WARN ] {sym:<12} Prediction skipped: {err}")
 
+    # Write output to latest_predictions.json
     with open(OUTPUT_BATCH_PATH, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2)
-    print(f"\n[OK] Batch predictions saved to: {OUTPUT_BATCH_PATH}")
+
+    print(f"\n[OK] Successfully generated real XGBoost predictions for {success_count}/{len(symbols)} tickers.")
+    print(f"[OK] Saved to: {OUTPUT_BATCH_PATH}")
     return results
 
 if __name__ == '__main__':
@@ -136,15 +217,6 @@ if __name__ == '__main__':
     if args.symbol:
         res = predict_single_symbol(args.symbol, model, meta)
         print(json.dumps(res, indent=2))
-    elif args.batch:
-        sample_catalog = [
-            'NVDA', 'AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'LLY', 'ORCL',
-            'AMD', 'PLTR', 'JPM', 'GS', 'V', 'MA', 'XOM', 'CVX', 'WMT', 'HD', 'PG', 'ISRG',
-            'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK', 'BHARTIARTL', 'SBIN', 'LT',
-            'ITC', 'TATAMOTORS', 'TITAN', 'HAL', 'BEL', 'TRENT', 'M&M'
-        ]
-        batch_predict(sample_catalog, model, meta)
     else:
-        # Default test NVDA
-        res = predict_single_symbol('NVDA', model, meta)
-        print(json.dumps(res, indent=2))
+        # Default action: run batch on full catalog
+        batch_predict(FULL_CATALOG, model, meta)

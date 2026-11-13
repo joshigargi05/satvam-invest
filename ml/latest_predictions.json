@@ -2,488 +2,1973 @@
   "NVDA": {
     "symbol": "NVDA",
     "market": "US",
-    "currentPrice": 210.96,
-    "changePct": -0.59,
-    "xgboostScore": 66.7,
-    "winProbability": 61.4,
-    "rawProbability": 0.5018,
+    "currentPrice": 166.19,
+    "changePct": -4.34,
+    "xgboostScore": 69.9,
+    "winProbability": 64.3,
+    "rawProbability": 0.5308,
     "technicalIndicators": {
-      "rsi": 22,
-      "vwapDeviationPct": -6.75,
-      "realizedVol20Pct": 29.3,
-      "atrPct": 2.83
+      "rsi": 24,
+      "vwapDeviationPct": -11.15,
+      "realizedVol20Pct": 52.7,
+      "atrPct": 6.41
     },
     "topFeatureDrivers": [
-      {
-        "feature": "stoch_k",
-        "value": 0.0235,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": -0.0478,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "macd_hist",
-        "value": -0.01,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:00.262780"
-  },
-  "AAPL": {
-    "symbol": "AAPL",
-    "market": "US",
-    "currentPrice": 347.73,
-    "changePct": -0.14,
-    "xgboostScore": 65.6,
-    "winProbability": 60.3,
-    "rawProbability": 0.4916,
-    "technicalIndicators": {
-      "rsi": 72,
-      "vwapDeviationPct": 2.44,
-      "realizedVol20Pct": 16.4,
-      "atrPct": 1.78
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "volatility_ratio",
-        "value": 0.6705,
-        "impact": "Bearish"
-      },
       {
         "feature": "atr_pct",
-        "value": 0.0178,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "volatility_20d",
-        "value": 0.164,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:00.434001"
-  },
-  "MSFT": {
-    "symbol": "MSFT",
-    "market": "US",
-    "currentPrice": 524.51,
-    "changePct": 0.66,
-    "xgboostScore": 69.7,
-    "winProbability": 64.2,
-    "rawProbability": 0.5295,
-    "technicalIndicators": {
-      "rsi": 50,
-      "vwapDeviationPct": -0.5,
-      "realizedVol20Pct": 19.7,
-      "atrPct": 2.1
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "ema_ratio_20_50",
-        "value": 0.0394,
+        "value": 0.0641,
         "impact": "Bullish"
       },
       {
-        "feature": "volatility_ratio",
-        "value": 0.8088,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "atr_pct",
-        "value": 0.021,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:00.590302"
-  },
-  "AMZN": {
-    "symbol": "AMZN",
-    "market": "US",
-    "currentPrice": 248.0,
-    "changePct": -0.95,
-    "xgboostScore": 68.4,
-    "winProbability": 63.0,
-    "rawProbability": 0.5176,
-    "technicalIndicators": {
-      "rsi": 47,
-      "vwapDeviationPct": -2.56,
-      "realizedVol20Pct": 32.8,
-      "atrPct": 2.86
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "stoch_k",
-        "value": 0.0821,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "volatility_ratio",
-        "value": 0.7658,
-        "impact": "Bearish"
-      },
-      {
         "feature": "price_to_ema20",
-        "value": -0.0279,
+        "value": -0.1541,
         "impact": "Bearish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 2.194,
+        "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:00.724016"
+    "evaluatedAt": "2026-11-13T17:10:08.996417"
   },
   "GOOGL": {
     "symbol": "GOOGL",
     "market": "US",
-    "currentPrice": 320.21,
-    "changePct": -1.24,
-    "xgboostScore": 63.6,
-    "winProbability": 58.6,
-    "rawProbability": 0.4741,
+    "currentPrice": 298.7,
+    "changePct": 1.79,
+    "xgboostScore": 70.9,
+    "winProbability": 65.2,
+    "rawProbability": 0.5397,
     "technicalIndicators": {
-      "rsi": 26,
-      "vwapDeviationPct": -6.81,
-      "realizedVol20Pct": 20.9,
-      "atrPct": 2.62
+      "rsi": 38,
+      "vwapDeviationPct": -0.3,
+      "realizedVol20Pct": 51.9,
+      "atrPct": 3.83
     },
     "topFeatureDrivers": [
       {
-        "feature": "stoch_k",
-        "value": 0.0008,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": -0.0599,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "bb_pct_b",
-        "value": -0.1553,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:00.849207"
-  },
-  "META": {
-    "symbol": "META",
-    "market": "US",
-    "currentPrice": 642.62,
-    "changePct": -0.96,
-    "xgboostScore": 67.6,
-    "winProbability": 62.2,
-    "rawProbability": 0.5099,
-    "technicalIndicators": {
-      "rsi": 24,
-      "vwapDeviationPct": -10.19,
-      "realizedVol20Pct": 41.7,
-      "atrPct": 3.93
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "macd_hist",
-        "value": -0.0201,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": -0.0841,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "ret_20d",
-        "value": -0.1451,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:00.971063"
-  },
-  "TSLA": {
-    "symbol": "TSLA",
-    "market": "US",
-    "currentPrice": 372.22,
-    "changePct": -0.63,
-    "xgboostScore": 72.6,
-    "winProbability": 66.8,
-    "rawProbability": 0.5552,
-    "technicalIndicators": {
-      "rsi": 46,
-      "vwapDeviationPct": 0.77,
-      "realizedVol20Pct": 36.5,
-      "atrPct": 3.14
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "ema_ratio_50_200",
-        "value": -0.0453,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "ret_60d",
-        "value": 0.2052,
+        "feature": "volatility_ratio",
+        "value": 1.485,
         "impact": "Bullish"
       },
       {
-        "feature": "price_to_ema200",
-        "value": -0.0321,
+        "feature": "macd_signal",
+        "value": -0.0479,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0567,
         "impact": "Bearish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:01.093120"
+    "evaluatedAt": "2026-11-13T17:10:09.074964"
+  },
+  "MU": {
+    "symbol": "MU",
+    "market": "US",
+    "currentPrice": 798.44,
+    "changePct": -1.59,
+    "xgboostScore": 98.5,
+    "winProbability": 90.6,
+    "rawProbability": 0.8372,
+    "technicalIndicators": {
+      "rsi": 44,
+      "vwapDeviationPct": -3.17,
+      "realizedVol20Pct": 102.5,
+      "atrPct": 8.03
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0803,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 1.0251,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": -0.0697,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.148907"
   },
   "AVGO": {
     "symbol": "AVGO",
     "market": "US",
-    "currentPrice": 321.68,
-    "changePct": -0.48,
-    "xgboostScore": 68.2,
-    "winProbability": 62.7,
-    "rawProbability": 0.515,
+    "currentPrice": 364.36,
+    "changePct": 5.54,
+    "xgboostScore": 67.1,
+    "winProbability": 61.7,
+    "rawProbability": 0.5056,
     "technicalIndicators": {
-      "rsi": 29,
-      "vwapDeviationPct": -7.94,
-      "realizedVol20Pct": 38.4,
-      "atrPct": 3.67
+      "rsi": 62,
+      "vwapDeviationPct": 10.7,
+      "realizedVol20Pct": 69.8,
+      "atrPct": 5.24
     },
     "topFeatureDrivers": [
       {
-        "feature": "ema_ratio_20_50",
-        "value": -0.0351,
+        "feature": "atr_pct",
+        "value": 0.0524,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.6975,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_5d",
+        "value": 0.2498,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.223146"
+  },
+  "MSFT": {
+    "symbol": "MSFT",
+    "market": "US",
+    "currentPrice": 523.0,
+    "changePct": 0.36,
+    "xgboostScore": 69.3,
+    "winProbability": 63.7,
+    "rawProbability": 0.5252,
+    "technicalIndicators": {
+      "rsi": 49,
+      "vwapDeviationPct": -1.57,
+      "realizedVol20Pct": 37.5,
+      "atrPct": 3.34
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3575,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "atr_pct",
+        "value": 0.0334,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": 0.095,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.296187"
+  },
+  "META": {
+    "symbol": "META",
+    "market": "US",
+    "currentPrice": 623.61,
+    "changePct": -0.82,
+    "xgboostScore": 66.3,
+    "winProbability": 61.0,
+    "rawProbability": 0.4981,
+    "technicalIndicators": {
+      "rsi": 44,
+      "vwapDeviationPct": -2.67,
+      "realizedVol20Pct": 40.6,
+      "atrPct": 3.36
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_20d",
+        "value": -0.1535,
         "impact": "Bearish"
       },
       {
-        "feature": "price_to_ema20",
-        "value": -0.0661,
+        "feature": "macd_signal",
+        "value": -0.0292,
         "impact": "Bearish"
       },
       {
-        "feature": "ret_60d",
-        "value": -0.1691,
+        "feature": "macd",
+        "value": -0.0277,
         "impact": "Bearish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:01.223919"
+    "evaluatedAt": "2026-11-13T17:10:09.372942"
+  },
+  "AMZN": {
+    "symbol": "AMZN",
+    "market": "US",
+    "currentPrice": 267.44,
+    "changePct": 0.48,
+    "xgboostScore": 70.7,
+    "winProbability": 65.0,
+    "rawProbability": 0.5378,
+    "technicalIndicators": {
+      "rsi": 64,
+      "vwapDeviationPct": 4.5,
+      "realizedVol20Pct": 42.7,
+      "atrPct": 3.95
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3412,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "atr_pct",
+        "value": 0.0395,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.4266,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.447363"
+  },
+  "TSM": {
+    "symbol": "TSM",
+    "market": "US",
+    "currentPrice": 405.49,
+    "changePct": -1.9,
+    "xgboostScore": 65.6,
+    "winProbability": 60.3,
+    "rawProbability": 0.4916,
+    "technicalIndicators": {
+      "rsi": 47,
+      "vwapDeviationPct": 0.84,
+      "realizedVol20Pct": 62.0,
+      "atrPct": 4.6
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.046,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.4701,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.6196,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.521540"
   },
   "LLY": {
     "symbol": "LLY",
     "market": "US",
-    "currentPrice": 1273.46,
-    "changePct": -2.54,
-    "xgboostScore": 69.6,
-    "winProbability": 64.0,
-    "rawProbability": 0.5283,
+    "currentPrice": 1427.28,
+    "changePct": -0.7,
+    "xgboostScore": 66.3,
+    "winProbability": 61.0,
+    "rawProbability": 0.4981,
     "technicalIndicators": {
-      "rsi": 70,
-      "vwapDeviationPct": 5.25,
-      "realizedVol20Pct": 31.0,
-      "atrPct": 3.25
+      "rsi": 74,
+      "vwapDeviationPct": 4.82,
+      "realizedVol20Pct": 38.4,
+      "atrPct": 3.54
     },
     "topFeatureDrivers": [
       {
-        "feature": "macd_hist",
-        "value": 0.0088,
+        "feature": "ema_ratio_20_50",
+        "value": 0.0605,
         "impact": "Bullish"
       },
       {
-        "feature": "macd",
-        "value": 0.0242,
+        "feature": "macd_signal",
+        "value": 0.0376,
         "impact": "Bullish"
       },
       {
-        "feature": "price_to_ema20",
-        "value": 0.0425,
-        "impact": "Bullish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:01.408979"
-  },
-  "ORCL": {
-    "symbol": "ORCL",
-    "market": "US",
-    "currentPrice": 126.16,
-    "changePct": 0.49,
-    "xgboostScore": 60.7,
-    "winProbability": 55.9,
-    "rawProbability": 0.4474,
-    "technicalIndicators": {
-      "rsi": 37,
-      "vwapDeviationPct": -6.64,
-      "realizedVol20Pct": 55.9,
-      "atrPct": 5.26
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "atr_pct",
-        "value": 0.0526,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "ema_ratio_50_200",
-        "value": -0.1508,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "price_to_ema200",
-        "value": -0.2363,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:01.541639"
-  },
-  "AMD": {
-    "symbol": "AMD",
-    "market": "US",
-    "currentPrice": 516.79,
-    "changePct": 1.74,
-    "xgboostScore": 72.0,
-    "winProbability": 66.2,
-    "rawProbability": 0.5499,
-    "technicalIndicators": {
-      "rsi": 27,
-      "vwapDeviationPct": -11.74,
-      "realizedVol20Pct": 50.9,
-      "atrPct": 5.66
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "atr_pct",
-        "value": 0.0566,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "macd_hist",
-        "value": -0.0251,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "ema_ratio_50_200",
-        "value": 0.2505,
+        "feature": "volatility_ratio",
+        "value": 1.2699,
         "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:01.662789"
+    "evaluatedAt": "2026-11-13T17:10:09.594115"
   },
   "PLTR": {
     "symbol": "PLTR",
     "market": "US",
-    "currentPrice": 196.75,
-    "changePct": 0.29,
-    "xgboostScore": 66.8,
-    "winProbability": 61.5,
-    "rawProbability": 0.5032,
+    "currentPrice": 171.58,
+    "changePct": -0.48,
+    "xgboostScore": 63.2,
+    "winProbability": 58.2,
+    "rawProbability": 0.4704,
     "technicalIndicators": {
-      "rsi": 55,
-      "vwapDeviationPct": 0.14,
-      "realizedVol20Pct": 45.3,
-      "atrPct": 4.56
+      "rsi": 31,
+      "vwapDeviationPct": -5.09,
+      "realizedVol20Pct": 62.2,
+      "atrPct": 5.53
     },
     "topFeatureDrivers": [
       {
-        "feature": "ret_60d",
-        "value": 0.6093,
+        "feature": "atr_pct",
+        "value": 0.0553,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.6225,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "bb_width",
+        "value": 0.3146,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.667082"
+  },
+  "ORCL": {
+    "symbol": "ORCL",
+    "market": "US",
+    "currentPrice": 127.11,
+    "changePct": -0.99,
+    "xgboostScore": 50.8,
+    "winProbability": 46.8,
+    "rawProbability": 0.3575,
+    "technicalIndicators": {
+      "rsi": 51,
+      "vwapDeviationPct": 0.19,
+      "realizedVol20Pct": 78.8,
+      "atrPct": 7.33
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0733,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.7883,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.1365,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.772774"
+  },
+  "NOW": {
+    "symbol": "NOW",
+    "market": "US",
+    "currentPrice": 100.66,
+    "changePct": -2.04,
+    "xgboostScore": 87.3,
+    "winProbability": 80.4,
+    "rawProbability": 0.6895,
+    "technicalIndicators": {
+      "rsi": 11,
+      "vwapDeviationPct": -17.57,
+      "realizedVol20Pct": 104.1,
+      "atrPct": 7.47
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "bb_width",
+        "value": 0.7867,
         "impact": "Bullish"
       },
       {
         "feature": "atr_pct",
-        "value": 0.0456,
+        "value": 0.0747,
         "impact": "Bullish"
       },
       {
-        "feature": "ema_ratio_20_50",
-        "value": 0.0612,
+        "feature": "volatility_20d",
+        "value": 1.041,
         "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:01.793315"
+    "evaluatedAt": "2026-11-13T17:10:09.847966"
   },
-  "JPM": {
-    "symbol": "JPM",
+  "CRWD": {
+    "symbol": "CRWD",
     "market": "US",
-    "currentPrice": 331.58,
-    "changePct": -1.47,
-    "xgboostScore": 59.3,
-    "winProbability": 54.5,
-    "rawProbability": 0.4341,
+    "currentPrice": 229.87,
+    "changePct": 0.35,
+    "xgboostScore": 70.1,
+    "winProbability": 64.5,
+    "rawProbability": 0.5324,
     "technicalIndicators": {
-      "rsi": 51,
-      "vwapDeviationPct": -0.59,
-      "realizedVol20Pct": 14.6,
-      "atrPct": 1.92
+      "rsi": 34,
+      "vwapDeviationPct": -4.1,
+      "realizedVol20Pct": 65.2,
+      "atrPct": 6.26
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0626,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.6516,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": 0.2384,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.923954"
+  },
+  "PANW": {
+    "symbol": "PANW",
+    "market": "US",
+    "currentPrice": 322.66,
+    "changePct": -3.53,
+    "xgboostScore": 74.1,
+    "winProbability": 68.2,
+    "rawProbability": 0.5694,
+    "technicalIndicators": {
+      "rsi": 31,
+      "vwapDeviationPct": -8.18,
+      "realizedVol20Pct": 65.3,
+      "atrPct": 6.18
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0618,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.6527,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": -0.0776,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:09.998763"
+  },
+  "AAPL": {
+    "symbol": "AAPL",
+    "market": "US",
+    "currentPrice": 354.88,
+    "changePct": -0.14,
+    "xgboostScore": 66.0,
+    "winProbability": 60.7,
+    "rawProbability": 0.4953,
+    "technicalIndicators": {
+      "rsi": 55,
+      "vwapDeviationPct": 2.98,
+      "realizedVol20Pct": 27.9,
+      "atrPct": 2.68
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2358,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "stoch_k",
+        "value": 0.869,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "bb_pct_b",
+        "value": 0.9365,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.072916"
+  },
+  "AMD": {
+    "symbol": "AMD",
+    "market": "US",
+    "currentPrice": 585.3,
+    "changePct": 5.86,
+    "xgboostScore": 73.2,
+    "winProbability": 67.3,
+    "rawProbability": 0.5607,
+    "technicalIndicators": {
+      "rsi": 57,
+      "vwapDeviationPct": 15.11,
+      "realizedVol20Pct": 117.5,
+      "atrPct": 7.62
     },
     "topFeatureDrivers": [
       {
         "feature": "volatility_20d",
-        "value": 0.1459,
+        "value": 1.1753,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "atr_pct",
+        "value": 0.0762,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_5d",
+        "value": 0.4473,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.152063"
+  },
+  "COST": {
+    "symbol": "COST",
+    "market": "US",
+    "currentPrice": 1092.21,
+    "changePct": 0.42,
+    "xgboostScore": 64.8,
+    "winProbability": 59.7,
+    "rawProbability": 0.485,
+    "technicalIndicators": {
+      "rsi": 72,
+      "vwapDeviationPct": 6.26,
+      "realizedVol20Pct": 22.6,
+      "atrPct": 1.98
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0415,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0608,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0263,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.233751"
+  },
+  "GE": {
+    "symbol": "GE",
+    "market": "US",
+    "currentPrice": 330.86,
+    "changePct": -3.47,
+    "xgboostScore": 68.3,
+    "winProbability": 62.9,
+    "rawProbability": 0.5168,
+    "technicalIndicators": {
+      "rsi": 69,
+      "vwapDeviationPct": 6.85,
+      "realizedVol20Pct": 44.7,
+      "atrPct": 3.56
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3707,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0126,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.4471,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.314777"
+  },
+  "AMAT": {
+    "symbol": "AMAT",
+    "market": "US",
+    "currentPrice": 380.95,
+    "changePct": -3.58,
+    "xgboostScore": 78.0,
+    "winProbability": 71.8,
+    "rawProbability": 0.6046,
+    "technicalIndicators": {
+      "rsi": 51,
+      "vwapDeviationPct": -0.16,
+      "realizedVol20Pct": 89.1,
+      "atrPct": 6.92
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0692,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.8913,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0872,
         "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.393773"
+  },
+  "ISRG": {
+    "symbol": "ISRG",
+    "market": "US",
+    "currentPrice": 439.89,
+    "changePct": -2.14,
+    "xgboostScore": 70.0,
+    "winProbability": 64.4,
+    "rawProbability": 0.5319,
+    "technicalIndicators": {
+      "rsi": 45,
+      "vwapDeviationPct": -1.49,
+      "realizedVol20Pct": 46.6,
+      "atrPct": 3.56
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2862,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0437,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.4664,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.473330"
+  },
+  "CRM": {
+    "symbol": "CRM",
+    "market": "US",
+    "currentPrice": 217.57,
+    "changePct": -0.2,
+    "xgboostScore": 70.1,
+    "winProbability": 64.5,
+    "rawProbability": 0.5328,
+    "technicalIndicators": {
+      "rsi": 22,
+      "vwapDeviationPct": -6.23,
+      "realizedVol20Pct": 31.9,
+      "atrPct": 3.91
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 0.5634,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "atr_pct",
+        "value": 0.0391,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": -0.1182,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.552639"
+  },
+  "NFLX": {
+    "symbol": "NFLX",
+    "market": "US",
+    "currentPrice": 62.69,
+    "changePct": -2.87,
+    "xgboostScore": 66.6,
+    "winProbability": 61.2,
+    "rawProbability": 0.5007,
+    "technicalIndicators": {
+      "rsi": 40,
+      "vwapDeviationPct": -3.54,
+      "realizedVol20Pct": 38.0,
+      "atrPct": 2.92
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.1448,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0513,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.2185,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.631899"
+  },
+  "JPM": {
+    "symbol": "JPM",
+    "market": "US",
+    "currentPrice": 342.82,
+    "changePct": -0.17,
+    "xgboostScore": 64.2,
+    "winProbability": 59.1,
+    "rawProbability": 0.4793,
+    "technicalIndicators": {
+      "rsi": 59,
+      "vwapDeviationPct": 0.89,
+      "realizedVol20Pct": 27.5,
+      "atrPct": 2.29
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3468,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "bb_width",
+        "value": 0.0562,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.0356,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.709682"
+  },
+  "LRCX": {
+    "symbol": "LRCX",
+    "market": "US",
+    "currentPrice": 233.78,
+    "changePct": -0.89,
+    "xgboostScore": 92.2,
+    "winProbability": 84.9,
+    "rawProbability": 0.734,
+    "technicalIndicators": {
+      "rsi": 51,
+      "vwapDeviationPct": 0.57,
+      "realizedVol20Pct": 101.4,
+      "atrPct": 7.17
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0717,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 1.014,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": -0.0906,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.807204"
+  },
+  "QCOM": {
+    "symbol": "QCOM",
+    "market": "US",
+    "currentPrice": 177.14,
+    "changePct": 0.32,
+    "xgboostScore": 68.1,
+    "winProbability": 62.7,
+    "rawProbability": 0.5149,
+    "technicalIndicators": {
+      "rsi": 51,
+      "vwapDeviationPct": 4.11,
+      "realizedVol20Pct": 66.8,
+      "atrPct": 5.73
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0573,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.6679,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.275,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.891910"
+  },
+  "NTAP": {
+    "symbol": "NTAP",
+    "market": "US",
+    "currentPrice": 186.08,
+    "changePct": 1.62,
+    "xgboostScore": 67.5,
+    "winProbability": 62.1,
+    "rawProbability": 0.5088,
+    "technicalIndicators": {
+      "rsi": 35,
+      "vwapDeviationPct": -6.54,
+      "realizedVol20Pct": 66.5,
+      "atrPct": 6.29
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0629,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.6652,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "bb_width",
+        "value": 0.3846,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:10.971240"
+  },
+  "RTX": {
+    "symbol": "RTX",
+    "market": "US",
+    "currentPrice": 198.36,
+    "changePct": -1.46,
+    "xgboostScore": 70.7,
+    "winProbability": 65.0,
+    "rawProbability": 0.5381,
+    "technicalIndicators": {
+      "rsi": 58,
+      "vwapDeviationPct": 1.2,
+      "realizedVol20Pct": 32.3,
+      "atrPct": 2.92
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3371,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.0998,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.7335,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.047129"
+  },
+  "LMT": {
+    "symbol": "LMT",
+    "market": "US",
+    "currentPrice": 604.09,
+    "changePct": -0.98,
+    "xgboostScore": 70.5,
+    "winProbability": 64.9,
+    "rawProbability": 0.5365,
+    "technicalIndicators": {
+      "rsi": 50,
+      "vwapDeviationPct": 0.42,
+      "realizedVol20Pct": 48.9,
+      "atrPct": 3.52
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.4407,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.4889,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0301,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.125890"
+  },
+  "CAT": {
+    "symbol": "CAT",
+    "market": "US",
+    "currentPrice": 605.28,
+    "changePct": 0.61,
+    "xgboostScore": 78.1,
+    "winProbability": 71.9,
+    "rawProbability": 0.6057,
+    "technicalIndicators": {
+      "rsi": 36,
+      "vwapDeviationPct": -5.1,
+      "realizedVol20Pct": 59.8,
+      "atrPct": 5.18
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.1007,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": -0.0816,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd",
+        "value": -0.0815,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.204785"
+  },
+  "GS": {
+    "symbol": "GS",
+    "market": "US",
+    "currentPrice": 913.6,
+    "changePct": -1.43,
+    "xgboostScore": 69.9,
+    "winProbability": 64.3,
+    "rawProbability": 0.531,
+    "technicalIndicators": {
+      "rsi": 57,
+      "vwapDeviationPct": 1.73,
+      "realizedVol20Pct": 39.4,
+      "atrPct": 3.21
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2793,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0232,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.1014,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.280276"
+  },
+  "MS": {
+    "symbol": "MS",
+    "market": "US",
+    "currentPrice": 189.17,
+    "changePct": -0.76,
+    "xgboostScore": 70.1,
+    "winProbability": 64.5,
+    "rawProbability": 0.5331,
+    "technicalIndicators": {
+      "rsi": 61,
+      "vwapDeviationPct": 2.16,
+      "realizedVol20Pct": 37.9,
+      "atrPct": 3.04
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3062,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0245,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.1116,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.360914"
+  },
+  "BLK": {
+    "symbol": "BLK",
+    "market": "US",
+    "currentPrice": 1216.61,
+    "changePct": -0.79,
+    "xgboostScore": 68.9,
+    "winProbability": 63.4,
+    "rawProbability": 0.5215,
+    "technicalIndicators": {
+      "rsi": 67,
+      "vwapDeviationPct": 4.51,
+      "realizedVol20Pct": 33.0,
+      "atrPct": 2.73
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2227,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0215,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0328,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.437191"
+  },
+  "V": {
+    "symbol": "V",
+    "market": "US",
+    "currentPrice": 420.31,
+    "changePct": -1.23,
+    "xgboostScore": 68.4,
+    "winProbability": 62.9,
+    "rawProbability": 0.517,
+    "technicalIndicators": {
+      "rsi": 59,
+      "vwapDeviationPct": 1.39,
+      "realizedVol20Pct": 25.7,
+      "atrPct": 2.43
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0444,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.026,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.178,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.510952"
+  },
+  "MA": {
+    "symbol": "MA",
+    "market": "US",
+    "currentPrice": 652.6,
+    "changePct": -1.23,
+    "xgboostScore": 64.6,
+    "winProbability": 59.5,
+    "rawProbability": 0.4831,
+    "technicalIndicators": {
+      "rsi": 61,
+      "vwapDeviationPct": 2.34,
+      "realizedVol20Pct": 28.5,
+      "atrPct": 2.61
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2672,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0467,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0277,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.585624"
+  },
+  "AXP": {
+    "symbol": "AXP",
+    "market": "US",
+    "currentPrice": 318.06,
+    "changePct": -1.56,
+    "xgboostScore": 69.2,
+    "winProbability": 63.6,
+    "rawProbability": 0.5244,
+    "technicalIndicators": {
+      "rsi": 54,
+      "vwapDeviationPct": -1.15,
+      "realizedVol20Pct": 25.7,
+      "atrPct": 2.61
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1905,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "stoch_k",
+        "value": 0.1893,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0255,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.658893"
+  },
+  "XOM": {
+    "symbol": "XOM",
+    "market": "US",
+    "currentPrice": 169.78,
+    "changePct": 1.84,
+    "xgboostScore": 68.8,
+    "winProbability": 63.3,
+    "rawProbability": 0.5205,
+    "technicalIndicators": {
+      "rsi": 34,
+      "vwapDeviationPct": -3.18,
+      "realizedVol20Pct": 32.1,
+      "atrPct": 2.84
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": -0.0109,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2144,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "stoch_d",
+        "value": 0.2422,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.733513"
+  },
+  "TSLA": {
+    "symbol": "TSLA",
+    "market": "US",
+    "currentPrice": 397.45,
+    "changePct": 1.69,
+    "xgboostScore": 65.4,
+    "winProbability": 60.2,
+    "rawProbability": 0.49,
+    "technicalIndicators": {
+      "rsi": 58,
+      "vwapDeviationPct": 4.39,
+      "realizedVol20Pct": 60.1,
+      "atrPct": 4.69
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0469,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.6005,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_5d",
+        "value": 0.1564,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.813650"
+  },
+  "ABBV": {
+    "symbol": "ABBV",
+    "market": "US",
+    "currentPrice": 294.45,
+    "changePct": -0.18,
+    "xgboostScore": 67.3,
+    "winProbability": 61.9,
+    "rawProbability": 0.5075,
+    "technicalIndicators": {
+      "rsi": 60,
+      "vwapDeviationPct": 1.79,
+      "realizedVol20Pct": 21.4,
+      "atrPct": 2.54
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0402,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": 0.115,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0205,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.888982"
+  },
+  "IBM": {
+    "symbol": "IBM",
+    "market": "US",
+    "currentPrice": 244.67,
+    "changePct": -1.43,
+    "xgboostScore": 71.1,
+    "winProbability": 65.4,
+    "rawProbability": 0.5417,
+    "technicalIndicators": {
+      "rsi": 41,
+      "vwapDeviationPct": -0.67,
+      "realizedVol20Pct": 26.4,
+      "atrPct": 2.62
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0333,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.6848,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0179,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:11.968433"
+  },
+  "CVX": {
+    "symbol": "CVX",
+    "market": "US",
+    "currentPrice": 216.35,
+    "changePct": 1.44,
+    "xgboostScore": 70.0,
+    "winProbability": 64.4,
+    "rawProbability": 0.532,
+    "technicalIndicators": {
+      "rsi": 30,
+      "vwapDeviationPct": -2.9,
+      "realizedVol20Pct": 27.2,
+      "atrPct": 2.45
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": -0.0099,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1588,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": 0.1062,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.045787"
+  },
+  "UBER": {
+    "symbol": "UBER",
+    "market": "US",
+    "currentPrice": 69.12,
+    "changePct": -2.21,
+    "xgboostScore": 75.5,
+    "winProbability": 69.5,
+    "rawProbability": 0.5821,
+    "technicalIndicators": {
+      "rsi": 58,
+      "vwapDeviationPct": 1.44,
+      "realizedVol20Pct": 32.7,
+      "atrPct": 3.06
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0587,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.1143,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "price_to_ema200",
+        "value": -0.0675,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.121581"
+  },
+  "UNH": {
+    "symbol": "UNH",
+    "market": "US",
+    "currentPrice": 405.13,
+    "changePct": 0.54,
+    "xgboostScore": 72.2,
+    "winProbability": 66.4,
+    "rawProbability": 0.5514,
+    "technicalIndicators": {
+      "rsi": 40,
+      "vwapDeviationPct": -0.45,
+      "realizedVol20Pct": 24.7,
+      "atrPct": 2.75
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "bb_width",
+        "value": 0.0788,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.2475,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "rsi_14",
+        "value": 0.4,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.199416"
+  },
+  "WMT": {
+    "symbol": "WMT",
+    "market": "US",
+    "currentPrice": 126.19,
+    "changePct": 0.41,
+    "xgboostScore": 69.0,
+    "winProbability": 63.5,
+    "rawProbability": 0.523,
+    "technicalIndicators": {
+      "rsi": 64,
+      "vwapDeviationPct": 2.29,
+      "realizedVol20Pct": 25.5,
+      "atrPct": 2.4
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_signal",
+        "value": 0.0303,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0438,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd",
+        "value": 0.0289,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.276064"
+  },
+  "HD": {
+    "symbol": "HD",
+    "market": "US",
+    "currentPrice": 348.26,
+    "changePct": -0.87,
+    "xgboostScore": 70.5,
+    "winProbability": 64.9,
+    "rawProbability": 0.5364,
+    "technicalIndicators": {
+      "rsi": 67,
+      "vwapDeviationPct": 4.54,
+      "realizedVol20Pct": 38.0,
+      "atrPct": 2.84
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2568,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0305,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd",
+        "value": 0.0352,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.356594"
+  },
+  "BAC": {
+    "symbol": "BAC",
+    "market": "US",
+    "currentPrice": 50.51,
+    "changePct": -0.32,
+    "xgboostScore": 66.2,
+    "winProbability": 60.9,
+    "rawProbability": 0.4976,
+    "technicalIndicators": {
+      "rsi": 50,
+      "vwapDeviationPct": -0.34,
+      "realizedVol20Pct": 24.7,
+      "atrPct": 2.37
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0459,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.1963,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": -0.0261,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.435111"
+  },
+  "TMO": {
+    "symbol": "TMO",
+    "market": "US",
+    "currentPrice": 699.44,
+    "changePct": -2.55,
+    "xgboostScore": 73.8,
+    "winProbability": 67.9,
+    "rawProbability": 0.5662,
+    "technicalIndicators": {
+      "rsi": 57,
+      "vwapDeviationPct": 0.93,
+      "realizedVol20Pct": 32.3,
+      "atrPct": 3.07
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0404,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": 0.1265,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1506,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.513920"
+  },
+  "ADBE": {
+    "symbol": "ADBE",
+    "market": "US",
+    "currentPrice": 238.54,
+    "changePct": 0.4,
+    "xgboostScore": 74.4,
+    "winProbability": 68.4,
+    "rawProbability": 0.5716,
+    "technicalIndicators": {
+      "rsi": 21,
+      "vwapDeviationPct": -4.43,
+      "realizedVol20Pct": 36.7,
+      "atrPct": 3.4
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_60d",
+        "value": -0.1245,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0431,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "rsi_14",
+        "value": 0.207,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.591456"
+  },
+  "TXN": {
+    "symbol": "TXN",
+    "market": "US",
+    "currentPrice": 312.48,
+    "changePct": 0.86,
+    "xgboostScore": 62.6,
+    "winProbability": 57.6,
+    "rawProbability": 0.4643,
+    "technicalIndicators": {
+      "rsi": 62,
+      "vwapDeviationPct": 6.52,
+      "realizedVol20Pct": 56.1,
+      "atrPct": 4.61
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0461,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.4311,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.561,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.668142"
+  },
+  "PG": {
+    "symbol": "PG",
+    "market": "US",
+    "currentPrice": 168.03,
+    "changePct": 0.21,
+    "xgboostScore": 64.0,
+    "winProbability": 58.9,
+    "rawProbability": 0.4776,
+    "technicalIndicators": {
+      "rsi": 66,
+      "vwapDeviationPct": 3.24,
+      "realizedVol20Pct": 28.3,
+      "atrPct": 1.92
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3404,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0419,
+        "impact": "Bullish"
       },
       {
         "feature": "atr_pct",
         "value": 0.0192,
         "impact": "Bearish"
-      },
-      {
-        "feature": "bb_width",
-        "value": 0.0317,
-        "impact": "Bearish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:02.040654"
+    "evaluatedAt": "2026-11-13T17:10:12.745807"
   },
-  "GS": {
-    "symbol": "GS",
+  "JNJ": {
+    "symbol": "JNJ",
     "market": "US",
-    "currentPrice": 875.68,
-    "changePct": -1.75,
-    "xgboostScore": 69.3,
-    "winProbability": 63.7,
-    "rawProbability": 0.5253,
+    "currentPrice": 283.52,
+    "changePct": 1.11,
+    "xgboostScore": 64.8,
+    "winProbability": 59.6,
+    "rawProbability": 0.4848,
     "technicalIndicators": {
-      "rsi": 43,
-      "vwapDeviationPct": -1.96,
-      "realizedVol20Pct": 19.2,
-      "atrPct": 2.79
+      "rsi": 70,
+      "vwapDeviationPct": 5.03,
+      "realizedVol20Pct": 25.7,
+      "atrPct": 2.57
     },
     "topFeatureDrivers": [
       {
-        "feature": "ema_ratio_20_50",
-        "value": -0.0426,
-        "impact": "Bearish"
+        "feature": "ret_20d",
+        "value": 0.1194,
+        "impact": "Bullish"
       },
       {
-        "feature": "macd_signal",
-        "value": -0.0269,
-        "impact": "Bearish"
+        "feature": "stoch_k",
+        "value": 0.883,
+        "impact": "Bullish"
       },
       {
-        "feature": "ret_60d",
-        "value": -0.1414,
-        "impact": "Bearish"
+        "feature": "price_to_ema20",
+        "value": 0.0409,
+        "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:02.270825"
+    "evaluatedAt": "2026-11-13T17:10:12.822709"
   },
-  "V": {
-    "symbol": "V",
+  "MRK": {
+    "symbol": "MRK",
     "market": "US",
-    "currentPrice": 407.92,
-    "changePct": -1.55,
-    "xgboostScore": 59.0,
-    "winProbability": 54.3,
-    "rawProbability": 0.432,
+    "currentPrice": 146.95,
+    "changePct": -0.16,
+    "xgboostScore": 70.8,
+    "winProbability": 65.1,
+    "rawProbability": 0.5391,
     "technicalIndicators": {
-      "rsi": 82,
-      "vwapDeviationPct": 5.56,
-      "realizedVol20Pct": 19.6,
-      "atrPct": 1.76
+      "rsi": 53,
+      "vwapDeviationPct": 0.27,
+      "realizedVol20Pct": 32.6,
+      "atrPct": 3.04
     },
     "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_50_200",
+        "value": 0.1205,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.6721,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1436,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.900721"
+  },
+  "KO": {
+    "symbol": "KO",
+    "market": "US",
+    "currentPrice": 97.44,
+    "changePct": -0.13,
+    "xgboostScore": 61.4,
+    "winProbability": 56.5,
+    "rawProbability": 0.4534,
+    "technicalIndicators": {
+      "rsi": 73,
+      "vwapDeviationPct": 3.13,
+      "realizedVol20Pct": 20.9,
+      "atrPct": 1.87
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2325,
+        "impact": "Bullish"
+      },
       {
         "feature": "atr_pct",
-        "value": 0.0176,
+        "value": 0.0187,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "stoch_k",
+        "value": 0.8795,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:12.979673"
+  },
+  "PEP": {
+    "symbol": "PEP",
+    "market": "US",
+    "currentPrice": 142.26,
+    "changePct": -1.17,
+    "xgboostScore": 71.1,
+    "winProbability": 65.4,
+    "rawProbability": 0.5421,
+    "technicalIndicators": {
+      "rsi": 63,
+      "vwapDeviationPct": 3.16,
+      "realizedVol20Pct": 27.2,
+      "atrPct": 2.38
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2325,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": 0.1081,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0259,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:13.056403"
+  },
+  "MCD": {
+    "symbol": "MCD",
+    "market": "US",
+    "currentPrice": 273.63,
+    "changePct": -0.43,
+    "xgboostScore": 77.4,
+    "winProbability": 71.2,
+    "rawProbability": 0.5987,
+    "technicalIndicators": {
+      "rsi": 72,
+      "vwapDeviationPct": 4.44,
+      "realizedVol20Pct": 31.8,
+      "atrPct": 2.59
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2488,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0537,
         "impact": "Bearish"
       },
       {
         "feature": "ret_20d",
-        "value": 0.1103,
+        "value": 0.1284,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:13.141258"
+  },
+  "CSCO": {
+    "symbol": "CSCO",
+    "market": "US",
+    "currentPrice": 102.01,
+    "changePct": 1.24,
+    "xgboostScore": 67.2,
+    "winProbability": 61.8,
+    "rawProbability": 0.5064,
+    "technicalIndicators": {
+      "rsi": 44,
+      "vwapDeviationPct": -1.32,
+      "realizedVol20Pct": 44.4,
+      "atrPct": 3.93
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0393,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0325,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2632,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:13.218801"
+  },
+  "PYPL": {
+    "symbol": "PYPL",
+    "market": "US",
+    "currentPrice": 58.3,
+    "changePct": -1.98,
+    "xgboostScore": 70.6,
+    "winProbability": 65.0,
+    "rawProbability": 0.5377,
+    "technicalIndicators": {
+      "rsi": 55,
+      "vwapDeviationPct": 1.38,
+      "realizedVol20Pct": 28.0,
+      "atrPct": 3.06
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 0.7277,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.6698,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.0458,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:13.302161"
+  },
+  "INTC": {
+    "symbol": "INTC",
+    "market": "US",
+    "currentPrice": 61.2,
+    "changePct": -2.08,
+    "xgboostScore": 98.5,
+    "winProbability": 90.6,
+    "rawProbability": 0.8745,
+    "technicalIndicators": {
+      "rsi": 31,
+      "vwapDeviationPct": -13.48,
+      "realizedVol20Pct": 129.2,
+      "atrPct": 10.31
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.1031,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": -0.1803,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "bb_width",
+        "value": 0.8802,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:13.384681"
+  },
+  "DIS": {
+    "symbol": "DIS",
+    "market": "US",
+    "currentPrice": 118.23,
+    "changePct": -1.19,
+    "xgboostScore": 65.8,
+    "winProbability": 60.5,
+    "rawProbability": 0.4932,
+    "technicalIndicators": {
+      "rsi": 64,
+      "vwapDeviationPct": 3.62,
+      "realizedVol20Pct": 23.5,
+      "atrPct": 2.21
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.037,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0215,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd",
+        "value": 0.0254,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:13.461972"
+  },
+  "RELIANCE": {
+    "symbol": "RELIANCE",
+    "market": "INDIA",
+    "currentPrice": 1339.7,
+    "changePct": 0.0,
+    "xgboostScore": 71.0,
+    "winProbability": 65.3,
+    "rawProbability": 0.5407,
+    "technicalIndicators": {
+      "rsi": 81,
+      "vwapDeviationPct": 6.71,
+      "realizedVol20Pct": 45.4,
+      "atrPct": 2.47
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.453,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": 0.1406,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0108,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:13.537727"
+  },
+  "TCS": {
+    "symbol": "TCS",
+    "market": "INDIA",
+    "currentPrice": 2407.5,
+    "changePct": -1.43,
+    "xgboostScore": 70.6,
+    "winProbability": 64.9,
+    "rawProbability": 0.5371,
+    "technicalIndicators": {
+      "rsi": 32,
+      "vwapDeviationPct": -2.7,
+      "realizedVol20Pct": 27.9,
+      "atrPct": 2.61
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "stoch_k",
+        "value": 0.0443,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.027,
         "impact": "Bullish"
       },
       {
@@ -492,390 +1977,885 @@
         "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:02.408549"
+    "evaluatedAt": "2026-11-13T17:10:13.613113"
   },
-  "MA": {
-    "symbol": "MA",
-    "market": "US",
-    "currentPrice": 623.6,
-    "changePct": -1.52,
-    "xgboostScore": 61.1,
-    "winProbability": 56.2,
-    "rawProbability": 0.4512,
+  "TATAMOTORS": {
+    "symbol": "TATAMOTORS",
+    "market": "INDIA",
+    "currentPrice": 287.4,
+    "changePct": -3.31,
+    "xgboostScore": 64.2,
+    "winProbability": 59.0,
+    "rawProbability": 0.4788,
     "technicalIndicators": {
-      "rsi": 86,
-      "vwapDeviationPct": 5.62,
-      "realizedVol20Pct": 19.4,
-      "atrPct": 1.66
+      "rsi": 70,
+      "vwapDeviationPct": 3.0,
+      "realizedVol20Pct": 31.9,
+      "atrPct": 2.54
     },
     "topFeatureDrivers": [
       {
-        "feature": "atr_pct",
-        "value": 0.0166,
+        "feature": "ema_ratio_50_200",
+        "value": -0.1084,
         "impact": "Bearish"
       },
       {
-        "feature": "rsi_14",
-        "value": 0.8553,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "stoch_d",
-        "value": 0.9463,
-        "impact": "Bullish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:02.572017"
-  },
-  "XOM": {
-    "symbol": "XOM",
-    "market": "US",
-    "currentPrice": 183.21,
-    "changePct": 2.79,
-    "xgboostScore": 66.9,
-    "winProbability": 61.5,
-    "rawProbability": 0.5034,
-    "technicalIndicators": {
-      "rsi": 86,
-      "vwapDeviationPct": 7.28,
-      "realizedVol20Pct": 18.3,
-      "atrPct": 2.14
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "ret_20d",
-        "value": 0.1409,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": 0.0605,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "ema_ratio_20_50",
-        "value": 0.0399,
-        "impact": "Bullish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:02.757334"
-  },
-  "CVX": {
-    "symbol": "CVX",
-    "market": "US",
-    "currentPrice": 233.21,
-    "changePct": 2.88,
-    "xgboostScore": 65.8,
-    "winProbability": 60.6,
-    "rawProbability": 0.4938,
-    "technicalIndicators": {
-      "rsi": 85,
-      "vwapDeviationPct": 8.0,
-      "realizedVol20Pct": 20.3,
-      "atrPct": 2.14
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "price_to_ema20",
-        "value": 0.0675,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "ret_20d",
-        "value": 0.1407,
+        "feature": "macd_hist",
+        "value": 0.0129,
         "impact": "Bullish"
       },
       {
         "feature": "ret_60d",
-        "value": 0.2233,
-        "impact": "Bullish"
+        "value": -0.1296,
+        "impact": "Bearish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:02.950497"
+    "evaluatedAt": "2026-11-13T17:10:13.687504"
   },
-  "WMT": {
-    "symbol": "WMT",
-    "market": "US",
-    "currentPrice": 119.89,
-    "changePct": -1.02,
-    "xgboostScore": 68.0,
-    "winProbability": 62.6,
-    "rawProbability": 0.5137,
+  "LT": {
+    "symbol": "LT",
+    "market": "INDIA",
+    "currentPrice": 4143.8,
+    "changePct": -0.37,
+    "xgboostScore": 72.0,
+    "winProbability": 66.2,
+    "rawProbability": 0.55,
     "technicalIndicators": {
-      "rsi": 85,
-      "vwapDeviationPct": 6.9,
-      "realizedVol20Pct": 24.0,
-      "atrPct": 2.2
+      "rsi": 87,
+      "vwapDeviationPct": 6.51,
+      "realizedVol20Pct": 19.1,
+      "atrPct": 2.15
     },
     "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0108,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": 0.1378,
+        "impact": "Bullish"
+      },
       {
         "feature": "rsi_14",
-        "value": 0.8545,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": 0.05,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "ret_20d",
-        "value": 0.1103,
+        "value": 0.8704,
         "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:03.120367"
+    "evaluatedAt": "2026-11-13T17:10:13.760747"
   },
-  "HD": {
-    "symbol": "HD",
-    "market": "US",
-    "currentPrice": 319.83,
-    "changePct": -2.41,
-    "xgboostScore": 72.7,
-    "winProbability": 66.9,
-    "rawProbability": 0.5568,
+  "HAL": {
+    "symbol": "HAL",
+    "market": "INDIA",
+    "currentPrice": 4809.8,
+    "changePct": -0.69,
+    "xgboostScore": 64.1,
+    "winProbability": 59.0,
+    "rawProbability": 0.4782,
     "technicalIndicators": {
-      "rsi": 78,
-      "vwapDeviationPct": 8.0,
-      "realizedVol20Pct": 29.6,
-      "atrPct": 2.38
+      "rsi": 56,
+      "vwapDeviationPct": -1.8,
+      "realizedVol20Pct": 23.0,
+      "atrPct": 2.99
     },
     "topFeatureDrivers": [
       {
-        "feature": "macd_hist",
-        "value": 0.0149,
+        "feature": "volume_surge_5",
+        "value": 1.4009,
         "impact": "Bullish"
       },
-      {
-        "feature": "ema_ratio_50_200",
-        "value": -0.0591,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": 0.0475,
-        "impact": "Bullish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:03.281574"
-  },
-  "PG": {
-    "symbol": "PG",
-    "market": "US",
-    "currentPrice": 161.02,
-    "changePct": -2.12,
-    "xgboostScore": 63.8,
-    "winProbability": 58.7,
-    "rawProbability": 0.4758,
-    "technicalIndicators": {
-      "rsi": 75,
-      "vwapDeviationPct": 5.14,
-      "realizedVol20Pct": 28.3,
-      "atrPct": 2.04
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "volatility_ratio",
-        "value": 1.4096,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "ret_20d",
-        "value": 0.1084,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": 0.0482,
-        "impact": "Bullish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:03.481136"
-  },
-  "ISRG": {
-    "symbol": "ISRG",
-    "market": "US",
-    "currentPrice": 452.29,
-    "changePct": 1.9,
-    "xgboostScore": 69.9,
-    "winProbability": 64.3,
-    "rawProbability": 0.5307,
-    "technicalIndicators": {
-      "rsi": 77,
-      "vwapDeviationPct": 7.29,
-      "realizedVol20Pct": 29.2,
-      "atrPct": 2.87
-    },
-    "topFeatureDrivers": [
       {
         "feature": "ret_60d",
-        "value": 0.2814,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": 0.0714,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "ema_ratio_50_200",
-        "value": -0.064,
+        "value": -0.0493,
         "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:03.602354"
-  },
-  "RELIANCE": {
-    "symbol": "RELIANCE",
-    "market": "INDIA",
-    "currentPrice": 1190.0,
-    "changePct": 0.46,
-    "xgboostScore": 78.0,
-    "winProbability": 71.8,
-    "rawProbability": 0.6047,
-    "technicalIndicators": {
-      "rsi": 55,
-      "vwapDeviationPct": -0.4,
-      "realizedVol20Pct": 25.9,
-      "atrPct": 2.37
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "ema_ratio_50_200",
-        "value": -0.0648,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "ema_ratio_20_50",
-        "value": -0.0267,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "volatility_ratio",
-        "value": 1.223,
-        "impact": "Bullish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:03.757944"
-  },
-  "TCS": {
-    "symbol": "TCS",
-    "market": "INDIA",
-    "currentPrice": 2530.0,
-    "changePct": 0.92,
-    "xgboostScore": 70.0,
-    "winProbability": 64.4,
-    "rawProbability": 0.5314,
-    "technicalIndicators": {
-      "rsi": 85,
-      "vwapDeviationPct": 11.37,
-      "realizedVol20Pct": 35.5,
-      "atrPct": 3.3
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "macd_hist",
-        "value": 0.0204,
-        "impact": "Bullish"
       },
       {
         "feature": "bb_width",
-        "value": 0.3406,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": 0.1004,
-        "impact": "Bullish"
+        "value": 0.0739,
+        "impact": "Bearish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:03.974393"
+    "evaluatedAt": "2026-11-13T17:10:13.834272"
   },
-  "HDFCBANK": {
-    "symbol": "HDFCBANK",
+  "BEL": {
+    "symbol": "BEL",
     "market": "INDIA",
-    "currentPrice": 692.8,
-    "changePct": -0.18,
-    "xgboostScore": 73.5,
-    "winProbability": 67.6,
-    "rawProbability": 0.5633,
+    "currentPrice": 400.85,
+    "changePct": -0.98,
+    "xgboostScore": 66.3,
+    "winProbability": 61.0,
+    "rawProbability": 0.4979,
     "technicalIndicators": {
-      "rsi": 39,
-      "vwapDeviationPct": -2.75,
-      "realizedVol20Pct": 24.0,
-      "atrPct": 2.29
+      "rsi": 80,
+      "vwapDeviationPct": 5.01,
+      "realizedVol20Pct": 24.3,
+      "atrPct": 2.34
     },
     "topFeatureDrivers": [
       {
+        "feature": "macd_hist",
+        "value": 0.0103,
+        "impact": "Bullish"
+      },
+      {
         "feature": "ema_ratio_50_200",
-        "value": -0.0856,
+        "value": -0.0404,
         "impact": "Bearish"
       },
       {
-        "feature": "price_to_ema200",
-        "value": -0.1213,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "volatility_ratio",
-        "value": 1.2225,
+        "feature": "stoch_k",
+        "value": 0.8842,
         "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:04.126477"
+    "evaluatedAt": "2026-11-13T17:10:13.908297"
+  },
+  "TRENT": {
+    "symbol": "TRENT",
+    "market": "INDIA",
+    "currentPrice": 3165.2,
+    "changePct": -0.47,
+    "xgboostScore": 66.7,
+    "winProbability": 61.3,
+    "rawProbability": 0.5016,
+    "technicalIndicators": {
+      "rsi": 82,
+      "vwapDeviationPct": 6.27,
+      "realizedVol20Pct": 33.1,
+      "atrPct": 2.77
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0507,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd",
+        "value": 0.0282,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0323,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:13.988227"
   },
   "INFY": {
     "symbol": "INFY",
     "market": "INDIA",
-    "currentPrice": 1153.8,
-    "changePct": 0.04,
-    "xgboostScore": 67.2,
-    "winProbability": 61.8,
-    "rawProbability": 0.506,
+    "currentPrice": 1141.5,
+    "changePct": -0.84,
+    "xgboostScore": 74.7,
+    "winProbability": 68.8,
+    "rawProbability": 0.5749,
     "technicalIndicators": {
-      "rsi": 70,
-      "vwapDeviationPct": 7.55,
-      "realizedVol20Pct": 36.3,
-      "atrPct": 3.74
+      "rsi": 53,
+      "vwapDeviationPct": 1.17,
+      "realizedVol20Pct": 36.1,
+      "atrPct": 3.17
     },
     "topFeatureDrivers": [
       {
-        "feature": "high_low_spread",
-        "value": 0.1385,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "macd_hist",
-        "value": 0.016,
-        "impact": "Bullish"
-      },
-      {
         "feature": "ema_ratio_50_200",
-        "value": -0.09,
+        "value": -0.0586,
         "impact": "Bearish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.6337,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0239,
+        "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:04.279446"
+    "evaluatedAt": "2026-11-13T17:10:14.063076"
+  },
+  "SBIN": {
+    "symbol": "SBIN",
+    "market": "INDIA",
+    "currentPrice": 1080.0,
+    "changePct": -0.6,
+    "xgboostScore": 63.5,
+    "winProbability": 58.4,
+    "rawProbability": 0.4724,
+    "technicalIndicators": {
+      "rsi": 78,
+      "vwapDeviationPct": 7.59,
+      "realizedVol20Pct": 22.8,
+      "atrPct": 2.3
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0133,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0728,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 1.4993,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.139454"
   },
   "ICICIBANK": {
     "symbol": "ICICIBANK",
     "market": "INDIA",
-    "currentPrice": 1394.2,
-    "changePct": -0.31,
-    "xgboostScore": 59.4,
-    "winProbability": 54.6,
-    "rawProbability": 0.4355,
+    "currentPrice": 1583.6,
+    "changePct": -0.4,
+    "xgboostScore": 65.6,
+    "winProbability": 60.3,
+    "rawProbability": 0.4914,
     "technicalIndicators": {
-      "rsi": 69,
-      "vwapDeviationPct": 2.95,
-      "realizedVol20Pct": 22.4,
-      "atrPct": 1.94
+      "rsi": 81,
+      "vwapDeviationPct": 8.12,
+      "realizedVol20Pct": 30.1,
+      "atrPct": 2.18
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_20d",
+        "value": 0.183,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3015,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0776,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.213787"
+  },
+  "M&M": {
+    "symbol": "M&M",
+    "market": "INDIA",
+    "currentPrice": 3333.0,
+    "changePct": -1.94,
+    "xgboostScore": 75.4,
+    "winProbability": 69.4,
+    "rawProbability": 0.5808,
+    "technicalIndicators": {
+      "rsi": 78,
+      "vwapDeviationPct": 8.89,
+      "realizedVol20Pct": 36.0,
+      "atrPct": 2.58
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0199,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": 0.193,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0782,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.291533"
+  },
+  "SUNPHARMA": {
+    "symbol": "SUNPHARMA",
+    "market": "INDIA",
+    "currentPrice": 1880.0,
+    "changePct": -0.27,
+    "xgboostScore": 63.6,
+    "winProbability": 58.5,
+    "rawProbability": 0.4735,
+    "technicalIndicators": {
+      "rsi": 81,
+      "vwapDeviationPct": 4.29,
+      "realizedVol20Pct": 16.8,
+      "atrPct": 2.61
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0098,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.1679,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "rsi_14",
+        "value": 0.8104,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.370571"
+  },
+  "BHARTIARTL": {
+    "symbol": "BHARTIARTL",
+    "market": "INDIA",
+    "currentPrice": 2106.0,
+    "changePct": 0.48,
+    "xgboostScore": 65.9,
+    "winProbability": 60.7,
+    "rawProbability": 0.4949,
+    "technicalIndicators": {
+      "rsi": 77,
+      "vwapDeviationPct": 6.46,
+      "realizedVol20Pct": 26.3,
+      "atrPct": 2.23
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_20d",
+        "value": 0.1735,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0273,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd",
+        "value": 0.0322,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.447876"
+  },
+  "HDFCBANK": {
+    "symbol": "HDFCBANK",
+    "market": "INDIA",
+    "currentPrice": 804.0,
+    "changePct": -1.02,
+    "xgboostScore": 71.3,
+    "winProbability": 65.6,
+    "rawProbability": 0.5439,
+    "technicalIndicators": {
+      "rsi": 85,
+      "vwapDeviationPct": 8.86,
+      "realizedVol20Pct": 27.2,
+      "atrPct": 2.21
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0158,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0756,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0617,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.524082"
+  },
+  "BAJFINANCE": {
+    "symbol": "BAJFINANCE",
+    "market": "INDIA",
+    "currentPrice": 1117.0,
+    "changePct": 0.18,
+    "xgboostScore": 68.6,
+    "winProbability": 63.1,
+    "rawProbability": 0.5191,
+    "technicalIndicators": {
+      "rsi": 85,
+      "vwapDeviationPct": 11.86,
+      "realizedVol20Pct": 38.4,
+      "atrPct": 2.8
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0193,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0969,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "bb_width",
+        "value": 0.2875,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.599762"
+  },
+  "HCLTECH": {
+    "symbol": "HCLTECH",
+    "market": "INDIA",
+    "currentPrice": 1378.0,
+    "changePct": -0.2,
+    "xgboostScore": 73.0,
+    "winProbability": 67.2,
+    "rawProbability": 0.5594,
+    "technicalIndicators": {
+      "rsi": 39,
+      "vwapDeviationPct": -1.83,
+      "realizedVol20Pct": 23.8,
+      "atrPct": 2.77
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_signal",
+        "value": 0.026,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 0.7573,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "stoch_k",
+        "value": 0.1333,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.676928"
+  },
+  "MARUTI": {
+    "symbol": "MARUTI",
+    "market": "INDIA",
+    "currentPrice": 12854.0,
+    "changePct": -1.31,
+    "xgboostScore": 65.5,
+    "winProbability": 60.2,
+    "rawProbability": 0.4905,
+    "technicalIndicators": {
+      "rsi": 80,
+      "vwapDeviationPct": 6.63,
+      "realizedVol20Pct": 27.9,
+      "atrPct": 2.3
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0159,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0782,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": 0.1499,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.754998"
+  },
+  "NTPC": {
+    "symbol": "NTPC",
+    "market": "INDIA",
+    "currentPrice": 319.1,
+    "changePct": -1.21,
+    "xgboostScore": 75.2,
+    "winProbability": 69.2,
+    "rawProbability": 0.5794,
+    "technicalIndicators": {
+      "rsi": 71,
+      "vwapDeviationPct": 2.17,
+      "realizedVol20Pct": 23.7,
+      "atrPct": 2.55
     },
     "topFeatureDrivers": [
       {
         "feature": "volatility_ratio",
-        "value": 1.2171,
+        "value": 1.2609,
         "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0473,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0068,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.833159"
+  },
+  "TITAN": {
+    "symbol": "TITAN",
+    "market": "INDIA",
+    "currentPrice": 4844.9,
+    "changePct": -1.56,
+    "xgboostScore": 66.3,
+    "winProbability": 61.0,
+    "rawProbability": 0.4978,
+    "technicalIndicators": {
+      "rsi": 80,
+      "vwapDeviationPct": 3.67,
+      "realizedVol20Pct": 24.8,
+      "atrPct": 2.64
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volume_surge_5",
+        "value": 1.692,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0136,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "bb_width",
+        "value": 0.2234,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.910494"
+  },
+  "ADANIPORTS": {
+    "symbol": "ADANIPORTS",
+    "market": "INDIA",
+    "currentPrice": 1903.3,
+    "changePct": -1.38,
+    "xgboostScore": 68.9,
+    "winProbability": 63.3,
+    "rawProbability": 0.5214,
+    "technicalIndicators": {
+      "rsi": 74,
+      "vwapDeviationPct": 3.38,
+      "realizedVol20Pct": 32.0,
+      "atrPct": 2.88
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd",
+        "value": 0.0236,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.0189,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0287,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:14.988358"
+  },
+  "BAJAJ-AUTO": {
+    "symbol": "BAJAJ-AUTO",
+    "market": "INDIA",
+    "currentPrice": 10850.0,
+    "changePct": -0.87,
+    "xgboostScore": 66.0,
+    "winProbability": 60.7,
+    "rawProbability": 0.4951,
+    "technicalIndicators": {
+      "rsi": 77,
+      "vwapDeviationPct": 2.74,
+      "realizedVol20Pct": 19.7,
+      "atrPct": 2.28
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 0.7496,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0093,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.0697,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.068836"
+  },
+  "ITC": {
+    "symbol": "ITC",
+    "market": "INDIA",
+    "currentPrice": 285.0,
+    "changePct": 0.33,
+    "xgboostScore": 63.2,
+    "winProbability": 58.2,
+    "rawProbability": 0.4701,
+    "technicalIndicators": {
+      "rsi": 82,
+      "vwapDeviationPct": 5.67,
+      "realizedVol20Pct": 19.4,
+      "atrPct": 2.39
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.074,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 0.7108,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "rsi_14",
+        "value": 0.8226,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.145096"
+  },
+  "AXISBANK": {
+    "symbol": "AXISBANK",
+    "market": "INDIA",
+    "currentPrice": 1331.0,
+    "changePct": -0.89,
+    "xgboostScore": 70.6,
+    "winProbability": 65.0,
+    "rawProbability": 0.5374,
+    "technicalIndicators": {
+      "rsi": 75,
+      "vwapDeviationPct": 5.58,
+      "realizedVol20Pct": 29.1,
+      "atrPct": 2.11
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0099,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1742,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0462,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.221206"
+  },
+  "KOTAKBANK": {
+    "symbol": "KOTAKBANK",
+    "market": "INDIA",
+    "currentPrice": 488.55,
+    "changePct": -0.38,
+    "xgboostScore": 60.7,
+    "winProbability": 55.9,
+    "rawProbability": 0.4476,
+    "technicalIndicators": {
+      "rsi": 84,
+      "vwapDeviationPct": 6.82,
+      "realizedVol20Pct": 24.7,
+      "atrPct": 2.19
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0487,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": 0.2441,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0572,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.298856"
+  },
+  "ADANIENT": {
+    "symbol": "ADANIENT",
+    "market": "INDIA",
+    "currentPrice": 2688.0,
+    "changePct": -1.95,
+    "xgboostScore": 67.2,
+    "winProbability": 61.8,
+    "rawProbability": 0.5064,
+    "technicalIndicators": {
+      "rsi": 69,
+      "vwapDeviationPct": 3.02,
+      "realizedVol20Pct": 32.5,
+      "atrPct": 2.78
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0278,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0102,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.1062,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.373881"
+  },
+  "POWERGRID": {
+    "symbol": "POWERGRID",
+    "market": "INDIA",
+    "currentPrice": 257.45,
+    "changePct": -0.77,
+    "xgboostScore": 71.9,
+    "winProbability": 66.1,
+    "rawProbability": 0.549,
+    "technicalIndicators": {
+      "rsi": 63,
+      "vwapDeviationPct": 1.15,
+      "realizedVol20Pct": 23.5,
+      "atrPct": 2.71
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0425,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "price_to_ema200",
+        "value": -0.0447,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0067,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.447884"
+  },
+  "ULTRACEMCO": {
+    "symbol": "ULTRACEMCO",
+    "market": "INDIA",
+    "currentPrice": 12100.0,
+    "changePct": -1.92,
+    "xgboostScore": 69.9,
+    "winProbability": 64.3,
+    "rawProbability": 0.5306,
+    "technicalIndicators": {
+      "rsi": 72,
+      "vwapDeviationPct": 5.63,
+      "realizedVol20Pct": 25.3,
+      "atrPct": 2.23
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_20d",
+        "value": 0.1209,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0088,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd",
+        "value": 0.0296,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.521636"
+  },
+  "COALINDIA": {
+    "symbol": "COALINDIA",
+    "market": "INDIA",
+    "currentPrice": 403.5,
+    "changePct": -0.2,
+    "xgboostScore": 66.2,
+    "winProbability": 60.9,
+    "rawProbability": 0.4969,
+    "technicalIndicators": {
+      "rsi": 62,
+      "vwapDeviationPct": 2.33,
+      "realizedVol20Pct": 24.6,
+      "atrPct": 2.06
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "atr_pct",
+        "value": 0.0206,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "stoch_k",
+        "value": 0.8742,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "stoch_d",
+        "value": 0.9063,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.594836"
+  },
+  "CIPLA": {
+    "symbol": "CIPLA",
+    "market": "INDIA",
+    "currentPrice": 1391.8,
+    "changePct": -1.17,
+    "xgboostScore": 61.0,
+    "winProbability": 56.1,
+    "rawProbability": 0.4495,
+    "technicalIndicators": {
+      "rsi": 68,
+      "vwapDeviationPct": 1.71,
+      "realizedVol20Pct": 12.9,
+      "atrPct": 1.94
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_20d",
+        "value": 0.1291,
+        "impact": "Bearish"
       },
       {
         "feature": "atr_pct",
@@ -883,308 +2863,1034 @@
         "impact": "Bearish"
       },
       {
-        "feature": "volume_surge_5",
-        "value": 1.3628,
+        "feature": "stoch_d",
+        "value": 0.859,
         "impact": "Bullish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:04.420336"
+    "evaluatedAt": "2026-11-13T17:10:15.669168"
   },
-  "BHARTIARTL": {
-    "symbol": "BHARTIARTL",
+  "APOLLOHOSP": {
+    "symbol": "APOLLOHOSP",
     "market": "INDIA",
-    "currentPrice": 1892.1,
-    "changePct": -0.15,
-    "xgboostScore": 67.0,
-    "winProbability": 61.7,
-    "rawProbability": 0.5048,
+    "currentPrice": 8526.0,
+    "changePct": 0.13,
+    "xgboostScore": 66.2,
+    "winProbability": 60.9,
+    "rawProbability": 0.4971,
     "technicalIndicators": {
-      "rsi": 71,
-      "vwapDeviationPct": 3.18,
-      "realizedVol20Pct": 24.4,
-      "atrPct": 2.55
+      "rsi": 75,
+      "vwapDeviationPct": 4.26,
+      "realizedVol20Pct": 26.6,
+      "atrPct": 2.41
     },
     "topFeatureDrivers": [
-      {
-        "feature": "volume_surge_5",
-        "value": 1.5734,
-        "impact": "Bullish"
-      },
       {
         "feature": "macd_hist",
-        "value": 0.0078,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "ema_ratio_50_200",
-        "value": -0.0192,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:04.553141"
-  },
-  "SBIN": {
-    "symbol": "SBIN",
-    "market": "INDIA",
-    "currentPrice": 958.6,
-    "changePct": -1.18,
-    "xgboostScore": 60.6,
-    "winProbability": 55.7,
-    "rawProbability": 0.4461,
-    "technicalIndicators": {
-      "rsi": 52,
-      "vwapDeviationPct": -0.29,
-      "realizedVol20Pct": 18.3,
-      "atrPct": 1.93
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "ema_ratio_20_50",
-        "value": -0.0216,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "atr_pct",
-        "value": 0.0193,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "bb_width",
-        "value": 0.0434,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:04.694156"
-  },
-  "LT": {
-    "symbol": "LT",
-    "market": "INDIA",
-    "currentPrice": 3647.0,
-    "changePct": 0.24,
-    "xgboostScore": 60.9,
-    "winProbability": 56.1,
-    "rawProbability": 0.4493,
-    "technicalIndicators": {
-      "rsi": 46,
-      "vwapDeviationPct": -1.43,
-      "realizedVol20Pct": 21.7,
-      "atrPct": 2.14
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "ema_ratio_20_50",
-        "value": -0.0275,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "macd_signal",
-        "value": -0.0194,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "volatility_ratio",
-        "value": 1.1645,
-        "impact": "Bullish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:04.824701"
-  },
-  "ITC": {
-    "symbol": "ITC",
-    "market": "INDIA",
-    "currentPrice": 257.9,
-    "changePct": -0.39,
-    "xgboostScore": 69.3,
-    "winProbability": 63.7,
-    "rawProbability": 0.525,
-    "technicalIndicators": {
-      "rsi": 52,
-      "vwapDeviationPct": -1.78,
-      "realizedVol20Pct": 33.6,
-      "atrPct": 2.64
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "ema_ratio_50_200",
-        "value": -0.097,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "volatility_ratio",
-        "value": 1.2781,
-        "impact": "Bullish"
-      },
-      {
-        "feature": "price_to_ema200",
-        "value": -0.1267,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:05.017255"
-  },
-  "TITAN": {
-    "symbol": "TITAN",
-    "market": "INDIA",
-    "currentPrice": 4299.7,
-    "changePct": -1.16,
-    "xgboostScore": 63.2,
-    "winProbability": 58.1,
-    "rawProbability": 0.4698,
-    "technicalIndicators": {
-      "rsi": 33,
-      "vwapDeviationPct": -4.45,
-      "realizedVol20Pct": 22.3,
-      "atrPct": 2.21
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "macd_signal",
-        "value": -0.029,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "ema_ratio_20_50",
-        "value": -0.0318,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "ret_20d",
-        "value": -0.1189,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:05.398343"
-  },
-  "HAL": {
-    "symbol": "HAL",
-    "market": "INDIA",
-    "currentPrice": 4725.0,
-    "changePct": -3.08,
-    "xgboostScore": 67.8,
-    "winProbability": 62.3,
-    "rawProbability": 0.5115,
-    "technicalIndicators": {
-      "rsi": 56,
-      "vwapDeviationPct": -1.09,
-      "realizedVol20Pct": 31.6,
-      "atrPct": 2.52
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "volatility_ratio",
-        "value": 1.1528,
+        "value": 0.008,
         "impact": "Bullish"
       },
       {
         "feature": "stoch_k",
-        "value": 0.3199,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": -0.0192,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:05.543087"
-  },
-  "BEL": {
-    "symbol": "BEL",
-    "market": "INDIA",
-    "currentPrice": 362.0,
-    "changePct": -0.69,
-    "xgboostScore": 69.7,
-    "winProbability": 64.1,
-    "rawProbability": 0.5292,
-    "technicalIndicators": {
-      "rsi": 33,
-      "vwapDeviationPct": -4.37,
-      "realizedVol20Pct": 20.3,
-      "atrPct": 2.28
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "ema_ratio_20_50",
-        "value": -0.0281,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "price_to_ema200",
-        "value": -0.1117,
-        "impact": "Bearish"
-      },
-      {
-        "feature": "price_to_ema20",
-        "value": -0.0443,
-        "impact": "Bearish"
-      }
-    ],
-    "evaluatedAt": "2026-10-24T22:06:05.686037"
-  },
-  "TRENT": {
-    "symbol": "TRENT",
-    "market": "INDIA",
-    "currentPrice": 2727.5,
-    "changePct": -1.74,
-    "xgboostScore": 68.5,
-    "winProbability": 63.0,
-    "rawProbability": 0.5185,
-    "technicalIndicators": {
-      "rsi": 60,
-      "vwapDeviationPct": -3.02,
-      "realizedVol20Pct": 51.6,
-      "atrPct": 3.2
-    },
-    "topFeatureDrivers": [
-      {
-        "feature": "volatility_ratio",
-        "value": 1.5611,
+        "value": 0.8399,
         "impact": "Bullish"
       },
       {
-        "feature": "volatility_20d",
-        "value": 0.5156,
+        "feature": "ret_20d",
+        "value": 0.0897,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.743159"
+  },
+  "EICHERMOT": {
+    "symbol": "EICHERMOT",
+    "market": "INDIA",
+    "currentPrice": 7650.0,
+    "changePct": 1.34,
+    "xgboostScore": 67.6,
+    "winProbability": 62.2,
+    "rawProbability": 0.5096,
+    "technicalIndicators": {
+      "rsi": 76,
+      "vwapDeviationPct": 3.65,
+      "realizedVol20Pct": 24.1,
+      "atrPct": 2.44
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0065,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "rsi_14",
+        "value": 0.7593,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.0497,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.818888"
+  },
+  "DIVISLAB": {
+    "symbol": "DIVISLAB",
+    "market": "INDIA",
+    "currentPrice": 11442.0,
+    "changePct": -0.37,
+    "xgboostScore": 75.8,
+    "winProbability": 69.7,
+    "rawProbability": 0.5843,
+    "technicalIndicators": {
+      "rsi": 91,
+      "vwapDeviationPct": 12.73,
+      "realizedVol20Pct": 46.9,
+      "atrPct": 3.19
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_20d",
+        "value": 0.2681,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.1166,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema200",
+        "value": 0.4247,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.897592"
+  },
+  "ONGC": {
+    "symbol": "ONGC",
+    "market": "INDIA",
+    "currentPrice": 225.0,
+    "changePct": 0.22,
+    "xgboostScore": 67.3,
+    "winProbability": 61.9,
+    "rawProbability": 0.507,
+    "technicalIndicators": {
+      "rsi": 58,
+      "vwapDeviationPct": 1.27,
+      "realizedVol20Pct": 22.1,
+      "atrPct": 2.1
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volume_surge_5",
+        "value": 1.6697,
         "impact": "Bullish"
       },
       {
         "feature": "ema_ratio_50_200",
-        "value": -0.0731,
+        "value": -0.0483,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1822,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:15.975571"
+  },
+  "HINDUNILVR": {
+    "symbol": "HINDUNILVR",
+    "market": "INDIA",
+    "currentPrice": 1992.9,
+    "changePct": 0.96,
+    "xgboostScore": 65.1,
+    "winProbability": 59.9,
+    "rawProbability": 0.4871,
+    "technicalIndicators": {
+      "rsi": 85,
+      "vwapDeviationPct": 6.22,
+      "realizedVol20Pct": 20.7,
+      "atrPct": 2.35
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0706,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "rsi_14",
+        "value": 0.8542,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.009,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.050626"
+  },
+  "TATASTEEL": {
+    "symbol": "TATASTEEL",
+    "market": "INDIA",
+    "currentPrice": 186.68,
+    "changePct": -0.7,
+    "xgboostScore": 68.3,
+    "winProbability": 62.8,
+    "rawProbability": 0.5162,
+    "technicalIndicators": {
+      "rsi": 76,
+      "vwapDeviationPct": 5.08,
+      "realizedVol20Pct": 29.4,
+      "atrPct": 2.61
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0115,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1816,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0267,
         "impact": "Bearish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:05.852256"
+    "evaluatedAt": "2026-11-13T17:10:16.125795"
   },
-  "M&M": {
-    "symbol": "M&M",
+  "JSWSTEEL": {
+    "symbol": "JSWSTEEL",
     "market": "INDIA",
-    "currentPrice": 2861.2,
-    "changePct": -0.1,
-    "xgboostScore": 76.7,
-    "winProbability": 70.6,
-    "rawProbability": 0.5927,
+    "currentPrice": 1348.0,
+    "changePct": -0.3,
+    "xgboostScore": 65.4,
+    "winProbability": 60.2,
+    "rawProbability": 0.4898,
     "technicalIndicators": {
-      "rsi": 50,
-      "vwapDeviationPct": -0.47,
-      "realizedVol20Pct": 25.4,
-      "atrPct": 2.3
+      "rsi": 83,
+      "vwapDeviationPct": 5.14,
+      "realizedVol20Pct": 33.5,
+      "atrPct": 2.38
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_20d",
+        "value": 0.1461,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1857,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "rsi_14",
+        "value": 0.8254,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.201786"
+  },
+  "HINDALCO": {
+    "symbol": "HINDALCO",
+    "market": "INDIA",
+    "currentPrice": 943.6,
+    "changePct": -2.12,
+    "xgboostScore": 64.6,
+    "winProbability": 59.4,
+    "rawProbability": 0.4829,
+    "technicalIndicators": {
+      "rsi": 78,
+      "vwapDeviationPct": 2.42,
+      "realizedVol20Pct": 21.6,
+      "atrPct": 2.68
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volume_surge_5",
+        "value": 1.8433,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0102,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.1012,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.277510"
+  },
+  "GRASIM": {
+    "symbol": "GRASIM",
+    "market": "INDIA",
+    "currentPrice": 3034.0,
+    "changePct": -2.6,
+    "xgboostScore": 64.1,
+    "winProbability": 58.9,
+    "rawProbability": 0.4778,
+    "technicalIndicators": {
+      "rsi": 61,
+      "vwapDeviationPct": -0.99,
+      "realizedVol20Pct": 23.8,
+      "atrPct": 2.52
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volume_surge_5",
+        "value": 1.6819,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volume_ratio_20",
+        "value": 2.3492,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.0666,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.388290"
+  },
+  "TECHM": {
+    "symbol": "TECHM",
+    "market": "INDIA",
+    "currentPrice": 1764.0,
+    "changePct": -0.56,
+    "xgboostScore": 67.2,
+    "winProbability": 61.8,
+    "rawProbability": 0.5061,
+    "technicalIndicators": {
+      "rsi": 44,
+      "vwapDeviationPct": 0.1,
+      "realizedVol20Pct": 38.9,
+      "atrPct": 2.55
     },
     "topFeatureDrivers": [
       {
         "feature": "ema_ratio_20_50",
-        "value": -0.0387,
-        "impact": "Bearish"
+        "value": 0.048,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2639,
+        "impact": "Bullish"
       },
       {
         "feature": "macd_signal",
-        "value": -0.0268,
+        "value": 0.0318,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.526676"
+  },
+  "WIPRO": {
+    "symbol": "WIPRO",
+    "market": "INDIA",
+    "currentPrice": 194.6,
+    "changePct": -0.82,
+    "xgboostScore": 80.9,
+    "winProbability": 74.4,
+    "rawProbability": 0.6308,
+    "technicalIndicators": {
+      "rsi": 57,
+      "vwapDeviationPct": 2.94,
+      "realizedVol20Pct": 34.2,
+      "atrPct": 2.45
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_signal",
+        "value": 0.0341,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.4999,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": 0.1385,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.611217"
+  },
+  "BAJAJFINSV": {
+    "symbol": "BAJAJFINSV",
+    "market": "INDIA",
+    "currentPrice": 1865.0,
+    "changePct": -1.17,
+    "xgboostScore": 68.6,
+    "winProbability": 63.1,
+    "rawProbability": 0.5189,
+    "technicalIndicators": {
+      "rsi": 79,
+      "vwapDeviationPct": 8.08,
+      "realizedVol20Pct": 25.2,
+      "atrPct": 2.56
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0146,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.6419,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0367,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.689913"
+  },
+  "NESTLEIND": {
+    "symbol": "NESTLEIND",
+    "market": "INDIA",
+    "currentPrice": 1263.2,
+    "changePct": 0.18,
+    "xgboostScore": 66.9,
+    "winProbability": 61.5,
+    "rawProbability": 0.5035,
+    "technicalIndicators": {
+      "rsi": 69,
+      "vwapDeviationPct": 1.78,
+      "realizedVol20Pct": 39.3,
+      "atrPct": 2.53
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3212,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0351,
         "impact": "Bearish"
       },
       {
         "feature": "ret_60d",
-        "value": -0.1253,
+        "value": -0.1407,
         "impact": "Bearish"
       }
     ],
-    "evaluatedAt": "2026-10-24T22:06:06.005723"
+    "evaluatedAt": "2026-11-13T17:10:16.764281"
+  },
+  "DRREDDY": {
+    "symbol": "DRREDDY",
+    "market": "INDIA",
+    "currentPrice": 1380.0,
+    "changePct": -0.48,
+    "xgboostScore": 65.3,
+    "winProbability": 60.0,
+    "rawProbability": 0.4887,
+    "technicalIndicators": {
+      "rsi": 85,
+      "vwapDeviationPct": 5.11,
+      "realizedVol20Pct": 25.7,
+      "atrPct": 2.08
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0443,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": 0.03,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": 0.1349,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.838725"
+  },
+  "SBILIFE": {
+    "symbol": "SBILIFE",
+    "market": "INDIA",
+    "currentPrice": 1789.9,
+    "changePct": -1.63,
+    "xgboostScore": 68.1,
+    "winProbability": 62.7,
+    "rawProbability": 0.5146,
+    "technicalIndicators": {
+      "rsi": 73,
+      "vwapDeviationPct": 5.91,
+      "realizedVol20Pct": 21.9,
+      "atrPct": 2.54
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0102,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0504,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "stoch_k",
+        "value": 0.8549,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.913494"
+  },
+  "HDFCLIFE": {
+    "symbol": "HDFCLIFE",
+    "market": "INDIA",
+    "currentPrice": 592.25,
+    "changePct": -0.93,
+    "xgboostScore": 63.2,
+    "winProbability": 58.2,
+    "rawProbability": 0.4702,
+    "technicalIndicators": {
+      "rsi": 83,
+      "vwapDeviationPct": 8.07,
+      "realizedVol20Pct": 26.7,
+      "atrPct": 2.4
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0137,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0814,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0745,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:16.987870"
+  },
+  "BPCL": {
+    "symbol": "BPCL",
+    "market": "INDIA",
+    "currentPrice": 302.0,
+    "changePct": -3.05,
+    "xgboostScore": 78.0,
+    "winProbability": 71.8,
+    "rawProbability": 0.6048,
+    "technicalIndicators": {
+      "rsi": 62,
+      "vwapDeviationPct": 0.53,
+      "realizedVol20Pct": 32.3,
+      "atrPct": 2.9
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2518,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0418,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0075,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.076609"
+  },
+  "BRITANNIA": {
+    "symbol": "BRITANNIA",
+    "market": "INDIA",
+    "currentPrice": 4750.5,
+    "changePct": -0.97,
+    "xgboostScore": 79.1,
+    "winProbability": 72.8,
+    "rawProbability": 0.6147,
+    "technicalIndicators": {
+      "rsi": 63,
+      "vwapDeviationPct": -0.04,
+      "realizedVol20Pct": 31.5,
+      "atrPct": 2.59
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3198,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.069,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.1396,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.153410"
+  },
+  "TATACONSUM": {
+    "symbol": "TATACONSUM",
+    "market": "INDIA",
+    "currentPrice": 1079.0,
+    "changePct": -0.58,
+    "xgboostScore": 74.5,
+    "winProbability": 68.5,
+    "rawProbability": 0.5724,
+    "technicalIndicators": {
+      "rsi": 77,
+      "vwapDeviationPct": 6.47,
+      "realizedVol20Pct": 32.8,
+      "atrPct": 2.67
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volatility_ratio",
+        "value": 1.3417,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.045,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.6232,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.229344"
+  },
+  "HEROMOTOCO": {
+    "symbol": "HEROMOTOCO",
+    "market": "INDIA",
+    "currentPrice": 5385.0,
+    "changePct": 0.8,
+    "xgboostScore": 68.0,
+    "winProbability": 62.6,
+    "rawProbability": 0.514,
+    "technicalIndicators": {
+      "rsi": 65,
+      "vwapDeviationPct": 2.18,
+      "realizedVol20Pct": 29.6,
+      "atrPct": 2.78
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_60d",
+        "value": -0.0627,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.1246,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_20d",
+        "value": 0.0728,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.304085"
+  },
+  "SHRIRAMFIN": {
+    "symbol": "SHRIRAMFIN",
+    "market": "INDIA",
+    "currentPrice": 970.0,
+    "changePct": -3.37,
+    "xgboostScore": 67.3,
+    "winProbability": 62.0,
+    "rawProbability": 0.5077,
+    "technicalIndicators": {
+      "rsi": 68,
+      "vwapDeviationPct": 8.24,
+      "realizedVol20Pct": 45.0,
+      "atrPct": 3.48
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0201,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "bb_width",
+        "value": 0.2629,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": -0.1287,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.379156"
+  },
+  "ASIANPAINT": {
+    "symbol": "ASIANPAINT",
+    "market": "INDIA",
+    "currentPrice": 2550.0,
+    "changePct": 0.53,
+    "xgboostScore": 68.6,
+    "winProbability": 63.1,
+    "rawProbability": 0.5186,
+    "technicalIndicators": {
+      "rsi": 77,
+      "vwapDeviationPct": 6.53,
+      "realizedVol20Pct": 25.2,
+      "atrPct": 2.92
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "macd_hist",
+        "value": 0.0117,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0396,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "stoch_k",
+        "value": 0.9185,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.456807"
+  },
+  "INDUSINDBK": {
+    "symbol": "INDUSINDBK",
+    "market": "INDIA",
+    "currentPrice": 914.4,
+    "changePct": -1.82,
+    "xgboostScore": 68.4,
+    "winProbability": 62.9,
+    "rawProbability": 0.5172,
+    "technicalIndicators": {
+      "rsi": 67,
+      "vwapDeviationPct": 3.73,
+      "realizedVol20Pct": 34.3,
+      "atrPct": 2.98
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "volume_surge_5",
+        "value": 1.6139,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0127,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0212,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.532919"
+  },
+  "MEESHO": {
+    "symbol": "MEESHO",
+    "market": "INDIA",
+    "currentPrice": 257.07,
+    "changePct": 1.16,
+    "xgboostScore": 70.3,
+    "winProbability": 64.7,
+    "rawProbability": 0.5348,
+    "technicalIndicators": {
+      "rsi": 89,
+      "vwapDeviationPct": 10.82,
+      "realizedVol20Pct": 36.7,
+      "atrPct": 3.48
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "price_to_ema20",
+        "value": 0.1004,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ret_60d",
+        "value": 0.3263,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema200",
+        "value": 0.3021,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.606477"
+  },
+  "SWIGGY": {
+    "symbol": "SWIGGY",
+    "market": "INDIA",
+    "currentPrice": 186.7,
+    "changePct": -2.86,
+    "xgboostScore": 65.3,
+    "winProbability": 60.1,
+    "rawProbability": 0.4889,
+    "technicalIndicators": {
+      "rsi": 59,
+      "vwapDeviationPct": -1.36,
+      "realizedVol20Pct": 75.2,
+      "atrPct": 4.56
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.1145,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_signal",
+        "value": -0.0888,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volatility_20d",
+        "value": 0.7519,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.682225"
+  },
+  "ETERNAL": {
+    "symbol": "ETERNAL",
+    "market": "INDIA",
+    "currentPrice": 363.65,
+    "changePct": -0.19,
+    "xgboostScore": 67.4,
+    "winProbability": 62.0,
+    "rawProbability": 0.5082,
+    "technicalIndicators": {
+      "rsi": 82,
+      "vwapDeviationPct": 9.26,
+      "realizedVol20Pct": 32.4,
+      "atrPct": 2.66
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_20d",
+        "value": 0.1508,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2338,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0406,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.758136"
+  },
+  "ZOMATO": {
+    "symbol": "ZOMATO",
+    "market": "INDIA",
+    "currentPrice": 363.65,
+    "changePct": -0.19,
+    "xgboostScore": 67.4,
+    "winProbability": 62.0,
+    "rawProbability": 0.5082,
+    "technicalIndicators": {
+      "rsi": 82,
+      "vwapDeviationPct": 9.26,
+      "realizedVol20Pct": 32.4,
+      "atrPct": 2.66
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_20d",
+        "value": 0.1508,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2338,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": 0.0406,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.833220"
+  },
+  "PAYTM": {
+    "symbol": "PAYTM",
+    "market": "INDIA",
+    "currentPrice": 1939.9,
+    "changePct": 0.77,
+    "xgboostScore": 74.8,
+    "winProbability": 68.8,
+    "rawProbability": 0.5753,
+    "technicalIndicators": {
+      "rsi": 80,
+      "vwapDeviationPct": 12.02,
+      "realizedVol20Pct": 40.6,
+      "atrPct": 3.46
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "price_to_ema20",
+        "value": 0.1062,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema200",
+        "value": 0.3398,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0143,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.911877"
+  },
+  "NYKAA": {
+    "symbol": "NYKAA",
+    "market": "INDIA",
+    "currentPrice": 365.2,
+    "changePct": 1.36,
+    "xgboostScore": 68.3,
+    "winProbability": 62.8,
+    "rawProbability": 0.5163,
+    "technicalIndicators": {
+      "rsi": 83,
+      "vwapDeviationPct": 5.31,
+      "realizedVol20Pct": 27.9,
+      "atrPct": 3.05
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "stoch_k",
+        "value": 0.972,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "rsi_14",
+        "value": 0.8316,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "price_to_ema20",
+        "value": 0.0457,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:17.987706"
+  },
+  "JIOFIN": {
+    "symbol": "JIOFIN",
+    "market": "INDIA",
+    "currentPrice": 227.5,
+    "changePct": -1.6,
+    "xgboostScore": 73.3,
+    "winProbability": 67.4,
+    "rawProbability": 0.5619,
+    "technicalIndicators": {
+      "rsi": 77,
+      "vwapDeviationPct": 4.56,
+      "realizedVol20Pct": 28.7,
+      "atrPct": 2.34
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ema_ratio_50_200",
+        "value": -0.0806,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "macd_hist",
+        "value": 0.0124,
+        "impact": "Bullish"
+      },
+      {
+        "feature": "volatility_ratio",
+        "value": 1.2103,
+        "impact": "Bullish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:18.063655"
+  },
+  "TATATECH": {
+    "symbol": "TATATECH",
+    "market": "INDIA",
+    "currentPrice": 668.8,
+    "changePct": -2.13,
+    "xgboostScore": 69.4,
+    "winProbability": 63.8,
+    "rawProbability": 0.5261,
+    "technicalIndicators": {
+      "rsi": 54,
+      "vwapDeviationPct": -5.45,
+      "realizedVol20Pct": 29.9,
+      "atrPct": 2.96
+    },
+    "topFeatureDrivers": [
+      {
+        "feature": "ret_60d",
+        "value": -0.2054,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "ema_ratio_20_50",
+        "value": -0.0385,
+        "impact": "Bearish"
+      },
+      {
+        "feature": "volume_surge_5",
+        "value": 0.5128,
+        "impact": "Bearish"
+      }
+    ],
+    "evaluatedAt": "2026-11-13T17:10:18.140979"
   }
 }

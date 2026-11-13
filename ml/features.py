@@ -43,20 +43,20 @@ def compute_features(df):
     data = df.copy()
 
     # Returns
-    data['ret_1d'] = data['Close'].pct_change(1)
-    data['ret_5d'] = data['Close'].pct_change(5)
-    data['ret_20d'] = data['Close'].pct_change(20)
-    data['ret_60d'] = data['Close'].pct_change(60)
+    data['ret_1d'] = data['Close'].pct_change(1).fillna(0.0)
+    data['ret_5d'] = data['Close'].pct_change(5).fillna(0.0)
+    data['ret_20d'] = data['Close'].pct_change(20).fillna(0.0)
+    data['ret_60d'] = data['Close'].pct_change(60).fillna(data['ret_20d']).fillna(0.0)
 
     # Moving Averages
     ema20 = data['Close'].ewm(span=20, adjust=False).mean()
     ema50 = data['Close'].ewm(span=50, adjust=False).mean()
     ema200 = data['Close'].ewm(span=200, adjust=False).mean()
 
-    data['ema_ratio_20_50'] = (ema20 / ema50) - 1.0
-    data['ema_ratio_50_200'] = (ema50 / ema200) - 1.0
-    data['price_to_ema20'] = (data['Close'] / ema20) - 1.0
-    data['price_to_ema200'] = (data['Close'] / ema200) - 1.0
+    data['ema_ratio_20_50'] = ((ema20 / ema50) - 1.0).fillna(0.0)
+    data['ema_ratio_50_200'] = ((ema50 / ema200) - 1.0).fillna(0.0)
+    data['price_to_ema20'] = ((data['Close'] / ema20) - 1.0).fillna(0.0)
+    data['price_to_ema200'] = ((data['Close'] / ema200) - 1.0).fillna(0.0)
 
     # Momentum - RSI(14)
     data['rsi_14'] = calculate_rsi(data['Close'], 14) / 100.0  # normalized [0, 1]
@@ -64,18 +64,18 @@ def compute_features(df):
     # Momentum - MACD(12, 26, 9)
     ema12 = data['Close'].ewm(span=12, adjust=False).mean()
     ema26 = data['Close'].ewm(span=26, adjust=False).mean()
-    macd_line = (ema12 - ema26) / data['Close']  # normalized by price
-    macd_signal = macd_line.ewm(span=9, adjust=False).mean()
-    macd_hist = macd_line - macd_signal
+    macd_line = ((ema12 - ema26) / data['Close']).fillna(0.0)  # normalized by price
+    macd_signal = macd_line.ewm(span=9, adjust=False).mean().fillna(0.0)
+    macd_hist = (macd_line - macd_signal).fillna(0.0)
 
     data['macd'] = macd_line
     data['macd_signal'] = macd_signal
     data['macd_hist'] = macd_hist
 
     # Volatility
-    daily_vol = data['ret_1d'].rolling(window=20).std()
+    daily_vol = data['ret_1d'].rolling(window=20).std().fillna(0.015)
     data['volatility_20d'] = daily_vol * np.sqrt(252)  # Annualized vol
-    vol60 = data['ret_1d'].rolling(window=60).std() * np.sqrt(252)
+    vol60 = data['ret_1d'].rolling(window=60).std().fillna(daily_vol) * np.sqrt(252)
     data['volatility_ratio'] = (data['volatility_20d'] / vol60.replace(0, np.nan)).fillna(1.0)
 
     # Average True Range (ATR)
