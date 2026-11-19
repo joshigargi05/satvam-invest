@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 
@@ -482,7 +483,7 @@ export const getStockBaselinePrice = (ticker, mkt = 'INDIA') => {
 
 export default function Markets() {
   const navigate = useNavigate();
-  const { buyAsset, balance, showTradeAlert } = usePortfolio();
+  const { buyAsset, sellAsset, holdings, balance, showTradeAlert } = usePortfolio();
   const { market, setMarket, currency, getCurrency } = useMarket();
   const currentStocksList = market === 'US' ? defaultStocksUS : defaultStocksIndia;
   
@@ -490,8 +491,12 @@ export default function Markets() {
   const [selectedTab, setSelectedTab] = useState('ALL'); // ALL, STOCKS, COMMODITIES
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [buyModalAsset, setBuyModalAsset] = useState(null);
-  const [buyUnits, setBuyUnits] = useState('1');
+  const [tradeModal, setTradeModal] = useState({
+    isOpen: false,
+    mode: 'BUY', // 'BUY' | 'SELL'
+    asset: null
+  });
+  const [tradeUnits, setTradeUnits] = useState('1');
   const [buyExitMode, setBuyExitMode] = useState('none'); // Default: 'none' (Manual Sell); secondary: 'percentage' | 'price'
   const [buyExitPct, setBuyExitPct] = useState('10');
   const [buyExitPrice, setBuyExitPrice] = useState('');
@@ -501,6 +506,27 @@ export default function Markets() {
   const [crossMarketPrompt, setCrossMarketPrompt] = useState({ isOpen: false, asset: null, currentMarket: market });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const tableRef = useRef(null);
+  const tradeInputRef = useRef(null);
+  const tradeModalRef = useRef(null);
+
+  // Escaping ancestral transforms: Lock body scroll & auto-focus input when Trade modal opens
+  useEffect(() => {
+    if (tradeModal.isOpen) {
+      document.body.style.overflow = 'hidden';
+      const timer = setTimeout(() => {
+        if (tradeInputRef.current) {
+          tradeInputRef.current.focus();
+          tradeInputRef.current.select();
+        }
+      }, 60);
+      return () => clearTimeout(timer);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [tradeModal.isOpen, tradeModal.mode]);
 
   // Auto-scroll to results table whenever a search term is entered
   useEffect(() => {
@@ -626,8 +652,8 @@ export default function Markets() {
       price: `${(asset.market || market) === 'INDIA' ? '₹' : '$'}${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     };
 
-    setBuyModalAsset(enrichedAsset);
-    setBuyUnits('1');
+    setTradeModal({ isOpen: true, mode: 'BUY', asset: enrichedAsset });
+    setTradeUnits('1');
     setBuyExitMode('none');
     setBuyExitPct('10');
     setBuyExitPrice((effectivePrice * 1.10).toFixed(2));
@@ -636,12 +662,56 @@ export default function Markets() {
     getQuotes(asset.ticker, asset.market || market).then(q => {
       const data = q[asset.ticker] || q[asset.ticker.toUpperCase()];
       if (data && typeof data.price === 'number' && data.price > 0) {
-        setBuyModalAsset(prev => {
-          if (!prev || prev.ticker !== asset.ticker) return prev;
+        setTradeModal(prev => {
+          if (!prev.isOpen || !prev.asset || prev.asset.ticker !== asset.ticker) return prev;
           return {
             ...prev,
-            currentPrice: data.price,
-            price: `${(prev.market === 'INDIA' ? '₹' : '$')}${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            asset: {
+              ...prev.asset,
+              currentPrice: data.price,
+              price: `${(prev.asset.market === 'INDIA' ? '₹' : '$')}${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            }
+          };
+        });
+      }
+    }).catch(console.error);
+  };
+
+  const handleSell = (asset) => {
+    if (asset.market && asset.market !== market) {
+      setCrossMarketPrompt({ isOpen: true, asset, currentMarket: market });
+      return;
+    }
+    const baseline = getStockBaselinePrice(asset.ticker, asset.market || market);
+    const effectivePrice = (Number(asset.currentPrice) > 0 && Number(asset.currentPrice) !== 100)
+      ? Number(asset.currentPrice)
+      : baseline;
+
+    const enrichedAsset = {
+      ...asset,
+      market: asset.market || market,
+      currentPrice: effectivePrice,
+      price: `${(asset.market || market) === 'INDIA' ? '₹' : '$'}${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    };
+
+    const ownedHolding = (holdings || []).find(h => h.ticker === asset.ticker);
+    const maxShares = Number(ownedHolding?.shares || 0);
+
+    setTradeModal({ isOpen: true, mode: 'SELL', asset: enrichedAsset });
+    setTradeUnits(maxShares > 0 ? String(maxShares) : '1');
+
+    getQuotes(asset.ticker, asset.market || market).then(q => {
+      const data = q[asset.ticker] || q[asset.ticker.toUpperCase()];
+      if (data && typeof data.price === 'number' && data.price > 0) {
+        setTradeModal(prev => {
+          if (!prev.isOpen || !prev.asset || prev.asset.ticker !== asset.ticker) return prev;
+          return {
+            ...prev,
+            asset: {
+              ...prev.asset,
+              currentPrice: data.price,
+              price: `${(prev.asset.market === 'INDIA' ? '₹' : '$')}${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            }
           };
         });
       }
@@ -665,8 +735,8 @@ export default function Markets() {
     };
 
     setTimeout(() => {
-      setBuyModalAsset(enrichedAsset);
-      setBuyUnits('1');
+      setTradeModal({ isOpen: true, mode: 'BUY', asset: enrichedAsset });
+      setTradeUnits('1');
       setBuyExitMode('none');
       setBuyExitPct('10');
       setBuyExitPrice((effectivePrice * 1.10).toFixed(2));
@@ -675,12 +745,15 @@ export default function Markets() {
       getQuotes(asset.ticker, targetMarket).then(q => {
         const data = q[asset.ticker] || q[asset.ticker.toUpperCase()];
         if (data && typeof data.price === 'number' && data.price > 0) {
-          setBuyModalAsset(prev => {
-            if (!prev || prev.ticker !== asset.ticker) return prev;
+          setTradeModal(prev => {
+            if (!prev.isOpen || !prev.asset || prev.asset.ticker !== asset.ticker) return prev;
             return {
               ...prev,
-              currentPrice: data.price,
-              price: `${(targetMarket === 'INDIA' ? '₹' : '$')}${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              asset: {
+                ...prev.asset,
+                currentPrice: data.price,
+                price: `${(targetMarket === 'INDIA' ? '₹' : '$')}${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              }
             };
           });
         }
@@ -690,8 +763,8 @@ export default function Markets() {
 
   const handleConfirmMarketBuy = (e) => {
     e.preventDefault();
-    if (!buyModalAsset) return;
-    const units = Number(buyUnits);
+    if (!tradeModal.asset) return;
+    const units = Number(tradeUnits);
     if (isNaN(units) || units <= 0) {
       if (showTradeAlert) {
         showTradeAlert({
@@ -726,29 +799,72 @@ export default function Markets() {
       autoExitRule = { enabled: true, mode: 'price', targetPrice: priceVal };
     }
 
-    const baseline = getStockBaselinePrice(buyModalAsset.ticker, buyModalAsset.market || market);
-    const finalPrice = (Number(buyModalAsset.currentPrice) > 0)
-      ? Number(buyModalAsset.currentPrice)
+    const baseline = getStockBaselinePrice(tradeModal.asset.ticker, tradeModal.asset.market || market);
+    const finalPrice = (Number(tradeModal.asset.currentPrice) > 0)
+      ? Number(tradeModal.asset.currentPrice)
       : baseline;
 
     try {
       const success = buyAsset({
-        ticker: buyModalAsset.ticker,
-        name: buyModalAsset.name,
+        ticker: tradeModal.asset.ticker,
+        name: tradeModal.asset.name,
         price: finalPrice,
         units,
-        category: buyModalAsset.sector,
-        assetType: buyModalAsset.assetType,
-        market: buyModalAsset.market || market,
+        category: tradeModal.asset.sector,
+        assetType: tradeModal.asset.assetType,
+        market: tradeModal.asset.market || market,
         bucket: 'core',
         autoExit: autoExitRule
       });
 
       if (success) {
-        setBuyModalAsset(null);
+        setTradeModal({ isOpen: false, mode: 'BUY', asset: null });
       }
     } catch (err) {
       console.error('Error executing buy order:', err);
+    }
+  };
+
+  const handleConfirmMarketSell = (e) => {
+    e.preventDefault();
+    if (!tradeModal.asset) return;
+    const units = Number(tradeUnits);
+    const ownedHolding = (holdings || []).find(h => h.ticker === tradeModal.asset.ticker);
+    const maxShares = Number(ownedHolding?.shares || 0);
+
+    if (maxShares <= 0) {
+      if (showTradeAlert) {
+        showTradeAlert({
+          title: 'No Shares in Portfolio',
+          message: `You currently do not hold any shares of ${tradeModal.asset.ticker} to sell. Please buy shares first.`
+        });
+      } else {
+        alert(`You do not hold any shares of ${tradeModal.asset.ticker} to sell.`);
+      }
+      return;
+    }
+
+    if (isNaN(units) || units <= 0 || units > maxShares) {
+      if (showTradeAlert) {
+        showTradeAlert({
+          title: 'Invalid Sell Quantity',
+          message: `Please specify a valid quantity between 1 and ${maxShares} shares to sell.`
+        });
+      } else {
+        alert(`Please specify a valid quantity between 1 and ${maxShares} shares.`);
+      }
+      return;
+    }
+
+    try {
+      const success = sellAsset(tradeModal.asset.ticker, units, ownedHolding.bucket || 'core');
+      if (success) {
+        setMarketToast(`Sold ${units} share(s) of ${tradeModal.asset.ticker} successfully!`);
+        setTimeout(() => setMarketToast(''), 4500);
+        setTradeModal({ isOpen: false, mode: 'BUY', asset: null });
+      }
+    } catch (err) {
+      console.error('Error executing sell order:', err);
     }
   };
 
@@ -1434,20 +1550,39 @@ export default function Markets() {
                 </td>
                 <td className="p-4 text-right">
                   {stock.market && stock.market !== market ? (
-                    <button 
-                      className="btn py-1.5 px-3 text-xs font-bold border border-amber-500/40 text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 transition-all active:scale-95" 
-                      onClick={() => handleBuy(stock)}
-                      title={`This is a ${stock.market === 'INDIA' ? 'Indian (₹)' : 'US ($)'} stock. Click to switch market & buy.`}
-                    >
-                      Switch &amp; Buy
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                      <button 
+                        className="btn py-1.5 px-2.5 text-xs font-bold border border-amber-500/40 text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 transition-all active:scale-95" 
+                        onClick={() => handleBuy(stock)}
+                        title={`This is a ${stock.market === 'INDIA' ? 'Indian (₹)' : 'US ($)'} stock. Click to switch market & buy.`}
+                      >
+                        Switch &amp; Buy
+                      </button>
+                      <button 
+                        className="btn py-1.5 px-2.5 text-xs font-bold border border-rose-500/40 text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 transition-all active:scale-95" 
+                        onClick={() => handleSell(stock)}
+                        title={`This is a ${stock.market === 'INDIA' ? 'Indian (₹)' : 'US ($)'} stock. Click to switch market & sell.`}
+                      >
+                        Switch &amp; Sell
+                      </button>
+                    </div>
                   ) : (
-                    <button 
-                      className="btn btn-primary py-1.5 px-4 text-xs font-bold" 
-                      onClick={() => handleBuy(stock)}
-                    >
-                      Buy {stock.assetType === 'commodity' ? 'Commodity' : 'Stock'}
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                      <button 
+                        className="btn btn-primary py-1.5 px-3.5 text-xs font-bold shadow-md shadow-emerald-500/20 active:scale-95 transition-all" 
+                        onClick={() => handleBuy(stock)}
+                        title={`Buy ${stock.ticker}`}
+                      >
+                        Buy
+                      </button>
+                      <button 
+                        className="btn py-1.5 px-3 text-xs font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 shadow-md shadow-rose-500/10 active:scale-95 transition-all" 
+                        onClick={() => handleSell(stock)}
+                        title={`Sell ${stock.ticker}`}
+                      >
+                        Sell
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
@@ -1465,221 +1600,432 @@ export default function Markets() {
         </div>
       )}
 
-      {/* Buy Asset + Auto-Exit Configuration Modal */}
-      {buyModalAsset && (() => {
-        const assetCurr = buyModalAsset.currency || getCurrency(buyModalAsset.ticker);
-        const baseline = getStockBaselinePrice(buyModalAsset.ticker, buyModalAsset.market || market);
-        const livePrice = (Number(buyModalAsset.currentPrice) > 0)
-          ? Number(buyModalAsset.currentPrice)
-          : baseline;
-        const qty = Number(buyUnits || 1);
-        const totalOrderCost = Number((livePrice * qty).toFixed(2));
-        const previewExitPrice = buyExitMode === 'percentage'
-          ? Number((livePrice * (1 + (Number(buyExitPct) || 0) / 100)).toFixed(2))
-          : (buyExitMode === 'price' ? Number(buyExitPrice || 0) : null);
+      {/* Unified Instant Trade Widget (Buy / Sell) - Portaled directly to body to bypass ancestor CSS transforms */}
+      {tradeModal.isOpen && tradeModal.asset && createPortal(
+        (() => {
+          const assetCurr = tradeModal.asset.currency || getCurrency(tradeModal.asset.ticker);
+          const baseline = getStockBaselinePrice(tradeModal.asset.ticker, tradeModal.asset.market || market);
+          const livePrice = (Number(tradeModal.asset.currentPrice) > 0)
+            ? Number(tradeModal.asset.currentPrice)
+            : baseline;
+          const qty = Number(tradeUnits || 1);
+          const totalOrderCost = Number((livePrice * qty).toFixed(2));
+          const previewExitPrice = buyExitMode === 'percentage'
+            ? Number((livePrice * (1 + (Number(buyExitPct) || 0) / 100)).toFixed(2))
+            : (buyExitMode === 'price' ? Number(buyExitPrice || 0) : null);
 
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto animate-fade-in">
-            <div className="glass-panel p-4 sm:p-6 rounded-2xl max-w-md w-full border border-blue-500/40 shadow-2xl bg-slate-900/95 my-auto max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-start mb-4 pb-3 border-b border-white/10">
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                      Instant Order + Auto-Exit
-                    </span>
-                    {buyModalAsset.exchange && (
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30">
-                        {buyModalAsset.exchange}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-lg font-bold text-white mt-1">
-                    Buy {buyModalAsset.ticker} — {buyModalAsset.name}
-                  </h3>
-                  <p className="text-xs text-slate-400">{buyModalAsset.sector}</p>
-                </div>
-                <button
-                  onClick={() => setBuyModalAsset(null)}
-                  className="text-slate-400 hover:text-white text-sm font-bold px-2 py-1"
-                >
-                  ✕
-                </button>
-              </div>
+          // Find current user holding for Sell mode
+          const ownedHolding = (holdings || []).find(h => h.ticker === tradeModal.asset.ticker);
+          const maxShares = Number(ownedHolding?.shares || 0);
+          const avgPrice = Number(ownedHolding?.avgPrice || livePrice);
+          const hasShares = maxShares > 0;
+          const sellProceeds = Number((qty * livePrice).toFixed(2));
+          const costBasis = Number((qty * avgPrice).toFixed(2));
+          const realizedPnl = Number((sellProceeds - costBasis).toFixed(2));
+          const realizedPnlPct = avgPrice > 0 ? Number((((livePrice - avgPrice) / avgPrice) * 100).toFixed(2)) : 0;
+          const isProfitable = realizedPnl >= 0;
 
-              <form onSubmit={handleConfirmMarketBuy} className="space-y-4">
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-white/10 flex justify-between items-center">
+          return (
+            <div 
+              ref={tradeModalRef}
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 overflow-y-auto animate-fade-in"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setTradeModal({ isOpen: false, mode: 'BUY', asset: null });
+                }
+              }}
+            >
+              <div 
+                className="glass-panel p-4 sm:p-6 rounded-2xl max-w-md w-full border border-blue-500/40 shadow-2xl bg-slate-900/98 my-auto max-h-[92vh] overflow-y-auto overscroll-contain relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header Row */}
+                <div className="flex justify-between items-start mb-3 pb-3 border-b border-white/10">
                   <div>
-                    <span className="text-xs text-slate-400 block">Live Market Price</span>
-                    <span className="text-lg font-bold text-white font-mono">
-                      {assetCurr}{livePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                        tradeModal.mode === 'BUY' 
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
+                          : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                      }`}>
+                        {tradeModal.mode === 'BUY' ? '● Live Buy Order' : '● Live Sell Order'}
+                      </span>
+                      {tradeModal.asset.exchange && (
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30">
+                          {tradeModal.asset.exchange}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-bold text-white mt-1">
+                      {tradeModal.mode === 'BUY' ? 'Buy' : 'Sell'} {tradeModal.asset.ticker} — {tradeModal.asset.name}
+                    </h3>
+                    <p className="text-xs text-slate-400">{tradeModal.asset.sector}</p>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block">Available Cash</span>
-                    <span className="text-sm font-bold text-emerald-400 font-mono">
-                      {currency}{Number(balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setTradeModal({ isOpen: false, mode: 'BUY', asset: null })}
+                    className="text-slate-400 hover:text-white text-sm font-bold px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    ✕
+                  </button>
                 </div>
 
-                {/* Quantity */}
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                    Number of {buyModalAsset.unit ? `Units (${buyModalAsset.unit})` : 'Shares'} to Buy
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={buyUnits}
-                      onChange={(e) => setBuyUnits(e.target.value)}
-                      className="chat-input w-full font-mono text-base py-2 px-3"
-                      required
-                    />
-                    {[1, 5, 10, 25].map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => setBuyUnits(String(preset))}
-                        className="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-white/10"
-                      >
-                        +{preset}
-                      </button>
-                    ))}
-                  </div>
+                {/* Mode Segmented Tab Switcher (Buy / Sell) */}
+                <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-950 border border-white/10 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTradeModal(prev => ({ ...prev, mode: 'BUY' }));
+                      setTradeUnits('1');
+                    }}
+                    className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
+                      tradeModal.mode === 'BUY'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <TrendingUp size={14} />
+                    <span>Buy Order</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTradeModal(prev => ({ ...prev, mode: 'SELL' }));
+                      if (maxShares > 0) setTradeUnits(String(maxShares));
+                    }}
+                    className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
+                      tradeModal.mode === 'SELL'
+                        ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/30'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <TrendingDown size={14} />
+                    <span>Sell Order</span>
+                  </button>
                 </div>
 
-                {/* Exit Strategy: Manual Sell (Default) vs Optional Auto-Exit */}
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                    Exit Strategy <span className="text-[10px] text-slate-400 font-normal">(Manual Sell is Default • Auto-Exit Optional)</span>
-                  </label>
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    <button
-                      type="button"
-                      onClick={() => setBuyExitMode('none')}
-                      className={`p-2 rounded-xl border text-left transition-all ${
-                        buyExitMode === 'none'
-                          ? 'bg-slate-800 border-white/40 text-white'
-                          : 'bg-slate-900/60 border-white/10 text-slate-400'
-                      }`}
-                    >
-                      <div className="text-xs font-bold text-white">Manual Sell</div>
-                      <div className="text-[10px] text-slate-400">Default exit</div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBuyExitMode('percentage')}
-                      className={`p-2 rounded-xl border text-left transition-all ${
-                        buyExitMode === 'percentage'
-                          ? 'bg-emerald-500/20 border-emerald-500/60 text-white'
-                          : 'bg-slate-900/60 border-white/10 text-slate-400'
-                      }`}
-                    >
-                      <div className="text-xs font-bold text-emerald-300">Auto: % Profit</div>
-                      <div className="text-[10px] text-slate-400">e.g. +10%</div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setBuyExitMode('price');
-                        if (!buyExitPrice) setBuyExitPrice((livePrice * 1.10).toFixed(2));
-                      }}
-                      className={`p-2 rounded-xl border text-left transition-all ${
-                        buyExitMode === 'price'
-                          ? 'bg-blue-500/20 border-blue-500/60 text-white'
-                          : 'bg-slate-900/60 border-white/10 text-slate-400'
-                      }`}
-                    >
-                      <div className="text-xs font-bold text-blue-300">Auto: Price</div>
-                      <div className="text-[10px] text-slate-400">Define {assetCurr}</div>
-                    </button>
-                  </div>
+                {/* BUY MODE FORM */}
+                {tradeModal.mode === 'BUY' ? (
+                  <form onSubmit={handleConfirmMarketBuy} className="space-y-4">
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-white/10 flex justify-between items-center">
+                      <div>
+                        <span className="text-xs text-slate-400 block">Live Market Price</span>
+                        <span className="text-lg font-bold text-white font-mono">
+                          {assetCurr}{livePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs text-slate-400 block">Available Cash</span>
+                        <span className="text-sm font-bold text-emerald-400 font-mono">
+                          {currency}{Number(balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
 
-                  {buyExitMode === 'percentage' && (
-                    <div className="space-y-2">
+                    {/* Quantity */}
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                        Number of {tradeModal.asset.unit ? `Units (${tradeModal.asset.unit})` : 'Shares'} to Buy
+                      </label>
                       <div className="flex items-center gap-2">
                         <input
+                          ref={tradeInputRef}
                           type="number"
-                          step="0.5"
-                          value={buyExitPct}
-                          onChange={(e) => setBuyExitPct(e.target.value)}
-                          className="chat-input w-full font-mono text-sm py-1.5 px-3"
-                          placeholder="10"
+                          min="1"
+                          step="1"
+                          value={tradeUnits}
+                          onChange={(e) => setTradeUnits(e.target.value)}
+                          className="chat-input w-full font-mono text-base py-2 px-3"
                           required
                         />
-                        {[5, 10, 15, 20].map((p) => (
+                        {[1, 5, 10, 25].map((preset) => (
                           <button
-                            key={p}
+                            key={preset}
                             type="button"
-                            onClick={() => setBuyExitPct(String(p))}
-                            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border ${
-                              Number(buyExitPct) === p
-                                ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50'
-                                : 'bg-slate-800 text-slate-300 border-white/10'
-                            }`}
+                            onClick={() => setTradeUnits(String(preset))}
+                            className="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-white/10"
                           >
-                            +{p}%
+                            +{preset}
                           </button>
                         ))}
                       </div>
                     </div>
-                  )}
 
-                  {buyExitMode === 'price' && (
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      value={buyExitPrice}
-                      onChange={(e) => setBuyExitPrice(e.target.value)}
-                      className="chat-input w-full font-mono text-sm py-1.5 px-3"
-                      placeholder={(livePrice * 1.10).toFixed(2)}
-                      required
-                    />
-                  )}
-                </div>
+                    {/* Exit Strategy: Manual Sell (Default) vs Optional Auto-Exit */}
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                        Exit Strategy <span className="text-[10px] text-slate-400 font-normal">(Manual Sell is Default • Auto-Exit Optional)</span>
+                      </label>
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        <button
+                          type="button"
+                          onClick={() => setBuyExitMode('none')}
+                          className={`p-2 rounded-xl border text-left transition-all ${
+                            buyExitMode === 'none'
+                              ? 'bg-slate-800 border-white/40 text-white'
+                              : 'bg-slate-900/60 border-white/10 text-slate-400'
+                          }`}
+                        >
+                          <div className="text-xs font-bold text-white">Manual Sell</div>
+                          <div className="text-[10px] text-slate-400">Default exit</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBuyExitMode('percentage')}
+                          className={`p-2 rounded-xl border text-left transition-all ${
+                            buyExitMode === 'percentage'
+                              ? 'bg-emerald-500/20 border-emerald-500/60 text-white'
+                              : 'bg-slate-900/60 border-white/10 text-slate-400'
+                          }`}
+                        >
+                          <div className="text-xs font-bold text-emerald-300">Auto: % Profit</div>
+                          <div className="text-[10px] text-slate-400">e.g. +10%</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBuyExitMode('price');
+                            if (!buyExitPrice) setBuyExitPrice((livePrice * 1.10).toFixed(2));
+                          }}
+                          className={`p-2 rounded-xl border text-left transition-all ${
+                            buyExitMode === 'price'
+                              ? 'bg-blue-500/20 border-blue-500/60 text-white'
+                              : 'bg-slate-900/60 border-white/10 text-slate-400'
+                          }`}
+                        >
+                          <div className="text-xs font-bold text-blue-300">Auto: Price</div>
+                          <div className="text-[10px] text-slate-400">Define {assetCurr}</div>
+                        </button>
+                      </div>
 
-                {/* Order Total & Auto-Exit Preview */}
-                <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-300 font-medium">Estimated Order Total</span>
-                    <span className="text-base font-black text-white font-mono">
-                      {assetCurr}{totalOrderCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  {previewExitPrice && previewExitPrice > 0 && (
-                    <div className="flex justify-between items-center text-xs pt-1 border-t border-white/10">
-                      <span className="text-emerald-300 font-medium">🎯 Auto-Sell Trigger Price</span>
-                      <span className="font-bold text-emerald-400 font-mono">
-                        {assetCurr}{previewExitPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </span>
+                      {buyExitMode === 'percentage' && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              step="0.5"
+                              value={buyExitPct}
+                              onChange={(e) => setBuyExitPct(e.target.value)}
+                              className="chat-input w-full font-mono text-sm py-1.5 px-3"
+                              placeholder="10"
+                              required
+                            />
+                            {[5, 10, 15, 20].map((p) => (
+                              <button
+                                key={p}
+                                type="button"
+                                onClick={() => setBuyExitPct(String(p))}
+                                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border ${
+                                  Number(buyExitPct) === p
+                                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50'
+                                    : 'bg-slate-800 text-slate-300 border-white/10'
+                                }`}
+                              >
+                                +{p}%
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {buyExitMode === 'price' && (
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          value={buyExitPrice}
+                          onChange={(e) => setBuyExitPrice(e.target.value)}
+                          className="chat-input w-full font-mono text-sm py-1.5 px-3"
+                          placeholder={(livePrice * 1.10).toFixed(2)}
+                          required
+                        />
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div className="flex items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setBuyModalAsset(null)}
-                    className="btn btn-outline flex-1 py-2.5 text-xs font-bold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary flex-1 py-2.5 text-xs font-bold shadow-lg shadow-emerald-500/20"
-                    style={{ background: 'linear-gradient(135deg, #10b981, #2563eb)' }}
-                  >
-                    Confirm Buy Order
-                  </button>
-                </div>
-              </form>
+                    {/* Order Total & Auto-Exit Preview */}
+                    <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-slate-300 font-medium">Estimated Order Total</span>
+                        <span className="text-base font-black text-white font-mono">
+                          {assetCurr}{totalOrderCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      {previewExitPrice && previewExitPrice > 0 && (
+                        <div className="flex justify-between items-center text-xs pt-1 border-t border-white/10">
+                          <span className="text-emerald-300 font-medium">🎯 Auto-Sell Trigger Price</span>
+                          <span className="font-bold text-emerald-400 font-mono">
+                            {assetCurr}{previewExitPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setTradeModal({ isOpen: false, mode: 'BUY', asset: null })}
+                        className="btn btn-outline flex-1 py-2.5 text-xs font-bold"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-primary flex-1 py-2.5 text-xs font-bold shadow-lg shadow-emerald-500/20"
+                        style={{ background: 'linear-gradient(135deg, #10b981, #2563eb)' }}
+                      >
+                        Confirm Buy Order
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  /* SELL MODE FORM */
+                  <form onSubmit={handleConfirmMarketSell} className="space-y-4">
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-white/10 flex justify-between items-center">
+                      <div>
+                        <span className="text-xs text-slate-400 block">Live Market Price</span>
+                        <span className="text-lg font-bold text-white font-mono">
+                          {assetCurr}{livePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs text-slate-400 block">Position Held</span>
+                        <span className={`text-sm font-bold font-mono ${hasShares ? 'text-amber-300' : 'text-slate-400'}`}>
+                          {maxShares} {maxShares === 1 ? 'Share' : 'Shares'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {hasShares ? (
+                      <>
+                        {/* Position Details Card */}
+                        <div className="p-3 rounded-xl bg-slate-950/70 border border-white/10 space-y-1.5 text-xs">
+                          <div className="flex justify-between text-slate-300">
+                            <span>Cost Basis (Avg Price)</span>
+                            <span className="font-mono font-bold text-white">
+                              {assetCurr}{avgPrice.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-slate-300">
+                            <span>Total Position Value</span>
+                            <span className="font-mono font-bold text-white">
+                              {assetCurr}{(maxShares * livePrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Shares to Sell Input */}
+                        <div>
+                          <div className="flex justify-between items-center mb-1.5">
+                            <label className="text-xs font-bold text-slate-300">
+                              Shares to Sell (Max: {maxShares})
+                            </label>
+                            <span className="text-[11px] text-slate-400 font-mono">
+                              Remaining: {Math.max(0, maxShares - qty)} sh
+                            </span>
+                          </div>
+                          <input
+                            ref={tradeInputRef}
+                            type="number"
+                            min="1"
+                            max={maxShares}
+                            step="1"
+                            value={tradeUnits}
+                            onChange={(e) => setTradeUnits(e.target.value)}
+                            className="chat-input w-full font-mono text-base py-2 px-3"
+                            required
+                          />
+                          <div className="grid grid-cols-4 gap-1.5 mt-2">
+                            {[
+                              { label: '25%', factor: 0.25 },
+                              { label: '50%', factor: 0.50 },
+                              { label: '75%', factor: 0.75 },
+                              { label: '100% (Max)', factor: 1.0 }
+                            ].map((preset) => (
+                              <button
+                                key={preset.label}
+                                type="button"
+                                onClick={() => {
+                                  const calc = Math.max(1, Math.floor(maxShares * preset.factor));
+                                  setTradeUnits(String(calc));
+                                }}
+                                className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                                  qty === Math.max(1, Math.floor(maxShares * preset.factor))
+                                    ? 'bg-rose-500/30 text-rose-300 border-rose-500/50'
+                                    : 'bg-slate-800 text-slate-300 border-white/10 hover:text-white'
+                                }`}
+                              >
+                                {preset.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Estimated Proceeds & P&L */}
+                        <div className="p-3 rounded-xl bg-rose-950/20 border border-rose-500/30 space-y-1.5">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-slate-300">Estimated Cash Proceeds</span>
+                            <span className="text-base font-black text-white font-mono">
+                              +{assetCurr}{sellProceeds.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center text-xs pt-1 border-t border-white/10">
+                            <span className="text-slate-400">Estimated Realized Return</span>
+                            <span className={`font-mono font-bold ${isProfitable ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {isProfitable ? '+' : ''}{assetCurr}{realizedPnl.toFixed(2)} ({isProfitable ? '+' : ''}{realizedPnlPct}%)
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setTradeModal({ isOpen: false, mode: 'BUY', asset: null })}
+                            className="btn btn-outline flex-1 py-2.5 text-xs font-bold"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="btn flex-1 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-500/25 transition-all hover:brightness-110 active:scale-95"
+                            style={{ background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' }}
+                          >
+                            Confirm Sell Order
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      /* Zero Shares Held Advisory Box */
+                      <div className="py-6 px-4 text-center rounded-2xl bg-slate-950/80 border border-white/10 space-y-3">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center justify-center mx-auto text-xl">
+                          ℹ️
+                        </div>
+                        <h4 className="text-sm font-bold text-white">
+                          No Open Position in {tradeModal.asset.ticker}
+                        </h4>
+                        <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                          You currently hold <strong>0 shares</strong> of {tradeModal.asset.name} in your {market === 'INDIA' ? 'Indian (₹)' : 'US ($)'} portfolio. To sell, you must first purchase shares.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTradeModal(prev => ({ ...prev, mode: 'BUY' }));
+                            setTradeUnits('1');
+                          }}
+                          className="btn btn-primary py-2 px-4 text-xs font-bold mx-auto shadow-lg shadow-emerald-500/20"
+                          style={{ background: 'linear-gradient(135deg, #10b981 0%, #2563eb 100%)' }}
+                        >
+                          ⚡ Switch to Buy {tradeModal.asset.ticker} Order
+                        </button>
+                      </div>
+                    )}
+                  </form>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })(),
+        document.body
+      )}
 
       {/* Cross-Market Purchase Prompt Modal */}
       <CrossMarketPromptModal

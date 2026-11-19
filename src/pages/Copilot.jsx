@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as Lucide from 'lucide-react';
 
 const Send = Lucide.Send || (() => '🚀');
@@ -172,6 +172,29 @@ export default function Copilot() {
     return localStorage.getItem('aiProvider') || 'gemini';
   });
 
+  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
+
+  const scrollToBottom = (smooth = true) => {
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
+      }
+      if (chatContainerRef.current) {
+        // Ensure the chat container is also visibly centered / in view in the browser viewport
+        const rect = chatContainerRef.current.getBoundingClientRect();
+        if (rect.top < 80 || rect.bottom > window.innerHeight) {
+          chatContainerRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+        }
+      }
+    }, 60);
+  };
+
+  // Auto-scroll when messages update or typing starts/stops
+  useEffect(() => {
+    scrollToBottom(true);
+  }, [messages.length, isTyping]);
+
   // Save history on change
   useEffect(() => {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
@@ -188,9 +211,11 @@ export default function Copilot() {
     const currentHistory = [...messages, userMsg];
     setMessages(currentHistory);
     setIsTyping(true);
+    scrollToBottom(true);
     const aiResponseText = await generateAIResponse(userMsg.text, currentHistory, provider);
     setIsTyping(false);
     setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: aiResponseText }]);
+    scrollToBottom(true);
   };
 
   const handleSend = () => {
@@ -198,6 +223,7 @@ export default function Copilot() {
     const text = input;
     setInput('');
     handleSendDirectly(text);
+    scrollToBottom(true);
   };
 
   const clearHistory = () => {
@@ -255,7 +281,7 @@ export default function Copilot() {
       </div>
 
       <div className="dashboard-grid">
-        <div className="glass-panel card col-span-2 chat-container">
+        <div ref={chatContainerRef} className="glass-panel card col-span-2 chat-container">
           <div className="chat-messages">
             {messages.map(msg => (
               <div key={msg.id} className={`message ${msg.type}`}>
@@ -292,6 +318,7 @@ export default function Copilot() {
                 <span className="text-muted">Analyzing market data using {provider.charAt(0).toUpperCase() + provider.slice(1)}...</span>
               </div>
             )}
+            <div ref={messagesEndRef} className="h-2 w-full" />
           </div>
           <div className="chat-input-area">
             <input 
@@ -318,7 +345,10 @@ export default function Copilot() {
                 <button 
                   key={ticker}
                   className="btn btn-outline" 
-                  onClick={() => handleSendDirectly(`You are an institutional-quality investment analyst.\nAnalyze the stock ${ticker}.\nProvide:\n1. Business summary\n2. Growth drivers\n3. Risks\n4. Valuation view\n5. Overall rating (Buy/Hold/Avoid)\n6. Confidence score (1–10)\n7. Revenue & Profit Data (Provide a markdown chart block as instructed in system prompt)`)}
+                  onClick={() => {
+                    handleSendDirectly(`You are an institutional-quality investment analyst.\nAnalyze the stock ${ticker}.\nProvide:\n1. Business summary\n2. Growth drivers\n3. Risks\n4. Valuation view\n5. Overall rating (Buy/Hold/Avoid)\n6. Confidence score (1–10)\n7. Revenue & Profit Data (Provide a markdown chart block as instructed in system prompt)`);
+                    scrollToBottom(true);
+                  }}
                 >
                   Generate {ticker} Report
                 </button>
@@ -336,6 +366,7 @@ export default function Copilot() {
                     if (e.key === 'Enter' && customTicker.trim()) {
                       handleSendDirectly(`You are an institutional-quality investment analyst.\nAnalyze the stock ${customTicker.trim()}.\nProvide:\n1. Business summary\n2. Growth drivers\n3. Risks\n4. Valuation view\n5. Overall rating (Buy/Hold/Avoid)\n6. Confidence score (1–10)\n7. Revenue & Profit Data (Provide a markdown chart block as instructed in system prompt)`);
                       setCustomTicker('');
+                      scrollToBottom(true);
                     }
                   }}
                 />
@@ -346,6 +377,7 @@ export default function Copilot() {
                     if (customTicker.trim()) {
                       handleSendDirectly(`You are an institutional-quality investment analyst.\nAnalyze the stock ${customTicker.trim()}.\nProvide:\n1. Business summary\n2. Growth drivers\n3. Risks\n4. Valuation view\n5. Overall rating (Buy/Hold/Avoid)\n6. Confidence score (1–10)\n7. Revenue & Profit Data (Provide a markdown chart block as instructed in system prompt)`);
                       setCustomTicker('');
+                      scrollToBottom(true);
                     }
                   }}
                 >
