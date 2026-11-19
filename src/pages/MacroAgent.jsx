@@ -1879,7 +1879,49 @@ export default function MacroAgent() {
             <Layers size={18} className="text-blue-400" />
             <h3 className="font-bold text-base text-white">Autonomous Rebalance Execution Audit Log</h3>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Mobile Rebalance Cards (<640px) */}
+          <div className="block sm:hidden space-y-3">
+            {rebalanceHistory.slice(0, 5).map((log, i) => (
+              <div key={i} className="p-3.5 rounded-xl bg-slate-900/90 border border-white/10 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-sans font-bold text-sm text-blue-300">{log.scenarioName}</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    log.scope === 'vault' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                  }`}>
+                    {log.scope === 'vault' ? `Vault (${log.divertPct}%)` : 'Full Scope'}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-400 font-mono">
+                  {new Date(log.timestamp).toLocaleString()}
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-xs">
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-white/5">
+                    <span className="text-[10px] text-slate-400 block uppercase font-semibold">Deployed</span>
+                    <span className="font-mono font-bold text-white text-xs">{currency}{log.deployedCapital?.toLocaleString()}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-white/5">
+                    <span className="text-[10px] text-slate-400 block uppercase font-semibold">Core Protected</span>
+                    <span className="font-mono font-bold text-emerald-400 text-xs">
+                      {log.coreCapitalProtected ? `${currency}${log.coreCapitalProtected.toLocaleString()}` : '-'}
+                    </span>
+                  </div>
+                </div>
+                {log.orders && log.orders.length > 0 && (
+                  <div className="pt-1.5 border-t border-white/5 flex flex-wrap gap-1.5">
+                    {log.orders.map((o, idx) => (
+                      <span key={idx} className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/10">
+                        {o.ticker} ({o.pct}%)
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop & Tablet Table (>=640px) */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="text-muted border-b border-white/5">

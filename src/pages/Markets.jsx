@@ -1463,7 +1463,7 @@ export default function Markets() {
         </div>
       )}
 
-      {/* Asset Catalog Table */}
+      {/* Asset Catalog Table & Mobile Cards */}
       <div ref={tableRef} className="glass-panel overflow-x-auto rounded-xl scroll-mt-24">
         {searchTerm.trim() && (
           <div className="p-3 px-4 bg-blue-500/10 border-b border-blue-500/20 flex items-center justify-between text-xs text-blue-300 flex-wrap gap-2">
@@ -1489,7 +1489,106 @@ export default function Markets() {
             </button>
           </div>
         )}
-        <table className="w-full text-left border-collapse">
+
+        {/* Mobile Touch Cards View (block sm:hidden) */}
+        <div className="block sm:hidden p-3 space-y-2.5">
+          {filteredStocks.map((stock, index) => (
+            <div
+              key={index}
+              className="p-3.5 rounded-xl bg-slate-900/80 border border-white/10 shadow-md space-y-2.5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
+                    style={{
+                      background: stock.assetType === 'commodity' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                      color: stock.assetType === 'commodity' ? '#fbbf24' : '#60a5fa'
+                    }}
+                  >
+                    {stock.ticker.substring(0, 2)}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-white font-black text-sm">{stock.ticker}</span>
+                      {stock.exchange && (
+                        <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-extrabold border ${
+                          stock.exchange === 'NSE' || stock.exchange === 'BSE'
+                            ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+                            : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                        }`}>
+                          {stock.exchange}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-400 truncate max-w-[170px]">{stock.name}</div>
+                  </div>
+                </div>
+
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
+                  stock.assetType === 'commodity' 
+                    ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' 
+                    : 'bg-blue-500/10 text-blue-300 border border-blue-500/20'
+                }`}>
+                  {stock.sector}
+                </span>
+              </div>
+
+              {/* Price & Change Row */}
+              <div className="flex items-baseline justify-between pt-1 border-t border-white/5 font-mono">
+                <div>
+                  <span className="text-xs text-slate-400 font-sans block text-[10px]">Live Price</span>
+                  <span className="text-base font-black text-white">{stock.price}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-slate-400 font-sans block text-[10px]">24h Change</span>
+                  <span style={{ color: stock.up ? 'var(--accent-primary)' : 'var(--accent-warning)' }} className="flex items-center font-bold text-xs">
+                    {stock.up ? <TrendingUp size={12} className="mr-0.5"/> : <TrendingDown size={12} className="mr-0.5"/>}
+                    {stock.change}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons Row */}
+              <div className="pt-2 border-t border-white/10 flex items-center gap-2">
+                {stock.market && stock.market !== market ? (
+                  <>
+                    <button 
+                      className="btn py-2 px-3 text-xs font-bold border border-amber-500/40 text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 flex-1 text-center" 
+                      onClick={() => handleBuy(stock)}
+                    >
+                      Switch &amp; Buy
+                    </button>
+                    <button 
+                      className="btn py-2 px-3 text-xs font-bold border border-rose-500/40 text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 flex-1 text-center" 
+                      onClick={() => handleSell(stock)}
+                    >
+                      Switch &amp; Sell
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      className="btn btn-primary py-2 px-3 text-xs font-bold flex-1 text-center shadow-md shadow-emerald-500/20" 
+                      onClick={() => handleBuy(stock)}
+                    >
+                      Buy
+                    </button>
+                    <button 
+                      className="btn py-2 px-3 text-xs font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex-1 text-center shadow-md shadow-rose-500/10" 
+                      onClick={() => handleSell(stock)}
+                    >
+                      Sell
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop & Tablet Table View (hidden sm:table) */}
+        <table className="hidden sm:table w-full text-left border-collapse">
           <thead>
             <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
               <th className="p-4 text-muted font-normal text-xs uppercase tracking-wider">Asset</th>

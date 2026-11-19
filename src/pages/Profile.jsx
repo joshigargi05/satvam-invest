@@ -608,13 +608,44 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Security Audit Trail Table */}
-          <div className="glass-panel p-6 rounded-2xl border border-white/10">
+          {/* Security Audit Trail */}
+          <div className="glass-panel p-4 sm:p-6 rounded-2xl border border-white/10">
             <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
               <Layers size={18} className="text-emerald-400" />
               Immutable Security Audit Log
             </h3>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Audit Cards (<640px) */}
+            <div className="block sm:hidden space-y-2.5">
+              {auditLogs.map((log) => (
+                <div key={log.id} className="p-3.5 rounded-xl bg-slate-900/90 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                        log.event.includes('FAIL')
+                          ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      }`}
+                    >
+                      {log.event}
+                    </span>
+                    <span className="text-[10px] font-mono uppercase text-blue-300 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
+                      {log.platform}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    {new Date(log.timestamp).toLocaleString()}
+                  </div>
+                  <div className="pt-1.5 border-t border-white/5 flex items-center justify-between text-xs">
+                    <span className="text-slate-300 font-sans">{log.details}</span>
+                    <span className="text-[11px] font-mono text-slate-500">{log.ip}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop & Tablet Table (>=640px) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-white/10 text-slate-400">

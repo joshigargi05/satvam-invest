@@ -653,7 +653,114 @@ export default function Dashboard() {
       )}
 
       <div className="glass-panel overflow-x-auto rounded-xl">
-        <table className="w-full text-left border-collapse">
+        {/* Mobile Holdings Touch Cards (block sm:hidden) */}
+        <div className="block sm:hidden p-3 space-y-2.5">
+          {holdings.length === 0 ? (
+            <div className="p-6 text-center text-muted">
+              No holdings yet. Go to <strong className="text-white cursor-pointer" onClick={() => navigate('/macro-agent')}>Global Agent</strong> or <strong className="text-white cursor-pointer" onClick={() => navigate('/markets')}>Markets</strong> to buy stocks &amp; commodities!
+            </div>
+          ) : (
+            holdings
+              .filter(asset => {
+                if (holdingsFilter === 'CORE') return (asset.bucket || 'core') !== 'agent_vault' && asset.bucket !== 'top1_agent';
+                if (holdingsFilter === 'VAULT') return asset.bucket === 'agent_vault' || asset.bucket === 'top1_agent';
+                return true;
+              })
+              .map((asset, index) => {
+                const performance = ((asset.currentPrice - asset.avgPrice) / asset.avgPrice) * 100;
+                const isPositive = performance >= 0;
+                const formattedShares = typeof asset.shares === 'number' 
+                  ? (asset.shares % 1 === 0 ? asset.shares : Number(asset.shares.toFixed(4))) 
+                  : asset.shares;
+                const isCommodity = asset.assetType === 'commodity' || asset.ticker.includes('=');
+                const isVaultHolding = asset.bucket === 'agent_vault';
+                const hasAutoExit = Boolean(asset.autoExit && asset.autoExit.enabled && asset.autoExit.targetPrice > 0);
+
+                return (
+                  <div key={index} className="p-3.5 rounded-xl bg-slate-900/80 border border-white/10 shadow-md space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs text-white shadow-lg shrink-0" style={{ 
+                          background: isCommodity 
+                            ? 'linear-gradient(135deg, #f59e0b, #d97706)' 
+                            : 'linear-gradient(135deg, var(--accent-primary) 0%, rgba(99, 102, 241, 0.8) 100%)' 
+                        }}>
+                          {asset.ticker.substring(0, 2)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-black text-white text-sm">{asset.ticker}</span>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border ${
+                              asset.bucket === 'top1_agent'
+                                ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                                : isVaultHolding 
+                                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' 
+                                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                            }`}>
+                              {asset.bucket === 'top1_agent' ? '🏆 Top Pick' : isVaultHolding ? '⚡ Vault' : '🛡️ Core'}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-muted truncate max-w-[170px]">{asset.name || asset.ticker}</div>
+                        </div>
+                      </div>
+
+                      <div className="text-right font-mono">
+                        <span className="text-xs font-black text-white block">
+                          {currency}{(asset.totalValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        <span className={`text-[11px] font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {isPositive ? '+' : ''}{(isNaN(performance) ? 0 : performance).toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 p-2 rounded-lg bg-slate-950/60 border border-white/5 text-center font-mono text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-sans block">Shares</span>
+                        <span className="font-bold text-white">{formattedShares}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-sans block">Avg Price</span>
+                        <span className="text-slate-300">{currency}{(asset.avgPrice || 0).toFixed(2)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-sans block">Live Price</span>
+                        <span className="font-bold text-white">{currency}{(asset.currentPrice || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+                      <button 
+                        onClick={() => openSellModal(asset)}
+                        className="btn py-1.5 px-3 text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 flex-1 text-center"
+                      >
+                        Sell Position
+                      </button>
+
+                      {hasAutoExit ? (
+                        <button
+                          onClick={() => openAutoExitModal(asset)}
+                          className="btn py-1.5 px-3 text-xs font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/40 flex-1 text-center truncate"
+                        >
+                          🎯 Exit: {currency}{Number(asset.autoExit.targetPrice).toFixed(0)}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openAutoExitModal(asset)}
+                          className="btn btn-outline py-1.5 px-3 text-xs font-semibold text-slate-300 flex-1 text-center"
+                        >
+                          + Auto-Exit
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+          )}
+        </div>
+
+        {/* Desktop & Tablet Table (hidden sm:table) */}
+        <table className="hidden sm:table w-full text-left border-collapse">
           <thead>
             <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
               <th className="p-4 text-muted font-normal text-sm">Asset</th>
@@ -671,7 +778,7 @@ export default function Dashboard() {
             {holdings.length === 0 ? (
               <tr>
                 <td colSpan="9" className="p-6 text-center text-muted">
-                  No holdings yet. Go to <strong className="text-white cursor-pointer" onClick={() => navigate('/macro-agent')}>Global Agent</strong> to auto-shuffle or <strong className="text-white cursor-pointer" onClick={() => navigate('/markets')}>Markets</strong> to buy stocks & commodities!
+                  No holdings yet. Go to <strong className="text-white cursor-pointer" onClick={() => navigate('/macro-agent')}>Global Agent</strong> to auto-shuffle or <strong className="text-white cursor-pointer" onClick={() => navigate('/markets')}>Markets</strong> to buy stocks &amp; commodities!
                 </td>
               </tr>
             ) : (
@@ -1300,56 +1407,108 @@ export default function Dashboard() {
           <p>No upcoming earnings found for your holdings.</p>
         </div>
       ) : (
-        <div className="glass-panel overflow-x-auto rounded-xl">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                <th className="p-4 text-muted font-normal text-sm">Company</th>
-                <th className="p-4 text-muted font-normal text-sm">Earnings Date</th>
-                <th className="p-4 text-muted font-normal text-sm">Expected EPS</th>
-                <th className="p-4 text-muted font-normal text-sm">Expected Rev</th>
-                <th className="p-4 text-muted font-normal text-sm text-right">Market Impact</th>
-              </tr>
-            </thead>
-            <tbody>
-              {earnings.map((item, index) => {
-                const dateObj = new Date(item.earningsDate);
-                const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                const isPositive = item.changePct >= 0;
+        <div className="glass-panel overflow-hidden rounded-xl">
+          {/* Mobile Earnings Cards (<640px) */}
+          <div className="block sm:hidden p-3 space-y-3">
+            {earnings.map((item, index) => {
+              const dateObj = new Date(item.earningsDate);
+              const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+              const isPositive = item.changePct >= 0;
 
-                // Format revenue estimate to billions/millions
-                let revStr = 'N/A';
-                if (item.revEstimate) {
-                  if (item.revEstimate >= 1e9) {
-                    revStr = `$${(item.revEstimate / 1e9).toFixed(2)}B`;
-                  } else if (item.revEstimate >= 1e6) {
-                    revStr = `$${(item.revEstimate / 1e6).toFixed(2)}M`;
-                  }
+              let revStr = 'N/A';
+              if (item.revEstimate) {
+                if (item.revEstimate >= 1e9) {
+                  revStr = `$${(item.revEstimate / 1e9).toFixed(2)}B`;
+                } else if (item.revEstimate >= 1e6) {
+                  revStr = `$${(item.revEstimate / 1e6).toFixed(2)}M`;
                 }
+              }
 
-                return (
-                  <tr key={index} className="hover:bg-white/5 transition-colors" style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                    <td className="p-4 font-bold flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #a855f7 0%, rgba(99, 102, 241, 0.8) 100%)' }}>
+              return (
+                <div key={index} className="p-3.5 rounded-xl bg-slate-900/80 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs text-white font-bold shadow-lg" style={{ background: 'linear-gradient(135deg, #a855f7 0%, rgba(99, 102, 241, 0.8) 100%)' }}>
                         {item.ticker.substring(0, 1)}
                       </div>
-                      <span className="text-sm font-bold">{item.ticker}</span>
-                    </td>
-                    <td className="p-4 text-sm font-medium">{dateStr}</td>
-                    <td className="p-4 text-sm">{item.epsEstimate ? `$${item.epsEstimate.toFixed(2)}` : 'N/A'}</td>
-                    <td className="p-4 text-sm">{revStr}</td>
-                    <td className="p-4 text-right">
-                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: isPositive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)' }}>
-                        <span className="text-xs font-bold" style={{ color: isPositive ? 'var(--accent-primary)' : 'var(--accent-warning)' }}>
-                          {isPositive ? '+' : ''}{item.changePct.toFixed(2)}%
-                        </span>
+                      <div>
+                        <span className="text-sm font-black text-white">{item.ticker}</span>
+                        <span className="block text-[11px] text-slate-400 font-mono">{dateStr}</span>
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                    <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full" style={{ background: isPositive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)' }}>
+                      <span className="text-xs font-bold" style={{ color: isPositive ? 'var(--accent-primary)' : 'var(--accent-warning)' }}>
+                        {isPositive ? '+' : ''}{item.changePct.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-xs">
+                    <div className="p-2 rounded-lg bg-slate-950/60 border border-white/5">
+                      <span className="text-[10px] uppercase text-slate-400 block font-semibold">Expected EPS</span>
+                      <span className="font-mono font-bold text-white text-xs">{item.epsEstimate ? `$${item.epsEstimate.toFixed(2)}` : 'N/A'}</span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-950/60 border border-white/5">
+                      <span className="text-[10px] uppercase text-slate-400 block font-semibold">Expected Rev</span>
+                      <span className="font-mono font-bold text-white text-xs">{revStr}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop & Tablet Table (>=640px) */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                  <th className="p-4 text-muted font-normal text-sm">Company</th>
+                  <th className="p-4 text-muted font-normal text-sm">Earnings Date</th>
+                  <th className="p-4 text-muted font-normal text-sm">Expected EPS</th>
+                  <th className="p-4 text-muted font-normal text-sm">Expected Rev</th>
+                  <th className="p-4 text-muted font-normal text-sm text-right">Market Impact</th>
+                </tr>
+              </thead>
+              <tbody>
+                {earnings.map((item, index) => {
+                  const dateObj = new Date(item.earningsDate);
+                  const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                  const isPositive = item.changePct >= 0;
+
+                  // Format revenue estimate to billions/millions
+                  let revStr = 'N/A';
+                  if (item.revEstimate) {
+                    if (item.revEstimate >= 1e9) {
+                      revStr = `$${(item.revEstimate / 1e9).toFixed(2)}B`;
+                    } else if (item.revEstimate >= 1e6) {
+                      revStr = `$${(item.revEstimate / 1e6).toFixed(2)}M`;
+                    }
+                  }
+
+                  return (
+                    <tr key={index} className="hover:bg-white/5 transition-colors" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                      <td className="p-4 font-bold flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #a855f7 0%, rgba(99, 102, 241, 0.8) 100%)' }}>
+                          {item.ticker.substring(0, 1)}
+                        </div>
+                        <span className="text-sm font-bold">{item.ticker}</span>
+                      </td>
+                      <td className="p-4 text-sm font-medium">{dateStr}</td>
+                      <td className="p-4 text-sm">{item.epsEstimate ? `$${item.epsEstimate.toFixed(2)}` : 'N/A'}</td>
+                      <td className="p-4 text-sm">{revStr}</td>
+                      <td className="p-4 text-right">
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: isPositive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)' }}>
+                          <span className="text-xs font-bold" style={{ color: isPositive ? 'var(--accent-primary)' : 'var(--accent-warning)' }}>
+                            {isPositive ? '+' : ''}{item.changePct.toFixed(2)}%
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

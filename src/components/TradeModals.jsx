@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 
@@ -25,7 +26,20 @@ export function TradeResultModal({ modalState, onClose }) {
     navigate = null;
   }
 
-  if (!modalState || !modalState.isOpen) return null;
+  const isOpen = Boolean(modalState && modalState.isOpen);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const {
     type = 'success', // 'success' | 'error' | 'warning'
@@ -46,7 +60,9 @@ export function TradeResultModal({ modalState, onClose }) {
   const isSuccess = type === 'success';
   const isBuy = action === 'BUY';
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div 
         className={`relative w-full max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-2xl p-4 sm:p-6 text-white shadow-2xl border ${
@@ -197,7 +213,8 @@ export function TradeResultModal({ modalState, onClose }) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -207,7 +224,20 @@ export function TradeResultModal({ modalState, onClose }) {
  * Lets users choose quantity, see exact proceeds, and liquidate into cash.
  */
 export function SellPositionModal({ modalState, onClose, onConfirmSell }) {
-  if (!modalState || !modalState.isOpen || !modalState.asset) return null;
+  const isOpen = Boolean(modalState && modalState.isOpen && modalState.asset);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const asset = modalState.asset;
   const maxShares = Number(asset.shares || 1);
@@ -230,7 +260,9 @@ export function SellPositionModal({ modalState, onClose, onConfirmSell }) {
     onConfirmSell(asset.ticker, sharesNum, asset.bucket);
   };
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-2xl p-4 sm:p-6 text-white shadow-2xl border border-rose-500/40 bg-slate-900/95 shadow-rose-500/15">
         {/* Close Button */}
@@ -343,7 +375,8 @@ export function SellPositionModal({ modalState, onClose, onConfirmSell }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -352,16 +385,31 @@ export function SellPositionModal({ modalState, onClose, onConfirmSell }) {
  * Prompts user to switch markets when attempting to buy a cross-market stock (e.g. QCOM on India tab).
  */
 export function CrossMarketPromptModal({ promptState, onClose, onSwitchAndBuy }) {
-  if (!promptState || !promptState.isOpen || !promptState.asset) return null;
+  const isOpen = Boolean(promptState && promptState.isOpen && promptState.asset);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const { asset, currentMarket } = promptState;
   const targetMarket = asset.market || (currentMarket === 'INDIA' ? 'US' : 'INDIA');
   const targetExchange = asset.exchange || (targetMarket === 'INDIA' ? 'NSE/BSE' : 'NASDAQ/NYSE');
   const targetCurrency = targetMarket === 'INDIA' ? '₹ INR' : '$ USD';
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-md rounded-2xl p-6 text-white shadow-2xl border border-blue-500/40 bg-slate-900/95 shadow-blue-500/20">
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-2xl p-4 sm:p-6 text-white shadow-2xl border border-blue-500/40 bg-slate-900/95 shadow-blue-500/20">
         <button
           type="button"
           onClick={onClose}
@@ -411,6 +459,7 @@ export function CrossMarketPromptModal({ promptState, onClose, onSwitchAndBuy })
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

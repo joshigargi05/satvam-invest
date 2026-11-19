@@ -754,7 +754,7 @@ export default function TopPicksAuditLedger() {
         </button>
       </div>
 
-      {/* Main Responsive Table */}
+      {/* Main Responsive Table / Mobile Cards */}
       {filteredRecords.length === 0 ? (
         <div className="p-8 text-center bg-slate-900/50 rounded-2xl border border-white/10 my-4">
           <Trophy size={36} className="mx-auto text-slate-600 mb-2" />
@@ -764,239 +764,408 @@ export default function TopPicksAuditLedger() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-slate-900/60 shadow-xl">
-          <table className="w-full text-left text-xs text-slate-300 border-collapse">
-            <thead>
-              <tr className="bg-slate-950/80 border-b border-white/10 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                <th className="py-3.5 px-4">Stock &amp; Rank</th>
-                <th className="py-3.5 px-4">Bought Date</th>
-                <th className="py-3.5 px-4">Bought Price</th>
-                <th className="py-3.5 px-4">Target on Buy Date</th>
-                <th className="py-3.5 px-4">Live Price &amp; Progress</th>
-                <th className="py-3.5 px-4 text-center">Target Status &amp; Trophy 🏆</th>
-                <th className="py-3.5 px-4 text-right">Profit Amount (%)</th>
-                <th className="py-3.5 px-4 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 font-sans">
-              {filteredRecords.map((record) => {
-                const curr = record.currency || (market === 'INDIA' ? '₹' : '$');
-                const isTargetHit = Boolean(record.targetHit);
-                const isBooked = record.status === 'PROFIT_BOOKED';
+        <>
+          {/* Mobile Card View (block sm:hidden) - Touch-optimized for Android & iOS Phones */}
+          <div className="block sm:hidden space-y-3 my-3">
+            {filteredRecords.map((record) => {
+              const curr = record.currency || (market === 'INDIA' ? '₹' : '$');
+              const isTargetHit = Boolean(record.targetHit);
+              const isBooked = record.status === 'PROFIT_BOOKED';
 
-                // Profit calculation
-                const effectiveExitPrice = isBooked ? record.bookedPrice : record.currentPrice;
-                const profitAmount = isBooked
-                  ? record.bookedProfit
-                  : Number(((record.currentPrice - record.boughtPrice) * record.shares).toFixed(2));
-                const profitPct = isBooked
-                  ? record.bookedProfitPct
-                  : Number((((record.currentPrice - record.boughtPrice) / record.boughtPrice) * 100).toFixed(2));
-                const isProfitable = profitAmount >= 0;
+              const effectiveExitPrice = isBooked ? record.bookedPrice : record.currentPrice;
+              const profitAmount = isBooked
+                ? record.bookedProfit
+                : Number(((record.currentPrice - record.boughtPrice) * record.shares).toFixed(2));
+              const profitPct = isBooked
+                ? record.bookedProfitPct
+                : Number((((record.currentPrice - record.boughtPrice) / record.boughtPrice) * 100).toFixed(2));
+              const isProfitable = profitAmount >= 0;
 
-                // Progress to target calculation
-                const targetDelta = record.targetPrice - record.boughtPrice;
-                const currentDelta = record.currentPrice - record.boughtPrice;
-                let progressPct = targetDelta > 0 ? Math.min(100, Math.max(0, Math.round((currentDelta / targetDelta) * 100))) : 100;
-                if (isTargetHit) progressPct = 100;
+              const targetDelta = record.targetPrice - record.boughtPrice;
+              const currentDelta = record.currentPrice - record.boughtPrice;
+              let progressPct = targetDelta > 0 ? Math.min(100, Math.max(0, Math.round((currentDelta / targetDelta) * 100))) : 100;
+              if (isTargetHit) progressPct = 100;
 
-                return (
-                  <tr
-                    key={record.id}
-                    className={`transition-colors hover:bg-white/[0.03] ${
-                      isTargetHit && !isBooked
-                        ? 'bg-amber-950/20 hover:bg-amber-950/30'
-                        : isBooked
-                        ? 'bg-slate-950/40 opacity-90'
-                        : ''
-                    }`}
-                  >
-                    {/* Column 1: Stock & Rank Badge */}
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 border ${
-                            record.rank === 1
-                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                              : record.rank === 2
-                              ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                              : 'bg-purple-500/20 text-purple-300 border-purple-500/40'
-                          }`}
-                        >
-                          #{record.rank}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-black text-white text-sm tracking-tight">
-                              {record.ticker}
-                            </span>
-                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/10 text-slate-300 font-mono font-bold">
-                              {record.sector}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400 truncate max-w-[170px]">
-                            {record.name}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Column 2: Bought Date & Time */}
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5 font-semibold text-slate-200">
-                          <Clock size={12} className="text-slate-400" />
-                          <span>{formatDate(record.boughtDate)}</span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-mono mt-0.5">
-                          {getDaysHeld(record.boughtDate)}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Column 3: Bought Price & Shares */}
-                    <td className="py-4 px-4 whitespace-nowrap font-mono">
-                      <div className="text-white font-bold text-xs">
-                        {curr}{Number(record.boughtPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
-                      <div className="text-[10px] text-slate-400 font-normal">
-                        {record.shares} sh • Total: {curr}{Number(record.investedCapital).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
-                    </td>
-
-                    {/* Column 4: Target Mentioned on Buy Date */}
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-black text-amber-300 text-xs">
-                          {curr}{Number(record.targetPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                        <span className="text-[10px] font-bold text-emerald-400 px-1 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/20 font-mono">
-                          +{record.targetUpsidePct}%
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                        <Target size={11} className="text-slate-500" />
-                        <span>Horizon: <strong>{record.targetTimeframe}</strong></span>
-                      </div>
-                    </td>
-
-                    {/* Column 5: Live Market Price & Progress Bar */}
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5 font-mono">
-                        <span className="font-bold text-white text-xs">
-                          {curr}{Number(record.currentPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                        {isTargetHit ? (
-                          <span className="text-[10px] font-extrabold text-amber-400 bg-amber-500/20 px-1.5 py-0.2 rounded border border-amber-500/30">
-                            100%
+              return (
+                <div
+                  key={record.id}
+                  className={`p-3.5 rounded-2xl border transition-all shadow-lg ${
+                    isTargetHit && !isBooked
+                      ? 'bg-gradient-to-b from-amber-950/30 to-slate-900/90 border-amber-500/50 shadow-amber-950/30'
+                      : isBooked
+                      ? 'bg-slate-900/70 border-emerald-500/30 opacity-95'
+                      : 'bg-slate-900/80 border-white/10'
+                  }`}
+                >
+                  {/* Card Header: Rank, Ticker, Sector, Status Badge */}
+                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs border ${
+                        record.rank === 1
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                          : record.rank === 2
+                          ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                          : 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                      }`}>
+                        #{record.rank}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-black text-white text-base">{record.ticker}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-slate-300 font-mono font-bold">
+                            {record.sector}
                           </span>
-                        ) : (
-                          <span className="text-[10px] font-bold text-blue-400">
-                            {progressPct}%
-                          </span>
-                        )}
+                        </div>
+                        <div className="text-[11px] text-slate-400 truncate max-w-[150px]">
+                          {record.name}
+                        </div>
                       </div>
-                      {/* Visual Progress Bar */}
-                      <div className="w-28 sm:w-32 bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1.5 border border-white/5">
-                        <div
-                          className={`h-full transition-all duration-500 ${
-                            isTargetHit
-                              ? 'bg-gradient-to-r from-amber-400 to-amber-500 shadow-sm shadow-amber-400'
-                              : 'bg-gradient-to-r from-blue-500 to-emerald-400'
-                          }`}
-                          style={{ width: `${progressPct}%` }}
-                        />
-                      </div>
-                    </td>
+                    </div>
 
-                    {/* Column 6: Target Milestone & Celebration Trophy 🏆 */}
-                    <td className="py-4 px-4 whitespace-nowrap text-center">
+                    <div>
                       {isBooked ? (
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-extrabold text-[11px] shadow-sm">
-                          <Trophy size={13} className="text-amber-400" />
-                          <span>Target Hit • Profit Secured</span>
-                        </div>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-extrabold text-[10px]">
+                          <Trophy size={11} className="text-amber-400" />
+                          <span>Booked</span>
+                        </span>
                       ) : isTargetHit ? (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 border border-amber-400/80 text-amber-200 font-black text-xs shadow-lg shadow-amber-500/20 animate-pulse">
-                          <Trophy size={15} className="text-amber-300 animate-bounce" />
-                          <span>🏆 TARGET HIT (+{record.targetUpsidePct}%)</span>
-                          <Sparkles size={12} className="text-amber-300" />
-                        </div>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-200 font-black text-[10px] shadow-sm animate-pulse">
+                          <Trophy size={12} className="text-amber-300 animate-bounce" />
+                          <span>🏆 TARGET HIT!</span>
+                        </span>
                       ) : (
-                        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-950/40 border border-blue-500/25 text-blue-300 text-[11px] font-semibold">
-                          <Clock size={11} />
-                          <span>In Flight ({progressPct}%)</span>
-                        </div>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-950/40 border border-blue-500/25 text-blue-300 text-[10px] font-semibold">
+                          <Clock size={10} />
+                          <span>{progressPct}% Hit</span>
+                        </span>
                       )}
-                    </td>
+                    </div>
+                  </div>
 
-                    {/* Column 7: Profit Amount & Return % */}
-                    <td className="py-4 px-4 whitespace-nowrap text-right font-mono">
-                      <div
-                        className={`font-black text-sm ${
-                          isProfitable ? 'text-emerald-400' : 'text-rose-400'
-                        }`}
-                      >
-                        {isProfitable ? '+' : ''}
-                        {curr}
-                        {profitAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
-                      <div
-                        className={`text-[11px] font-bold ${
-                          isProfitable ? 'text-emerald-300' : 'text-rose-300'
-                        }`}
-                      >
-                        {isProfitable ? '+' : ''}{profitPct}%
-                      </div>
-                    </td>
+                  {/* Pricing Snapshot: Bought vs Target */}
+                  <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-slate-950/60 border border-white/5 text-xs mb-2.5 font-mono">
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-sans block">Bought ({formatDate(record.boughtDate)})</span>
+                      <span className="font-bold text-white text-xs">
+                        {curr}{Number(record.boughtPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block font-sans">{record.shares} shares</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-sans block">Target ({record.targetTimeframe})</span>
+                      <span className="font-bold text-amber-300 text-xs">
+                        {curr}{Number(record.targetPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                      <span className="text-[10px] text-emerald-400 font-sans block">+{record.targetUpsidePct}% goal</span>
+                    </div>
+                  </div>
 
-                    {/* Column 8: Sell / Book Profit Action */}
-                    <td className="py-4 px-4 whitespace-nowrap text-center">
+                  {/* Live Price & Progress Bar */}
+                  <div className="mb-2.5 px-1">
+                    <div className="flex justify-between items-center text-xs mb-1">
+                      <span className="text-slate-400 font-medium">Live Market Price:</span>
+                      <span className="font-mono font-bold text-white">
+                        {curr}{Number(record.currentPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden border border-white/5">
+                      <div
+                        className={`h-full transition-all duration-500 ${
+                          isTargetHit
+                            ? 'bg-gradient-to-r from-amber-400 to-amber-500 shadow-sm shadow-amber-400'
+                            : 'bg-gradient-to-r from-blue-500 to-emerald-400'
+                        }`}
+                        style={{ width: `${progressPct}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Profit & Action Footer */}
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block font-sans">Net ROI:</span>
+                      <div className={`font-mono font-black text-xs flex items-center gap-1 ${isProfitable ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <span>{isProfitable ? '+' : ''}{curr}{profitAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span>({isProfitable ? '+' : ''}{profitPct}%)</span>
+                      </div>
+                    </div>
+
+                    <div>
                       {isBooked ? (
-                        <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 bg-white/5 px-2.5 py-1 rounded-lg border border-white/10">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10">
                           ✅ Realized
                         </span>
                       ) : isTargetHit ? (
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleBookProfit(record)}
-                            className="btn btn-primary py-1.5 px-3 text-xs font-black flex items-center gap-1.5 shadow-lg shadow-emerald-500/30 hover:scale-105 transition-transform"
-                            style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
-                            title="Book profit now and credit cash wallet"
-                          >
-                            <Zap size={13} className="text-amber-300" />
-                            <span>⚡ Book Profit</span>
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleBookProfit(record)}
+                          className="btn btn-primary py-2 px-3 text-xs font-black flex items-center gap-1.5 shadow-lg shadow-emerald-500/30"
+                          style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                        >
+                          <Zap size={13} className="text-amber-300" />
+                          <span>⚡ Book Profit</span>
+                        </button>
                       ) : (
-                        <div className="flex items-center justify-center gap-1.5">
+                        <div className="flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => handleBookProfit(record)}
-                            className="btn btn-outline py-1 px-2.5 text-[11px] font-semibold text-slate-300 hover:text-white hover:border-slate-400"
-                            title="Exit position early"
+                            className="btn btn-outline py-1.5 px-2 text-xs font-semibold text-slate-300"
                           >
                             Exit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleSimulateTargetHit(record)}
-                            className="px-2 py-1 rounded bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1"
-                            title="Simulate hitting target for testing celebration & trophies"
+                            className="px-2 py-1.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1"
                           >
                             <Trophy size={11} />
-                            <span>Simulate Hit</span>
+                            <span>Simulate</span>
                           </button>
                         </div>
                       )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop & Tablet Table (hidden sm:block) */}
+          <div className="hidden sm:block overflow-x-auto rounded-2xl border border-white/10 bg-slate-900/60 shadow-xl">
+            <table className="w-full text-left text-xs text-slate-300 border-collapse">
+              <thead>
+                <tr className="bg-slate-950/80 border-b border-white/10 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                  <th className="py-3.5 px-4">Stock &amp; Rank</th>
+                  <th className="py-3.5 px-4">Bought Date</th>
+                  <th className="py-3.5 px-4">Bought Price</th>
+                  <th className="py-3.5 px-4">Target on Buy Date</th>
+                  <th className="py-3.5 px-4">Live Price &amp; Progress</th>
+                  <th className="py-3.5 px-4 text-center">Target Status &amp; Trophy 🏆</th>
+                  <th className="py-3.5 px-4 text-right">Profit Amount (%)</th>
+                  <th className="py-3.5 px-4 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 font-sans">
+                {filteredRecords.map((record) => {
+                  const curr = record.currency || (market === 'INDIA' ? '₹' : '$');
+                  const isTargetHit = Boolean(record.targetHit);
+                  const isBooked = record.status === 'PROFIT_BOOKED';
+
+                  // Profit calculation
+                  const effectiveExitPrice = isBooked ? record.bookedPrice : record.currentPrice;
+                  const profitAmount = isBooked
+                    ? record.bookedProfit
+                    : Number(((record.currentPrice - record.boughtPrice) * record.shares).toFixed(2));
+                  const profitPct = isBooked
+                    ? record.bookedProfitPct
+                    : Number((((record.currentPrice - record.boughtPrice) / record.boughtPrice) * 100).toFixed(2));
+                  const isProfitable = profitAmount >= 0;
+
+                  // Progress to target calculation
+                  const targetDelta = record.targetPrice - record.boughtPrice;
+                  const currentDelta = record.currentPrice - record.boughtPrice;
+                  let progressPct = targetDelta > 0 ? Math.min(100, Math.max(0, Math.round((currentDelta / targetDelta) * 100))) : 100;
+                  if (isTargetHit) progressPct = 100;
+
+                  return (
+                    <tr
+                      key={record.id}
+                      className={`transition-colors hover:bg-white/[0.03] ${
+                        isTargetHit && !isBooked
+                          ? 'bg-amber-950/20 hover:bg-amber-950/30'
+                          : isBooked
+                          ? 'bg-slate-950/40 opacity-90'
+                          : ''
+                      }`}
+                    >
+                      {/* Column 1: Stock & Rank Badge */}
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 border ${
+                              record.rank === 1
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                : record.rank === 2
+                                ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                                : 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                            }`}
+                          >
+                            #{record.rank}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-black text-white text-sm tracking-tight">
+                                {record.ticker}
+                              </span>
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/10 text-slate-300 font-mono font-bold">
+                                {record.sector}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-400 truncate max-w-[170px]">
+                              {record.name}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Column 2: Bought Date & Time */}
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5 font-semibold text-slate-200">
+                            <Clock size={12} className="text-slate-400" />
+                            <span>{formatDate(record.boughtDate)}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                            {getDaysHeld(record.boughtDate)}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Column 3: Bought Price & Shares */}
+                      <td className="py-4 px-4 whitespace-nowrap font-mono">
+                        <div className="text-white font-bold text-xs">
+                          {curr}{Number(record.boughtPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-normal">
+                          {record.shares} sh • Total: {curr}{Number(record.investedCapital).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                      </td>
+
+                      {/* Column 4: Target Mentioned on Buy Date */}
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-black text-amber-300 text-xs">
+                            {curr}{Number(record.targetPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-400 px-1 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/20 font-mono">
+                            +{record.targetUpsidePct}%
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
+                          <Target size={11} className="text-slate-500" />
+                          <span>Horizon: <strong>{record.targetTimeframe}</strong></span>
+                        </div>
+                      </td>
+
+                      {/* Column 5: Live Market Price & Progress Bar */}
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 font-mono">
+                          <span className="font-bold text-white text-xs">
+                            {curr}{Number(record.currentPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          {isTargetHit ? (
+                            <span className="text-[10px] font-extrabold text-amber-400 bg-amber-500/20 px-1.5 py-0.2 rounded border border-amber-500/30">
+                              100%
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold text-blue-400">
+                              {progressPct}%
+                            </span>
+                          )}
+                        </div>
+                        {/* Visual Progress Bar */}
+                        <div className="w-28 sm:w-32 bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1.5 border border-white/5">
+                          <div
+                            className={`h-full transition-all duration-500 ${
+                              isTargetHit
+                                ? 'bg-gradient-to-r from-amber-400 to-amber-500 shadow-sm shadow-amber-400'
+                              : 'bg-gradient-to-r from-blue-500 to-emerald-400'
+                            }`}
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </td>
+
+                      {/* Column 6: Target Milestone & Celebration Trophy 🏆 */}
+                      <td className="py-4 px-4 whitespace-nowrap text-center">
+                        {isBooked ? (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-extrabold text-[11px] shadow-sm">
+                            <Trophy size={13} className="text-amber-400" />
+                            <span>Target Hit • Profit Secured</span>
+                          </div>
+                        ) : isTargetHit ? (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 border border-amber-400/80 text-amber-200 font-black text-xs shadow-lg shadow-amber-500/20 animate-pulse">
+                            <Trophy size={15} className="text-amber-300 animate-bounce" />
+                            <span>🏆 TARGET HIT (+{record.targetUpsidePct}%)</span>
+                            <Sparkles size={12} className="text-amber-300" />
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-950/40 border border-blue-500/25 text-blue-300 text-[11px] font-semibold">
+                            <Clock size={11} />
+                            <span>In Flight ({progressPct}%)</span>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Column 7: Profit Amount & Return % */}
+                      <td className="py-4 px-4 whitespace-nowrap text-right font-mono">
+                        <div
+                          className={`font-black text-sm ${
+                            isProfitable ? 'text-emerald-400' : 'text-rose-400'
+                          }`}
+                        >
+                          {isProfitable ? '+' : ''}
+                          {curr}
+                          {profitAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div
+                          className={`text-[11px] font-bold ${
+                            isProfitable ? 'text-emerald-300' : 'text-rose-300'
+                          }`}
+                        >
+                          {isProfitable ? '+' : ''}{profitPct}%
+                        </div>
+                      </td>
+
+                      {/* Column 8: Sell / Book Profit Action */}
+                      <td className="py-4 px-4 whitespace-nowrap text-center">
+                        {isBooked ? (
+                          <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 bg-white/5 px-2.5 py-1 rounded-lg border border-white/10">
+                            ✅ Realized
+                          </span>
+                        ) : isTargetHit ? (
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleBookProfit(record)}
+                              className="btn btn-primary py-1.5 px-3 text-xs font-black flex items-center gap-1.5 shadow-lg shadow-emerald-500/30 hover:scale-105 transition-transform"
+                              style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                              title="Book profit now and credit cash wallet"
+                            >
+                              <Zap size={13} className="text-amber-300" />
+                              <span>⚡ Book Profit</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleBookProfit(record)}
+                              className="btn btn-outline py-1 px-2.5 text-[11px] font-semibold text-slate-300 hover:text-white hover:border-slate-400"
+                              title="Exit position early"
+                            >
+                              Exit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSimulateTargetHit(record)}
+                              className="px-2 py-1 rounded bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1"
+                              title="Simulate hitting target for testing celebration & trophies"
+                            >
+                              <Trophy size={11} />
+                              <span>Simulate Hit</span>
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Footer Info Box */}

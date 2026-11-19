@@ -162,8 +162,11 @@ function Navigation() {
 
   return (
     <>
-      {/* Mobile Header (Native-like sticky app bar with glassmorphism blur) */}
-      <div className="md-hidden sticky top-0 z-40 flex justify-between items-center p-3.5 bg-slate-950/90 backdrop-blur-md border-b border-white/10 shadow-lg">
+      {/* Mobile Header (Native-like sticky app bar with glassmorphism blur and iOS notch / Dynamic Island safe area support) */}
+      <div 
+        className="md-hidden sticky top-0 z-40 flex justify-between items-center px-3.5 pb-3 bg-slate-950/90 backdrop-blur-md border-b border-white/10 shadow-lg"
+        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))' }}
+      >
         <div className="flex items-center gap-2.5">
           <GaloraLogo size={30} />
           <div>

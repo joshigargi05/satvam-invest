@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 import {
@@ -510,6 +511,18 @@ export default function DeepQuantAgent() {
 
   const [activeTranscriptStock, setActiveTranscriptStock] = useState(null);
   const [showTranscriptModal, setShowTranscriptModal] = useState(false);
+
+  // Mobile / iOS body scroll lock when transcript modal is open
+  useEffect(() => {
+    if (showTranscriptModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showTranscriptModal]);
 
   // Replicate Top 3 Recommended Stocks on mount or when market toggle changes
   useEffect(() => {
@@ -1574,92 +1587,146 @@ export default function DeepQuantAgent() {
                     </div>
                   </div>
 
-                  {/* Side-by-Side Comparison Matrix Table */}
-                  <div className="overflow-x-auto rounded-xl border border-white/10">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px] border-b border-white/10">
-                          <th className="p-3 font-bold w-1/4">Metric</th>
-                          {results.map((r) => (
-                            <th key={r.ticker} className="p-3 font-bold">
+                  {/* Side-by-Side Comparison Matrix */}
+                  <div className="rounded-xl border border-white/10 overflow-hidden">
+                    {/* Mobile Comparison Cards (<640px) */}
+                    <div className="block sm:hidden p-3 space-y-3 bg-slate-950/60">
+                      {results.map((r) => {
+                        const tg = getStockTarget(r);
+                        return (
+                          <div key={r.ticker} className="p-3.5 rounded-xl bg-slate-900/90 border border-white/10 space-y-2.5">
+                            <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: r.theme.primary }} />
-                                <span className="text-white text-sm font-black">{r.ticker}</span>
+                                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: r.theme.primary }} />
+                                <span className="text-white text-base font-black tracking-tight">{r.ticker}</span>
                                 {r.isTopPick && (
                                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
                                     Top Pick
                                   </span>
                                 )}
                               </div>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5 text-slate-200">
-                        <tr>
-                          <td className="p-3 text-slate-300 font-semibold">Live Market Price</td>
-                          {results.map((r) => (
-                            <td key={r.ticker} className="p-3 font-mono font-bold text-white text-sm">
-                              {r.currency}{r.currentPrice.toFixed(2)}
-                              <span className={`ml-2 text-xs font-semibold ${r.changePct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                {r.changePct >= 0 ? '+' : ''}{r.changePct.toFixed(2)}%
-                              </span>
-                            </td>
-                          ))}
-                        </tr>
-                        <tr>
-                          <td className="p-3 text-slate-300 font-semibold">Unified Target &amp; Upside</td>
-                          {results.map((r) => {
-                            const tg = getStockTarget(r);
-                            return (
-                              <td key={r.ticker} className="p-3 font-mono font-bold">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <Target size={14} className="text-purple-400" />
-                                  <span className="text-white">
-                                    {r.currency}{tg.targetPrice.toFixed(2)}
-                                  </span>
-                                  <span
-                                    className={`text-xs px-2 py-0.5 rounded-full ${
-                                      tg.upsidePct > 0
-                                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                        : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                                    }`}
-                                  >
-                                    {tg.upsidePct > 0 ? `+${tg.upsidePct}%` : `${tg.upsidePct}%`} ({tg.label})
-                                  </span>
-                                </div>
-                              </td>
-                            );
-                          })}
-                        </tr>
-                        <tr>
-                          <td className="p-3 text-slate-300 font-semibold">Outperform Probability</td>
-                          {results.map((r) => (
-                            <td key={r.ticker} className="p-3 font-mono font-extrabold text-emerald-400 text-sm">
-                              {r.winProbability}%
-                            </td>
-                          ))}
-                        </tr>
-                        <tr>
-                          <td className="p-3 text-slate-300 font-semibold">Quantitative Signal</td>
-                          {results.map((r) => (
-                            <td key={r.ticker} className="p-3 font-bold">
-                              <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
                                 {r.algorithmConviction}
                               </span>
-                            </td>
-                          ))}
-                        </tr>
-                        <tr>
-                          <td className="p-3 text-slate-300 font-semibold">Executive Transcript Sentiment</td>
-                          {results.map((r) => (
-                            <td key={r.ticker} className="p-3 font-mono text-purple-300 font-bold">
-                              {r.executiveSentiment}/100 Positive
-                            </td>
-                          ))}
-                        </tr>
-                      </tbody>
-                    </table>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="p-2 rounded-lg bg-slate-950/60 border border-white/5">
+                                <span className="text-[10px] text-slate-400 block uppercase font-semibold">Live Price</span>
+                                <div className="font-mono font-bold text-white text-sm">
+                                  {r.currency}{r.currentPrice.toFixed(2)}
+                                </div>
+                                <span className={`text-[11px] font-semibold ${r.changePct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {r.changePct >= 0 ? '+' : ''}{r.changePct.toFixed(2)}%
+                                </span>
+                              </div>
+                              <div className="p-2 rounded-lg bg-slate-950/60 border border-white/5">
+                                <span className="text-[10px] text-slate-400 block uppercase font-semibold">Target & Upside</span>
+                                <div className="font-mono font-bold text-purple-300 text-sm">
+                                  {r.currency}{tg.targetPrice.toFixed(2)}
+                                </div>
+                                <span className={`text-[10px] font-extrabold px-1.5 py-0.2 rounded ${tg.upsidePct > 0 ? 'text-emerald-300' : 'text-red-300'}`}>
+                                  +{tg.upsidePct}% ({tg.label})
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-1.5 border-t border-white/5 text-[11px]">
+                              <span className="text-slate-400">Win Probability: <strong className="text-emerald-400 font-mono">{r.winProbability}%</strong></span>
+                              <span className="text-purple-300 font-mono">{r.executiveSentiment}/100 Sentiment</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Tablet & Desktop Matrix Table (>=640px) */}
+                    <div className="hidden sm:block overflow-x-auto">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px] border-b border-white/10">
+                            <th className="p-3 font-bold w-1/4">Metric</th>
+                            {results.map((r) => (
+                              <th key={r.ticker} className="p-3 font-bold">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: r.theme.primary }} />
+                                  <span className="text-white text-sm font-black">{r.ticker}</span>
+                                  {r.isTopPick && (
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
+                                      Top Pick
+                                    </span>
+                                  )}
+                                </div>
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-slate-200">
+                          <tr>
+                            <td className="p-3 text-slate-300 font-semibold">Live Market Price</td>
+                            {results.map((r) => (
+                              <td key={r.ticker} className="p-3 font-mono font-bold text-white text-sm">
+                                {r.currency}{r.currentPrice.toFixed(2)}
+                                <span className={`ml-2 text-xs font-semibold ${r.changePct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {r.changePct >= 0 ? '+' : ''}{r.changePct.toFixed(2)}%
+                                </span>
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="p-3 text-slate-300 font-semibold">Unified Target &amp; Upside</td>
+                            {results.map((r) => {
+                              const tg = getStockTarget(r);
+                              return (
+                                <td key={r.ticker} className="p-3 font-mono font-bold">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <Target size={14} className="text-purple-400" />
+                                    <span className="text-white">
+                                      {r.currency}{tg.targetPrice.toFixed(2)}
+                                    </span>
+                                    <span
+                                      className={`text-xs px-2 py-0.5 rounded-full ${
+                                        tg.upsidePct > 0
+                                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                          : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                      }`}
+                                    >
+                                      {tg.upsidePct > 0 ? `+${tg.upsidePct}%` : `${tg.upsidePct}%`} ({tg.label})
+                                    </span>
+                                  </div>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                          <tr>
+                            <td className="p-3 text-slate-300 font-semibold">Outperform Probability</td>
+                            {results.map((r) => (
+                              <td key={r.ticker} className="p-3 font-mono font-extrabold text-emerald-400 text-sm">
+                                {r.winProbability}%
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="p-3 text-slate-300 font-semibold">Quantitative Signal</td>
+                            {results.map((r) => (
+                              <td key={r.ticker} className="p-3 font-bold">
+                                <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                  {r.algorithmConviction}
+                                </span>
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="p-3 text-slate-300 font-semibold">Executive Transcript Sentiment</td>
+                            {results.map((r) => (
+                              <td key={r.ticker} className="p-3 font-mono text-purple-300 font-bold">
+                                {r.executiveSentiment}/100 Positive
+                              </td>
+                            ))}
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}
@@ -2026,14 +2093,14 @@ export default function DeepQuantAgent() {
         </div>
       )}
 
-      {/* Transcript Modal */}
-      {showTranscriptModal && activeTranscriptStock && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="glass-panel w-full max-w-2xl rounded-2xl border border-purple-500/40 shadow-2xl overflow-hidden">
-            <div className="p-5 border-b border-white/10 flex items-center justify-between bg-slate-950/80">
+      {/* Transcript Modal (Portaled directly to document.body for robust mobile/tablet/desktop display) */}
+      {showTranscriptModal && activeTranscriptStock && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] overflow-y-auto flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="glass-panel w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl border border-purple-500/40 shadow-2xl overflow-hidden bg-slate-900">
+            <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-slate-950/80 shrink-0">
               <div className="flex items-center gap-2">
                 <FileText size={18} className="text-purple-400" />
-                <h3 className="font-bold text-white text-base">
+                <h3 className="font-bold text-white text-sm sm:text-base">
                   {activeTranscriptStock.ticker} — Full Q3 Institutional Earnings Transcript
                 </h3>
               </div>
@@ -2045,7 +2112,7 @@ export default function DeepQuantAgent() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto text-xs leading-relaxed text-slate-200">
+            <div className="p-4 sm:p-6 space-y-4 max-h-[70vh] overflow-y-auto text-xs leading-relaxed text-slate-200">
               <div className="p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/30">
                 <div className="text-[10px] uppercase font-bold text-purple-300 mb-1">Executive Tone Assessment</div>
                 <p>{activeTranscriptStock.synthesis}</p>
@@ -2072,7 +2139,7 @@ export default function DeepQuantAgent() {
               </div>
             </div>
 
-            <div className="p-4 border-t border-white/10 bg-slate-950/80 flex justify-end">
+            <div className="p-3.5 sm:p-4 border-t border-white/10 bg-slate-950/80 flex justify-end shrink-0">
               <button
                 onClick={() => setShowTranscriptModal(false)}
                 className="btn btn-outline py-2 px-5 text-xs font-bold"
@@ -2081,7 +2148,8 @@ export default function DeepQuantAgent() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 import {
@@ -44,6 +45,18 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
   const [tradeExitOption, setTradeExitOption] = useState('none'); // Default: 'none' (Manual Sell); secondary: '10pct' | 'ai_target' | 'custom_price'
   const [tradeCustomExitPrice, setTradeCustomExitPrice] = useState('');
   const [purchaseToast, setPurchaseToast] = useState('');
+
+  // Lock body scroll on mobile/iOS when trade modal is open
+  useEffect(() => {
+    if (tradeModalStock) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [tradeModalStock]);
 
   // 1) Target Horizon Timeframe for Algo Stock Target: 'quarterly' | 'sixMonths' | 'twelveMonths'
   const [targetTimeframe, setTargetTimeframe] = useState('twelveMonths');
@@ -597,9 +610,9 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
         </div>
       )}
 
-      {/* Instant Trade Execution Modal for Top Pick */}
-      {tradeModalStock && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+      {/* Instant Trade Execution Modal for Top Pick (Portaled directly to document.body for flawless mobile & desktop viewport positioning) */}
+      {tradeModalStock && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in">
           <div className="glass-panel max-w-md w-full max-h-[92vh] overflow-y-auto overscroll-contain p-4 sm:p-6 rounded-2xl border border-emerald-500/40 shadow-2xl bg-slate-900">
             <div className="flex justify-between items-start mb-4 pb-3 border-b border-white/10">
               <div>
@@ -785,7 +798,8 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
