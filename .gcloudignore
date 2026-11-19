@@ -1,0 +1,10 @@
+.gcloudignore
+.git
+.gitignore
+node_modules
+dist
+android
+ios
+store-assets
+.gemini
+*.log

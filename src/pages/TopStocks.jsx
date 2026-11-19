@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Lucide from 'lucide-react';
 import TopAlgoPicks from '../components/TopAlgoPicks';
+import TopPicksAuditLedger from '../components/TopPicksAuditLedger';
 import { useMarket } from '../context/MarketContext';
 import { usePortfolio } from '../context/PortfolioContext';
 
@@ -81,6 +82,11 @@ export default function TopStocks() {
       {/* Main Top 3 Recommended Stocks Component */}
       <div>
         <TopAlgoPicks pageContext="top-stocks" />
+      </div>
+
+      {/* Top 3 Stocks Audit & Target Ledger Table */}
+      <div>
+        <TopPicksAuditLedger />
       </div>
     </div>
   );

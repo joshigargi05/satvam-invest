@@ -10,6 +10,7 @@ import {
 } from '../services/api';
 import { useMarket } from '../context/MarketContext';
 import { usePortfolio } from '../context/PortfolioContext';
+import { recordTopPickAuditPurchase } from './TopPicksAuditLedger';
 
 const Sparkles = Lucide.Sparkles || (() => '✨');
 const TrendingUp = Lucide.TrendingUp || (() => '📈');
@@ -220,6 +221,24 @@ export default function TopAlgoPicks({ pageContext = 'portfolio' }) {
     });
 
     if (success) {
+      const modalTarget = getStockTargetInfo(tradeModalStock);
+      recordTopPickAuditPurchase({
+        ticker: tradeModalStock.ticker,
+        name: tradeModalStock.companyName,
+        rank: tradeModalStock.rank || 1,
+        rankBadge: tradeModalStock.rankBadge || `#${tradeModalStock.rank || 1} Algo Pick`,
+        sector: tradeModalStock.sector || 'Equities',
+        market: market,
+        currency: tradeModalStock.currency || (market === 'INDIA' ? '₹' : '$'),
+        shares: units,
+        boughtPrice: Number(tradeModalStock.currentPrice),
+        boughtDate: new Date().toISOString(),
+        targetPrice: Number(modalTarget.targetPrice),
+        targetTimeframe: modalTarget.timeframe || modalTarget.label || '12 Months',
+        targetUpsidePct: Number(modalTarget.upsidePct),
+        currentPrice: Number(tradeModalStock.currentPrice)
+      });
+
       const bucketLabel = tradeBucket === 'agent_vault' ? 'Tactical Vault' : 'Long-Term Core';
       const exitNote = autoExitRule ? ` (Auto-Exit Armed)` : '';
       setPurchaseToast(`Purchased ${units} share(s) of ${tradeModalStock.ticker} into ${bucketLabel}${exitNote}!`);
